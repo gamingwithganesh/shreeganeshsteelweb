@@ -655,3 +655,41 @@ h6 {
     flex-direction: column;
   }
 }
+
+/* Home Storefront Responsive Product Grid (2-Column Mobile Flipkart Style) */
+.home-products-desktop-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: 2rem;
+}
+
+.home-products-mobile-grid {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .home-products-desktop-grid {
+    display: none !important;
+  }
+
+  .home-products-mobile-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  .home-mobile-product-card {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .home-mobile-product-card:active {
+    transform: scale(0.98);
+  }
+}

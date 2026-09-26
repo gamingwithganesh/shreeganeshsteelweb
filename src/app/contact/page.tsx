@@ -3,7 +3,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { IconPhone } from '@/components/Icons';
+import { IconPhone, IconChat } from '@/components/Icons';
 import LocationSection from '@/components/LocationSection';
 
 function ContactContent() {
@@ -231,7 +231,8 @@ function ContactContent() {
                 onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f1f5f9')}
                 onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#ffffff')}
               >
-                <span>💬 WhatsApp Your Drawings &amp; Blueprints</span>
+                <IconChat size={16} />
+                <span>WhatsApp Your Drawings &amp; Blueprints</span>
               </a>
             </div>
 

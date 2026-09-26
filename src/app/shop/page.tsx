@@ -7,7 +7,21 @@ import { useSearchParams } from 'next/navigation';
 import { PRODUCTS, CATEGORIES, SECTORS, MATERIAL_GRADES, ProductItem } from '@/data/products';
 import { useCart } from '@/context/CartContext';
 import { ThreeDStar, ThreeDRuler, ThreeDShield, ThreeDFactory, ThreeDBolt } from '@/components/ThreeDIcons';
-import { ModernLocationPin } from '@/components/Icons';
+import { 
+  ModernLocationPin, 
+  IconTag, 
+  IconPackage, 
+  IconShield, 
+  IconGate, 
+  IconStructural, 
+  IconStar, 
+  IconGear, 
+  IconHeart, 
+  IconVerifiedShield, 
+  IconSearch, 
+  IconPlus, 
+  IconCheck 
+} from '@/components/Icons';
 
 function ShopContent() {
   const searchParams = useSearchParams();
@@ -215,42 +229,48 @@ function ShopContent() {
             onClick={() => setSortBy(sortBy === 'price-asc' ? 'default' : 'price-asc')}
             className={`quick-chip ${sortBy === 'price-asc' ? 'active' : ''}`}
           >
-            <span>🏷 Direct Factory Rates</span>
+            <IconTag size={13} />
+            <span>Direct Factory Rates</span>
           </button>
 
           <button
             onClick={() => setInStockOnly(!inStockOnly)}
             className={`quick-chip ${inStockOnly ? 'active' : ''}`}
           >
-            <span>📦 Ready In Stock</span>
+            <IconPackage size={13} />
+            <span>Ready In Stock</span>
           </button>
 
           <button
             onClick={() => setSelectedMaterial(selectedMaterial === 'SS Grade 304' ? 'All Materials' : 'SS Grade 304')}
             className={`quick-chip ${selectedMaterial === 'SS Grade 304' ? 'active' : ''}`}
           >
-            <span>🛡 SS Grade 304</span>
+            <IconShield size={13} />
+            <span>SS Grade 304</span>
           </button>
 
           <button
             onClick={() => setSelectedCategory(selectedCategory === 'Gates & Entrances' ? 'All' : 'Gates & Entrances')}
             className={`quick-chip ${selectedCategory === 'Gates & Entrances' ? 'active' : ''}`}
           >
-            <span>🚪 Gates &amp; Entrances</span>
+            <IconGate size={13} />
+            <span>Gates &amp; Entrances</span>
           </button>
 
           <button
             onClick={() => setSelectedCategory(selectedCategory === 'Industrial Sheds & PEB' ? 'All' : 'Industrial Sheds & PEB')}
             className={`quick-chip ${selectedCategory === 'Industrial Sheds & PEB' ? 'active' : ''}`}
           >
-            <span>🏗 PEB &amp; Sheds</span>
+            <IconStructural size={13} />
+            <span>PEB &amp; Sheds</span>
           </button>
 
           <button
             onClick={() => setSortBy(sortBy === 'rating' ? 'default' : 'rating')}
             className={`quick-chip ${sortBy === 'rating' ? 'active' : ''}`}
           >
-            <span>⭐ 4.5+ Rated</span>
+            <IconStar size={13} color="#f59e0b" style={{ fill: '#f59e0b' }} />
+            <span>4.5+ Rated</span>
           </button>
         </div>
 
@@ -642,14 +662,15 @@ function ShopContent() {
                             background: 'none',
                             border: 'none',
                             cursor: 'pointer',
-                            padding: '2px',
+                            padding: '4px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
                             color: isWishlisted ? '#ef4444' : '#cbd5e1',
-                            fontSize: '1.2rem',
-                            lineHeight: 1,
                             flexShrink: 0,
                           }}
                         >
-                          {isWishlisted ? '❤️' : '🤍'}
+                          <IconHeart size={18} filled={isWishlisted} color={isWishlisted ? '#ef4444' : '#94a3b8'} />
                         </button>
                       </div>
 
@@ -668,7 +689,7 @@ function ShopContent() {
                             gap: '2px',
                           }}
                         >
-                          <span>★</span>
+                          <IconStar size={10} color="#ffffff" style={{ fill: '#ffffff' }} />
                           <span>{product.rating}</span>
                         </span>
                         <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
@@ -685,7 +706,7 @@ function ShopContent() {
                             fontWeight: 800,
                           }}
                         >
-                          <span>🛡</span>
+                          <IconVerifiedShield size={13} color="#1d4ed8" />
                           <span style={{ fontStyle: 'italic', fontWeight: 900 }}>Assured</span>
                         </span>
                       </div>
@@ -733,9 +754,13 @@ function ShopContent() {
                         fontWeight: 700,
                         textAlign: 'center',
                         borderRadius: '10px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '5px',
                       }}
                     >
-                      Customize ⚙
+                      <IconGear size={13} />
+                      <span>Customize</span>
                     </Link>
 
                     <button
@@ -758,9 +783,13 @@ function ShopContent() {
                         fontWeight: 700,
                         textAlign: 'center',
                         borderRadius: '10px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '5px',
                       }}
                     >
-                      Add to Cart +
+                      <IconPlus size={13} />
+                      <span>Add to Cart</span>
                     </button>
                   </div>
                 </div>
@@ -776,7 +805,9 @@ function ShopContent() {
                 textAlign: 'center',
               }}
             >
-              <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>🔍</div>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.75rem' }}>
+                <IconSearch size={40} color="#94a3b8" />
+              </div>
               <h3 className="font-display" style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a' }}>
                 No Fabrications Found
               </h3>
@@ -968,11 +999,14 @@ function ShopContent() {
                             {product.category}
                           </span>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '0.8rem', fontWeight: 700, color: '#f59e0b' }}>
-                              ★ {product.rating} <span style={{ color: '#94a3b8', fontSize: '0.72rem' }}>({product.reviewsCount})</span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', fontWeight: 700, color: '#f59e0b' }}>
+                              <IconStar size={13} color="#f59e0b" style={{ fill: '#f59e0b' }} />
+                              <span>{product.rating}</span>
+                              <span style={{ color: '#94a3b8', fontSize: '0.72rem' }}>({product.reviewsCount})</span>
                             </div>
-                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '2px', fontSize: '0.7rem', color: '#1d4ed8', fontWeight: 800 }}>
-                              🛡 <span style={{ fontStyle: 'italic', fontWeight: 900 }}>Assured</span>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', fontSize: '0.7rem', color: '#1d4ed8', fontWeight: 800 }}>
+                              <IconVerifiedShield size={13} color="#1d4ed8" />
+                              <span style={{ fontStyle: 'italic', fontWeight: 900 }}>Assured</span>
                             </span>
                           </div>
                         </div>
@@ -1019,9 +1053,13 @@ function ShopContent() {
                                 fontSize: '0.8rem',
                                 fontWeight: 700,
                                 textAlign: 'center',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
                               }}
                             >
-                              Customize ⚙
+                              <IconGear size={14} />
+                              <span>Customize</span>
                             </Link>
 
                             <button
@@ -1043,9 +1081,13 @@ function ShopContent() {
                                 fontSize: '0.8rem',
                                 fontWeight: 700,
                                 textAlign: 'center',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
                               }}
                             >
-                              Add to Cart +
+                              <IconPlus size={14} />
+                              <span>Add to Cart</span>
                             </button>
                           </div>
                         </div>
@@ -1064,7 +1106,9 @@ function ShopContent() {
                   textAlign: 'center',
                 }}
               >
-                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔍</div>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+                  <IconSearch size={48} color="#94a3b8" />
+                </div>
                 <h3 className="font-display" style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0f172a' }}>
                   No Fabrications Found Matching Criteria
                 </h3>
@@ -1118,7 +1162,7 @@ function ShopContent() {
                     }}
                   >
                     <span>{opt.label}</span>
-                    {isSelected && <span style={{ color: '#000000', fontWeight: 900 }}>✓</span>}
+                    {isSelected && <IconCheck size={16} color="#000000" />}
                   </button>
                 );
               })}

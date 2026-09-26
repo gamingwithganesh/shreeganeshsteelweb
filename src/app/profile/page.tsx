@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useCart, StoredOrder } from '@/context/CartContext';
 import OrderDetailsModal from '@/components/OrderDetailsModal';
 import { ThreeDShield, ThreeDFactory, ThreeDTruck, ThreeDPhone, ThreeDClock } from '@/components/ThreeDIcons';
+import { IconLogOut } from '@/components/Icons';
 
 export default function ProfilePage() {
   const { userOrders, selectedCity, logoutUser } = useCart();
@@ -95,10 +96,13 @@ export default function ProfilePage() {
                 backgroundColor: '#fef2f2',
                 border: '1px solid #fecaca',
                 borderRadius: '10px',
-                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
               }}
             >
-              🚪 Logout
+              <IconLogOut size={15} />
+              <span>Logout</span>
             </button>
           </div>
         </div>

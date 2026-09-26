@@ -6,6 +6,18 @@ import Link from 'next/link';
 import { PRODUCTS, ProductItem } from '@/data/products';
 import { useCart } from '@/context/CartContext';
 import { ThreeDStar, ThreeDTruck, ThreeDShield, ThreeDFactory, ThreeDRuler } from '@/components/ThreeDIcons';
+import { IconCheck, IconPlus, IconGear, IconTag, IconVerifiedShield, IconStar } from '@/components/Icons';
+
+const getMarketPrice = (priceNum: number) => {
+  const mrp = Math.round((priceNum * 1.25) / 100) * 100;
+  return `₹${mrp.toLocaleString('en-IN')}`;
+};
+
+const getDiscountPercent = (priceNum: number) => {
+  const mrp = Math.round((priceNum * 1.25) / 100) * 100;
+  const discount = Math.round(((mrp - priceNum) / mrp) * 100);
+  return `${discount}%`;
+};
 
 const SECTORS = [
   { id: 'all', label: 'All Products' },
@@ -197,14 +209,154 @@ export default function HomeShoppingSection() {
           </div>
         </div>
 
-        {/* Spacious 3-Column Product Grid */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 300px), 1fr))',
-            gap: '2rem',
-          }}
-        >
+        {/* MOBILE VIEW (< 768px): 2-Column E-Commerce Grid (Flipkart Style matching user reference) */}
+        <div className="home-products-mobile-grid">
+          {filteredProducts.map((prod) => {
+            const isAdded = addedProductId === prod.id;
+            return (
+              <div key={prod.id} className="home-mobile-product-card">
+                {/* Product Thumbnail */}
+                <div style={{ position: 'relative', width: '100%', height: '140px', backgroundColor: '#0f172a' }}>
+                  <Image
+                    src={prod.image}
+                    alt={prod.name}
+                    fill
+                    style={{ objectFit: 'cover' }}
+                  />
+                  {prod.badge && (
+                    <span
+                      style={{
+                        position: 'absolute',
+                        top: '6px',
+                        left: '6px',
+                        backgroundColor: '#000000',
+                        color: '#ffffff',
+                        fontSize: '0.58rem',
+                        fontWeight: 800,
+                        padding: '2px 6px',
+                        borderRadius: '4px',
+                        boxShadow: '0 2px 6px rgba(0,0,0,0.25)',
+                      }}
+                    >
+                      {prod.badge}
+                    </span>
+                  )}
+                  {/* Rating Pill overlay at bottom-left */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      bottom: '6px',
+                      left: '6px',
+                      backgroundColor: 'rgba(0,0,0,0.75)',
+                      backdropFilter: 'blur(4px)',
+                      color: '#ffffff',
+                      fontSize: '0.65rem',
+                      fontWeight: 800,
+                      padding: '2px 6px',
+                      borderRadius: '4px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '3px',
+                    }}
+                  >
+                    <IconStar size={11} color="#f59e0b" style={{ fill: '#f59e0b' }} />
+                    <span>{prod.rating}</span>
+                    <span style={{ color: '#cbd5e1', fontSize: '0.6rem' }}>({prod.reviewsCount})</span>
+                  </div>
+                </div>
+
+                {/* Card Body */}
+                <div style={{ padding: '10px 10px 12px', display: 'flex', flexDirection: 'column', flex: 1 }}>
+                  <div
+                    style={{
+                      fontSize: '0.62rem',
+                      color: '#64748b',
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.04em',
+                      marginBottom: '2px',
+                    }}
+                  >
+                    {prod.category.split('&')[0]}
+                  </div>
+
+                  <Link href={`/shop/${prod.id}`} style={{ textDecoration: 'none', color: '#0f172a' }}>
+                    <h3
+                      style={{
+                        fontSize: '0.84rem',
+                        fontWeight: 700,
+                        lineHeight: 1.25,
+                        margin: '0 0 6px 0',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                      }}
+                    >
+                      {prod.name}
+                    </h3>
+                  </Link>
+
+                  <div style={{ marginTop: 'auto' }}>
+                    {/* Price Row: Strikethrough Market MRP + Bold Price */}
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '5px', flexWrap: 'wrap' }}>
+                      <span style={{ color: '#94a3b8', textDecoration: 'line-through', fontSize: '0.72rem' }}>
+                        {getMarketPrice(prod.unitPriceNumeric)}
+                      </span>
+                      <span style={{ color: '#000000', fontWeight: 900, fontSize: '0.98rem' }}>
+                        {prod.price}
+                      </span>
+                    </div>
+
+                    <div style={{ fontSize: '0.64rem', color: '#16a34a', fontWeight: 800, marginTop: '2px', display: 'flex', alignItems: 'center', gap: '2px' }}>
+                      <span>↓ {getDiscountPercent(prod.unitPriceNumeric)}</span>
+                      <span>• Direct Rate</span>
+                    </div>
+
+                    {/* Quick Add Button */}
+                    <div style={{ marginTop: '8px' }}>
+                      <button
+                        type="button"
+                        onClick={() => handleQuickAdd(prod)}
+                        style={{
+                          width: '100%',
+                          padding: '7px 4px',
+                          fontSize: '0.74rem',
+                          fontWeight: 700,
+                          borderRadius: '8px',
+                          border: 'none',
+                          cursor: 'pointer',
+                          backgroundColor: isAdded ? '#10b981' : '#000000',
+                          color: '#ffffff',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '4px',
+                          transition: 'all 0.15s ease',
+                        }}
+                      >
+                        {isAdded ? (
+                          <>
+                            <IconCheck size={13} color="#ffffff" />
+                            <span>Added!</span>
+                          </>
+                        ) : (
+                          <>
+                            <IconPlus size={13} color="#ffffff" />
+                            <span>Add to Cart</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* DESKTOP VIEW (≥ 768px): Spacious 3-Column Product Grid */}
+        <div className="home-products-desktop-grid">
           {filteredProducts.map((prod) => (
             <div
               key={prod.id}
@@ -417,8 +569,9 @@ export default function HomeShoppingSection() {
                   }}
                 >
                   <div>
-                    <div style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                      {prod.priceType === 'per_sqft' ? 'Per Sq Ft' : prod.priceType === 'per_ft' ? 'Per Running Ft' : 'Direct Unit Rate'}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
+                      <span style={{ fontSize: '0.78rem', color: '#16a34a', fontWeight: 800 }}>↓ {getDiscountPercent(prod.unitPriceNumeric)}</span>
+                      <span style={{ fontSize: '0.75rem', color: '#94a3b8', textDecoration: 'line-through' }}>{getMarketPrice(prod.unitPriceNumeric)}</span>
                     </div>
                     <div
                       className="font-display"
@@ -489,12 +642,12 @@ export default function HomeShoppingSection() {
                     >
                       {addedProductId === prod.id ? (
                         <>
-                          <span>✓</span>
+                          <IconCheck size={14} color="#ffffff" />
                           <span>Added!</span>
                         </>
                       ) : (
                         <>
-                          <span>+</span>
+                          <IconPlus size={14} color="#ffffff" />
                           <span>Add to Cart</span>
                         </>
                       )}

@@ -23,6 +23,7 @@ import HomeShoppingSection from '@/components/HomeShoppingSection';
 import EngineeredSolutionsShowcase from '@/components/EngineeredSolutionsShowcase';
 import EngineeringArtisanSection from '@/components/EngineeringArtisanSection';
 import HeroTypewriterHeadline from '@/components/HeroTypewriterHeadline';
+import { IconPhone } from '@/components/Icons';
 
 export default function Home() {
   return (
@@ -169,7 +170,7 @@ export default function Home() {
                 e.currentTarget.style.transform = 'translateY(0)';
               }}
             >
-              <span>📞</span>
+              <IconPhone size={16} />
               <span>Call +91 94230 32182</span>
             </a>
           </div>

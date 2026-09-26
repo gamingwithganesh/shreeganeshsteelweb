@@ -7,6 +7,7 @@ import { useCart, StoredOrder } from '@/context/CartContext';
 import OrderTrackerTimeline from '@/components/OrderTrackerTimeline';
 import OrderDetailsModal from '@/components/OrderDetailsModal';
 import { ThreeDShield, ThreeDFactory, ThreeDTruck, ThreeDPhone } from '@/components/ThreeDIcons';
+import { IconSearch, IconRuler, IconBolt, IconShield, IconTruck } from '@/components/Icons';
 
 function TrackOrderContent() {
   const searchParams = useSearchParams();
@@ -502,7 +503,9 @@ function TrackOrderContent() {
               textAlign: 'center',
             }}
           >
-            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔍</div>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+              <IconSearch size={48} color="#94a3b8" />
+            </div>
             <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.5rem' }}>
               Track Your Fabrication Order
             </h3>
@@ -510,10 +513,10 @@ function TrackOrderContent() {
               Enter your Order ID (found on your order invoice/receipt) or your registered mobile number to see real-time cutting, welding, powder coating, and site dispatch progress.
             </p>
             <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', flexWrap: 'wrap', color: '#64748b', fontSize: '0.85rem' }}>
-              <span>📐 CAD CNC Cutting</span>
-              <span>⚡ TIG/MIG Welding</span>
-              <span>🛡️ Powder Coating</span>
-              <span>🚚 Site Dispatch</span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}><IconRuler size={15} color="#64748b" /> CAD CNC Cutting</span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}><IconBolt size={15} color="#64748b" /> TIG/MIG Welding</span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}><IconShield size={15} color="#64748b" /> Powder Coating</span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}><IconTruck size={15} color="#64748b" /> Site Dispatch</span>
             </div>
           </div>
         )}
@@ -714,7 +717,8 @@ function TrackOrderContent() {
                   cursor: 'pointer',
                 }}
               >
-                🔍 Track Another Order
+                <IconSearch size={14} />
+                <span>Track Another Order</span>
               </button>
 
               <div style={{ display: 'flex', gap: '10px' }}>

@@ -2,7 +2,7 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import { SERVICES } from '@/data/services';
 import ServiceIcon from '@/components/ServiceIcon';
-import { IconCheck, IconPhone } from '@/components/Icons';
+import { IconCheck, IconPhone, IconMicrophone } from '@/components/Icons';
 import { ThreeDClock, ThreeDMicroscope, ThreeDShield, ThreeDRuler, ThreeDTruck, ThreeDBolt, ThreeDFactory } from '@/components/ThreeDIcons';
 
 export const metadata: Metadata = {
@@ -195,7 +195,7 @@ export default function ServicesPage() {
                       <span>IS 2062 Grade Steel</span>
                       <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>▾</span>
                     </div>
-                    <span style={{ color: '#94a3b8', fontSize: '0.9rem' }}>🎙️</span>
+                    <IconMicrophone size={16} color="#94a3b8" />
                   </div>
                 </div>
 

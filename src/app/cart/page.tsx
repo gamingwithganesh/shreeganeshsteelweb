@@ -8,6 +8,7 @@ import { useCart, VIDARBHA_CITIES, StoredOrder } from '@/context/CartContext';
 import PaymentModal from '@/components/PaymentModal';
 import OrderDetailsModal from '@/components/OrderDetailsModal';
 import { ThreeDSuccess } from '@/components/ThreeDIcons';
+import { IconPrinter, IconTruck, IconChat } from '@/components/Icons';
 import { compressImageToTargetRange } from '@/utils/imageCompressor';
 
 export default function CartPage() {
@@ -283,7 +284,8 @@ export default function CartPage() {
                 onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.85')}
                 onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
               >
-                <span>🖨️ Print / Download Bill (PDF)</span>
+                <IconPrinter size={16} />
+                <span>Print / Download Bill (PDF)</span>
               </button>
 
               <Link
@@ -303,7 +305,8 @@ export default function CartPage() {
                   transition: 'background-color 0.15s ease',
                 }}
               >
-                <span>🚚 Track Live Status</span>
+                <IconTruck size={16} />
+                <span>Track Live Status</span>
               </Link>
 
               <a
@@ -326,7 +329,8 @@ export default function CartPage() {
                   gap: '8px',
                 }}
               >
-                <span>💬 WhatsApp Us</span>
+                <IconChat size={16} />
+                <span>WhatsApp Us</span>
               </a>
             </div>
 
@@ -547,10 +551,13 @@ export default function CartPage() {
                   fontSize: '0.85rem',
                   fontWeight: 700,
                   border: 'none',
-                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
                 }}
               >
-                🖨️ View Full Bill / Receipt
+                <IconPrinter size={15} />
+                <span>View Full Bill / Receipt</span>
               </button>
             </div>
           </div>
