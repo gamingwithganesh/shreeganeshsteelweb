@@ -41,7 +41,7 @@ export default function PaymentModal({ isOpen, onClose, onOrderPlacedSuccess }: 
   const [completedOrder, setCompletedOrder] = useState<StoredOrder | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  const upiId = '9423032182@upi';
+  const upiId = '9423032182@sbi';
   const advanceAmount = Math.round(grandTotal * 0.2);
   const payableAmount = paymentOption === 'advance_20' ? advanceAmount : grandTotal;
   const balanceAmount = paymentOption === 'advance_20' ? grandTotal - advanceAmount : 0;
@@ -538,7 +538,7 @@ export default function PaymentModal({ isOpen, onClose, onOrderPlacedSuccess }: 
                   <img
                     src="/images/ganesh_upi_qr.png"
                     alt="Scan to Pay – Shree Ganesh Steel & Welding Workshop UPI"
-                    style={{ width: '200px', height: '200px', objectFit: 'contain', display: 'block' }}
+                    style={{ width: '260px', height: '260px', objectFit: 'contain', display: 'block' }}
                   />
                   <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '8px' }}>Scan with GPay / PhonePe / Paytm</div>
                 </div>
