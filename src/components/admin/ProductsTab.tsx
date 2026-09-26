@@ -4,6 +4,41 @@ import React, { useState, useRef } from 'react';
 import Image from 'next/image';
 import { useAdmin } from '@/context/AdminContext';
 import { ProductItem } from '@/data/products';
+import {
+  IconUpload,
+  IconLink,
+  IconImage,
+  IconCheck,
+  IconPlus,
+  IconClose,
+  IconInfo,
+} from '@/components/Icons';
+
+// Helper to convert Google Drive share links to direct embeddable image stream URLs
+function formatGoogleImageUrl(url: string): string {
+  const trimmed = url.trim();
+  if (!trimmed) return '';
+
+  // Google Drive sharing URL formats:
+  // Format 1: https://drive.google.com/file/d/{FILE_ID}/view?usp=sharing
+  const driveMatch1 = trimmed.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if (driveMatch1 && driveMatch1[1]) {
+    return `https://drive.google.com/thumbnail?id=${driveMatch1[1]}&sz=w1200`;
+  }
+
+  // Format 2: https://drive.google.com/open?id={FILE_ID} or ?id={FILE_ID}
+  const driveMatch2 = trimmed.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if (driveMatch2 && driveMatch2[1]) {
+    return `https://drive.google.com/thumbnail?id=${driveMatch2[1]}&sz=w1200`;
+  }
+
+  return trimmed;
+}
+
+function isGoogleDriveLink(url: string): boolean {
+  if (!url) return false;
+  return url.includes('drive.google.com') || url.includes('docs.google.com');
+}
 
 export default function ProductsTab() {
   const { products, addProduct, updateProduct, deleteProduct } = useAdmin();
@@ -26,8 +61,18 @@ export default function ProductsTab() {
   const [leadTime, setLeadTime] = useState('7 - 12 days');
   const [description, setDescription] = useState('');
   const [imageBase64, setImageBase64] = useState('/images/product_gate.jpg');
+  const [addImageMode, setAddImageMode] = useState<'file' | 'url'>('file');
+  const [imageUrlInput, setImageUrlInput] = useState('');
+  const [imageLoadError, setImageLoadError] = useState(false);
+
+  // Edit Product Image State
+  const [editImageMode, setEditImageMode] = useState<'file' | 'url'>('file');
+  const [editImageUrlInput, setEditImageUrlInput] = useState('');
+  const [editImageLoadError, setEditImageLoadError] = useState(false);
+
   const [isCompressing, setIsCompressing] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
+
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const editFileInputRef = useRef<HTMLInputElement | null>(null);
@@ -78,6 +123,23 @@ export default function ProductsTab() {
       img.src = readerEvent.target?.result as string;
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleImageUrlChange = (val: string, isEdit = false) => {
+    const formatted = formatGoogleImageUrl(val);
+    if (isEdit) {
+      setEditImageUrlInput(val);
+      setEditImageLoadError(false);
+      if (editingProduct && formatted) {
+        setEditingProduct({ ...editingProduct, image: formatted });
+      }
+    } else {
+      setImageUrlInput(val);
+      setImageLoadError(false);
+      if (formatted) {
+        setImageBase64(formatted);
+      }
+    }
   };
 
   const categories: Array<ProductItem['category'] | 'all'> = [
@@ -148,6 +210,9 @@ export default function ProductsTab() {
     setIsAddModalOpen(false);
     setName('');
     setDescription('');
+    setAddImageMode('file');
+    setImageUrlInput('');
+    setImageLoadError(false);
     setToastMsg(`Product added successfully.`);
     setTimeout(() => setToastMsg(''), 3000);
   };
@@ -169,6 +234,9 @@ export default function ProductsTab() {
     });
 
     setEditingProduct(null);
+    setEditImageMode('file');
+    setEditImageUrlInput('');
+    setEditImageLoadError(false);
     setToastMsg(`Product updated successfully.`);
     setTimeout(() => setToastMsg(''), 3000);
   };
@@ -241,7 +309,7 @@ export default function ProductsTab() {
               gap: '6px',
             }}
           >
-            <span>+</span>
+            <IconPlus size={14} color="#ffffff" />
             <span>Add Product</span>
           </button>
         </div>
@@ -262,7 +330,7 @@ export default function ProductsTab() {
             gap: '8px',
           }}
         >
-          <span>✓</span>
+          <IconCheck size={14} color="#ffffff" />
           <span>{toastMsg}</span>
         </div>
       )}
@@ -414,7 +482,13 @@ export default function ProductsTab() {
                             flexShrink: 0,
                           }}
                         >
-                          <Image src={product.image} alt={product.name} fill style={{ objectFit: 'cover' }} />
+                          <Image
+                            src={product.image}
+                            alt={product.name}
+                            fill
+                            unoptimized={Boolean(product.image?.startsWith('http'))}
+                            style={{ objectFit: 'cover' }}
+                          />
                         </div>
                         <div style={{ fontWeight: 600, color: '#09090b', fontSize: '0.825rem' }}>
                           {product.name}
@@ -442,7 +516,17 @@ export default function ProductsTab() {
                       <div style={{ display: 'inline-flex', gap: '6px' }}>
                         <button
                           type="button"
-                          onClick={() => setEditingProduct({ ...product })}
+                          onClick={() => {
+                            setEditingProduct({ ...product });
+                            if (product.image?.startsWith('http')) {
+                              setEditImageMode('url');
+                              setEditImageUrlInput(product.image);
+                            } else {
+                              setEditImageMode('file');
+                              setEditImageUrlInput('');
+                            }
+                            setEditImageLoadError(false);
+                          }}
                           style={{
                             padding: '4px 10px',
                             borderRadius: '6px',
@@ -518,55 +602,226 @@ export default function ProductsTab() {
               <button
                 type="button"
                 onClick={() => setIsAddModalOpen(false)}
-                style={{ background: 'none', border: 'none', fontSize: '1.1rem', cursor: 'pointer', color: '#71717a' }}
+                aria-label="Close"
+                style={{ background: 'none', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '4px', borderRadius: '6px' }}
               >
-                ✕
+                <IconClose size={18} color="#71717a" />
               </button>
             </div>
 
             <form onSubmit={handleCreateProduct} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#09090b', marginBottom: '4px' }}>
-                  Photo
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#09090b', marginBottom: '8px' }}>
+                  Product Picture
                 </label>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <div
-                    style={{
-                      width: '48px',
-                      height: '48px',
-                      borderRadius: '8px',
-                      overflow: 'hidden',
-                      position: 'relative',
-                      backgroundColor: '#f4f4f5',
-                      border: '1px solid #e4e4e7',
-                    }}
-                  >
-                    <Image src={imageBase64} alt="Preview" fill style={{ objectFit: 'cover' }} />
-                  </div>
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    accept="image/*"
-                    onChange={(e) => handleImageUpload(e, false)}
-                    style={{ display: 'none' }}
-                  />
+
+                {/* Segmented Mode Switcher */}
+                <div
+                  style={{
+                    display: 'inline-flex',
+                    backgroundColor: '#f4f4f5',
+                    padding: '3px',
+                    borderRadius: '8px',
+                    border: '1px solid #e4e4e7',
+                    marginBottom: '10px',
+                    gap: '4px',
+                    width: '100%',
+                  }}
+                >
                   <button
                     type="button"
-                    onClick={() => fileInputRef.current?.click()}
+                    onClick={() => setAddImageMode('file')}
                     style={{
-                      padding: '6px 12px',
+                      flex: 1,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px',
+                      padding: '6px 10px',
                       borderRadius: '6px',
-                      border: '1px solid #e4e4e7',
-                      backgroundColor: '#ffffff',
-                      color: '#09090b',
-                      fontSize: '0.78rem',
+                      border: 'none',
+                      fontSize: '0.74rem',
                       fontWeight: 600,
                       cursor: 'pointer',
+                      backgroundColor: addImageMode === 'file' ? '#09090b' : 'transparent',
+                      color: addImageMode === 'file' ? '#ffffff' : '#71717a',
+                      transition: 'all 0.15s ease',
                     }}
                   >
-                    {isCompressing ? 'Compressing...' : 'Upload Image'}
+                    <IconUpload size={14} color={addImageMode === 'file' ? '#ffffff' : '#71717a'} />
+                    <span>Upload Picture</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAddImageMode('url')}
+                    style={{
+                      flex: 1,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px',
+                      padding: '6px 10px',
+                      borderRadius: '6px',
+                      border: 'none',
+                      fontSize: '0.74rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      backgroundColor: addImageMode === 'url' ? '#09090b' : 'transparent',
+                      color: addImageMode === 'url' ? '#ffffff' : '#71717a',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    <IconLink size={14} color={addImageMode === 'url' ? '#ffffff' : '#71717a'} />
+                    <span>Add URL</span>
                   </button>
                 </div>
+
+                {/* Option 1: File Upload */}
+                {addImageMode === 'file' ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div
+                      style={{
+                        width: '52px',
+                        height: '52px',
+                        borderRadius: '8px',
+                        overflow: 'hidden',
+                        position: 'relative',
+                        backgroundColor: '#f4f4f5',
+                        border: '1px solid #e4e4e7',
+                        flexShrink: 0,
+                      }}
+                    >
+                      {/* Standard img tag avoids Next.js parse crashes on local drafts */}
+                      <img
+                        src={imageBase64 || '/images/product_gate.jpg'}
+                        alt="Preview"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    </div>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      accept="image/*"
+                      onChange={(e) => handleImageUpload(e, false)}
+                      style={{ display: 'none' }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '7px 14px',
+                        borderRadius: '8px',
+                        border: '1px solid #09090b',
+                        backgroundColor: '#09090b',
+                        color: '#ffffff',
+                        fontSize: '0.76rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <IconUpload size={14} color="#ffffff" />
+                      <span>{isCompressing ? 'Compressing...' : 'Upload Picture'}</span>
+                    </button>
+                    <span style={{ fontSize: '0.72rem', color: '#71717a' }}>PNG, JPG or WebP</span>
+                  </div>
+                ) : (
+                  /* Option 2: Image URL */
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div
+                        style={{
+                          width: '52px',
+                          height: '52px',
+                          borderRadius: '8px',
+                          overflow: 'hidden',
+                          position: 'relative',
+                          backgroundColor: '#f4f4f5',
+                          border: '1px solid #e4e4e7',
+                          flexShrink: 0,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        {imageLoadError ? (
+                          <IconImage size={22} color="#a1a1aa" />
+                        ) : (
+                          <img
+                            src={imageBase64 || '/images/product_gate.jpg'}
+                            alt="Preview"
+                            onError={() => setImageLoadError(true)}
+                            onLoad={() => setImageLoadError(false)}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          />
+                        )}
+                      </div>
+                      <div style={{ flex: 1, position: 'relative' }}>
+                        <div
+                          style={{
+                            position: 'absolute',
+                            left: '10px',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            pointerEvents: 'none',
+                            display: 'flex',
+                            alignItems: 'center',
+                          }}
+                        >
+                          <IconLink size={14} color="#71717a" />
+                        </div>
+                        <input
+                          type="url"
+                          placeholder="Paste image link or Google Drive link..."
+                          value={imageUrlInput}
+                          onChange={(e) => handleImageUrlChange(e.target.value, false)}
+                          style={{
+                            width: '100%',
+                            padding: '8px 12px 8px 30px',
+                            borderRadius: '8px',
+                            border: imageLoadError ? '1px solid #dc2626' : '1px solid #e4e4e7',
+                            backgroundColor: '#fafafa',
+                            color: '#09090b',
+                            fontSize: '0.78rem',
+                            outline: 'none',
+                            boxSizing: 'border-box',
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    {isGoogleDriveLink(imageUrlInput) && (
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          fontSize: '0.72rem',
+                          color: '#09090b',
+                          backgroundColor: '#f4f4f5',
+                          padding: '5px 10px',
+                          borderRadius: '6px',
+                          border: '1px solid #e4e4e7',
+                        }}
+                      >
+                        <IconCheck size={12} color="#09090b" />
+                        <span>Google Drive link detected and formatted for display.</span>
+                      </div>
+                    )}
+
+                    {imageLoadError ? (
+                      <div style={{ fontSize: '0.72rem', color: '#dc2626' }}>
+                        Could not load preview. If using Google Drive, make sure link sharing is set to &ldquo;Anyone with the link can view&rdquo;.
+                      </div>
+                    ) : (
+                      <div style={{ fontSize: '0.71rem', color: '#71717a', lineHeight: 1.4 }}>
+                        Paste any direct image link or Google Drive link (make sure file is shared to anyone with link).
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div>
@@ -736,55 +991,225 @@ export default function ProductsTab() {
               <button
                 type="button"
                 onClick={() => setEditingProduct(null)}
-                style={{ background: 'none', border: 'none', fontSize: '1.1rem', cursor: 'pointer', color: '#71717a' }}
+                aria-label="Close"
+                style={{ background: 'none', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: '4px', borderRadius: '6px' }}
               >
-                ✕
+                <IconClose size={18} color="#71717a" />
               </button>
             </div>
 
             <form onSubmit={handleEditSave} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#09090b', marginBottom: '4px' }}>
-                  Photo
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#09090b', marginBottom: '8px' }}>
+                  Product Picture
                 </label>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <div
-                    style={{
-                      width: '48px',
-                      height: '48px',
-                      borderRadius: '8px',
-                      overflow: 'hidden',
-                      position: 'relative',
-                      backgroundColor: '#f4f4f5',
-                      border: '1px solid #e4e4e7',
-                    }}
-                  >
-                    <Image src={editingProduct.image} alt="Preview" fill style={{ objectFit: 'cover' }} />
-                  </div>
-                  <input
-                    type="file"
-                    ref={editFileInputRef}
-                    accept="image/*"
-                    onChange={(e) => handleImageUpload(e, true)}
-                    style={{ display: 'none' }}
-                  />
+
+                {/* Segmented Mode Switcher */}
+                <div
+                  style={{
+                    display: 'inline-flex',
+                    backgroundColor: '#f4f4f5',
+                    padding: '3px',
+                    borderRadius: '8px',
+                    border: '1px solid #e4e4e7',
+                    marginBottom: '10px',
+                    gap: '4px',
+                    width: '100%',
+                  }}
+                >
                   <button
                     type="button"
-                    onClick={() => editFileInputRef.current?.click()}
+                    onClick={() => setEditImageMode('file')}
                     style={{
-                      padding: '6px 12px',
+                      flex: 1,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px',
+                      padding: '6px 10px',
                       borderRadius: '6px',
-                      border: '1px solid #e4e4e7',
-                      backgroundColor: '#ffffff',
-                      color: '#09090b',
-                      fontSize: '0.78rem',
+                      border: 'none',
+                      fontSize: '0.74rem',
                       fontWeight: 600,
                       cursor: 'pointer',
+                      backgroundColor: editImageMode === 'file' ? '#09090b' : 'transparent',
+                      color: editImageMode === 'file' ? '#ffffff' : '#71717a',
+                      transition: 'all 0.15s ease',
                     }}
                   >
-                    Change Image
+                    <IconUpload size={14} color={editImageMode === 'file' ? '#ffffff' : '#71717a'} />
+                    <span>Upload Picture</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditImageMode('url')}
+                    style={{
+                      flex: 1,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px',
+                      padding: '6px 10px',
+                      borderRadius: '6px',
+                      border: 'none',
+                      fontSize: '0.74rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      backgroundColor: editImageMode === 'url' ? '#09090b' : 'transparent',
+                      color: editImageMode === 'url' ? '#ffffff' : '#71717a',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    <IconLink size={14} color={editImageMode === 'url' ? '#ffffff' : '#71717a'} />
+                    <span>Add URL</span>
                   </button>
                 </div>
+
+                {/* Option 1: File Upload */}
+                {editImageMode === 'file' ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div
+                      style={{
+                        width: '52px',
+                        height: '52px',
+                        borderRadius: '8px',
+                        overflow: 'hidden',
+                        position: 'relative',
+                        backgroundColor: '#f4f4f5',
+                        border: '1px solid #e4e4e7',
+                        flexShrink: 0,
+                      }}
+                    >
+                      <img
+                        src={editingProduct.image || '/images/product_gate.jpg'}
+                        alt="Preview"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    </div>
+                    <input
+                      type="file"
+                      ref={editFileInputRef}
+                      accept="image/*"
+                      onChange={(e) => handleImageUpload(e, true)}
+                      style={{ display: 'none' }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => editFileInputRef.current?.click()}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '7px 14px',
+                        borderRadius: '8px',
+                        border: '1px solid #09090b',
+                        backgroundColor: '#09090b',
+                        color: '#ffffff',
+                        fontSize: '0.76rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <IconUpload size={14} color="#ffffff" />
+                      <span>{isCompressing ? 'Compressing...' : 'Change Picture'}</span>
+                    </button>
+                    <span style={{ fontSize: '0.72rem', color: '#71717a' }}>PNG, JPG or WebP</span>
+                  </div>
+                ) : (
+                  /* Option 2: Image URL */
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div
+                        style={{
+                          width: '52px',
+                          height: '52px',
+                          borderRadius: '8px',
+                          overflow: 'hidden',
+                          position: 'relative',
+                          backgroundColor: '#f4f4f5',
+                          border: '1px solid #e4e4e7',
+                          flexShrink: 0,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        {editImageLoadError ? (
+                          <IconImage size={22} color="#a1a1aa" />
+                        ) : (
+                          <img
+                            src={editingProduct.image || '/images/product_gate.jpg'}
+                            alt="Preview"
+                            onError={() => setEditImageLoadError(true)}
+                            onLoad={() => setEditImageLoadError(false)}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          />
+                        )}
+                      </div>
+                      <div style={{ flex: 1, position: 'relative' }}>
+                        <div
+                          style={{
+                            position: 'absolute',
+                            left: '10px',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            pointerEvents: 'none',
+                            display: 'flex',
+                            alignItems: 'center',
+                          }}
+                        >
+                          <IconLink size={14} color="#71717a" />
+                        </div>
+                        <input
+                          type="url"
+                          placeholder="Paste image link or Google Drive link..."
+                          value={editImageUrlInput}
+                          onChange={(e) => handleImageUrlChange(e.target.value, true)}
+                          style={{
+                            width: '100%',
+                            padding: '8px 12px 8px 30px',
+                            borderRadius: '8px',
+                            border: editImageLoadError ? '1px solid #dc2626' : '1px solid #e4e4e7',
+                            backgroundColor: '#fafafa',
+                            color: '#09090b',
+                            fontSize: '0.78rem',
+                            outline: 'none',
+                            boxSizing: 'border-box',
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    {isGoogleDriveLink(editImageUrlInput) && (
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          fontSize: '0.72rem',
+                          color: '#09090b',
+                          backgroundColor: '#f4f4f5',
+                          padding: '5px 10px',
+                          borderRadius: '6px',
+                          border: '1px solid #e4e4e7',
+                        }}
+                      >
+                        <IconCheck size={12} color="#09090b" />
+                        <span>Google Drive link detected and formatted for display.</span>
+                      </div>
+                    )}
+
+                    {editImageLoadError ? (
+                      <div style={{ fontSize: '0.72rem', color: '#dc2626' }}>
+                        Could not load preview. If using Google Drive, make sure link sharing is set to &ldquo;Anyone with the link can view&rdquo;.
+                      </div>
+                    ) : (
+                      <div style={{ fontSize: '0.71rem', color: '#71717a', lineHeight: 1.4 }}>
+                        Paste any direct image link or Google Drive link (make sure file is shared to anyone with link).
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div>
