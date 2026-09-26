@@ -5,11 +5,13 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import { PRODUCTS, ProductItem } from '@/data/products';
+import { useLiveProducts } from '@/hooks/useLiveProducts';
 
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const { cart, currentUser, setIsAuthModalOpen, logoutUser } = useCart();
+  const { products: liveProducts } = useLiveProducts();
   const [currentAdmin, setCurrentAdmin] = useState<{ name: string; email: string } | null>(null);
 
   useEffect(() => {
@@ -124,7 +126,7 @@ export default function Navbar() {
 
     const timer = setTimeout(() => {
       const q = searchQuery.toLowerCase().trim();
-      const matches = PRODUCTS.filter(
+      const matches = liveProducts.filter(
         (p) =>
           p.name.toLowerCase().includes(q) ||
           p.category.toLowerCase().includes(q) ||
@@ -134,7 +136,7 @@ export default function Navbar() {
     }, 180);
 
     return () => clearTimeout(timer);
-  }, [searchQuery]);
+  }, [searchQuery, liveProducts]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();

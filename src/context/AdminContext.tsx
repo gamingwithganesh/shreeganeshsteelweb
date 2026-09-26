@@ -236,6 +236,10 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     if (!isLoaded) return;
     try {
       localStorage.setItem(PRODUCTS_KEY, JSON.stringify(products));
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('sgwwsp_products_changed'));
+        window.dispatchEvent(new Event('storage'));
+      }
     } catch (e) {}
   }, [products, isLoaded]);
 
@@ -429,6 +433,16 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       id: newId,
     };
     setProducts((prev) => [newProduct, ...prev]);
+
+    // Background sync with API
+    try {
+      fetch('/api/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newProduct),
+      }).catch(() => {});
+    } catch (e) {}
+
     return newProduct;
   };
 
@@ -440,6 +454,13 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
 
   const deleteProduct = (id: string) => {
     setProducts((prev) => prev.filter((p) => p.id !== id));
+
+    // Background delete from API
+    try {
+      fetch(`/api/products?id=${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+      }).catch(() => {});
+    } catch (e) {}
   };
 
   // Settings Management

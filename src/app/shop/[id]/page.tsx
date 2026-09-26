@@ -14,7 +14,7 @@ export function generateMetadata({ params }: { params: { id: string } }): Metada
   const product = PRODUCTS.find((p) => p.id === params.id);
   if (!product) {
     return {
-      title: 'Product Not Found | SGWWSP',
+      title: 'Fabrication Product Detail | Shree Ganesh Steel Workshop',
     };
   }
   return {
@@ -26,9 +26,5 @@ export function generateMetadata({ params }: { params: { id: string } }): Metada
 export default function ProductDetailPage({ params }: { params: { id: string } }) {
   const product = PRODUCTS.find((p) => p.id === params.id);
 
-  if (!product) {
-    notFound();
-  }
-
-  return <ProductDetailClient product={product} />;
+  return <ProductDetailClient product={product} productId={params.id} />;
 }

@@ -5,12 +5,47 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ProductItem } from '@/data/products';
 import { useCart } from '@/context/CartContext';
+import { useLiveProducts } from '@/hooks/useLiveProducts';
 import MeasurementGuideModal from '@/components/MeasurementGuideModal';
 import { ThreeDClock, ThreeDShield, ThreeDTruck, ThreeDStar, ThreeDRuler, ThreeDFactory, ThreeDPhone } from '@/components/ThreeDIcons';
 import { ModernLocationPin } from '@/components/Icons';
 import { compressImageToTargetRange } from '@/utils/imageCompressor';
 
-export default function ProductDetailClient({ product }: { product: ProductItem }) {
+export default function ProductDetailClient({
+  product: initialProduct,
+  productId,
+}: {
+  product?: ProductItem;
+  productId?: string;
+}) {
+  const { products: liveProducts, isLoaded } = useLiveProducts();
+  const product = initialProduct || liveProducts.find((p) => p.id === productId);
+
+  if (!product) {
+    if (!isLoaded) {
+      return (
+        <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <p style={{ color: '#71717a', fontSize: '0.9rem' }}>Loading product details...</p>
+        </div>
+      );
+    }
+    return (
+      <div style={{ minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', padding: '40px 20px', textAlign: 'center' }}>
+        <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#09090b' }}>Product Not Found</h2>
+        <p style={{ color: '#71717a', maxWidth: '420px', fontSize: '0.875rem' }}>
+          The requested custom fabrication product is unavailable or may have been modified by workshop administration.
+        </p>
+        <Link href="/shop" style={{ padding: '10px 20px', borderRadius: '8px', backgroundColor: '#09090b', color: '#ffffff', textDecoration: 'none', fontWeight: 600, fontSize: '0.85rem' }}>
+          Return to Fabrication Catalog
+        </Link>
+      </div>
+    );
+  }
+
+  return <ProductDetailView product={product} />;
+}
+
+function ProductDetailView({ product }: { product: ProductItem }) {
   const { addToCart, selectedCity, setIsLocationModalOpen } = useCart();
 
   // Gallery state
@@ -132,6 +167,7 @@ export default function ProductDetailClient({ product }: { product: ProductItem 
                 alt={product.name}
                 fill
                 priority
+                unoptimized={Boolean(activeImage?.startsWith('http'))}
                 style={{ objectFit: 'cover' }}
               />
 
@@ -193,7 +229,13 @@ export default function ProductDetailClient({ product }: { product: ProductItem 
                       boxShadow: activeImage === img ? '0 4px 12px rgba(0,0,0,0.25)' : 'none',
                     }}
                   >
-                    <Image src={img} alt={`Thumbnail ${idx}`} fill style={{ objectFit: 'cover' }} />
+                    <Image
+                      src={img}
+                      alt={`Thumbnail ${idx}`}
+                      fill
+                      unoptimized={Boolean(img?.startsWith('http'))}
+                      style={{ objectFit: 'cover' }}
+                    />
                   </button>
                 ))}
               </div>

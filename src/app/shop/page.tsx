@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { PRODUCTS, CATEGORIES, SECTORS, MATERIAL_GRADES, ProductItem } from '@/data/products';
+import { useLiveProducts } from '@/hooks/useLiveProducts';
 import { useCart } from '@/context/CartContext';
 import { ThreeDStar, ThreeDRuler, ThreeDShield, ThreeDFactory, ThreeDBolt } from '@/components/ThreeDIcons';
 import { 
@@ -31,6 +32,7 @@ function ShopContent() {
   const initialSector = searchParams.get('sector') || 'All Sectors';
 
   const { addToCart, cart, setIsCartOpen, selectedCity, setIsLocationModalOpen } = useCart();
+  const { products: liveProducts } = useLiveProducts();
   const cartItemCount = cart.reduce((total, item) => total + (item.quantity || 1), 0);
 
   const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory);
@@ -70,7 +72,7 @@ function ShopContent() {
   };
 
   const filteredProducts = useMemo(() => {
-    let list = PRODUCTS.filter((item) => {
+    let list = liveProducts.filter((item) => {
       const matchCat = selectedCategory === 'All' || item.category === selectedCategory;
       const matchSector = selectedSector === 'All Sectors' || item.sector === selectedSector;
       const matchMaterial = selectedMaterial === 'All Materials' || item.materialGrade === selectedMaterial;
@@ -95,7 +97,7 @@ function ShopContent() {
     }
 
     return list;
-  }, [selectedCategory, selectedSector, selectedMaterial, inStockOnly, searchQuery, sortBy]);
+  }, [liveProducts, selectedCategory, selectedSector, selectedMaterial, inStockOnly, searchQuery, sortBy]);
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
@@ -653,6 +655,7 @@ function ShopContent() {
                         src={product.image}
                         alt={product.name}
                         fill
+                        unoptimized={Boolean(product.image?.startsWith('http'))}
                         style={{ objectFit: 'cover' }}
                       />
                       {product.badge && (
@@ -905,6 +908,7 @@ function ShopContent() {
                           src={product.image}
                           alt={product.name}
                           fill
+                          unoptimized={Boolean(product.image?.startsWith('http'))}
                           style={{ objectFit: 'cover' }}
                         />
                         {product.badge && (

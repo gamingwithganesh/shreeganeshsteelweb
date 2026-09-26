@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { PRODUCTS, ProductItem } from '@/data/products';
+import { useLiveProducts } from '@/hooks/useLiveProducts';
 import { useCart } from '@/context/CartContext';
 import { ThreeDStar, ThreeDTruck, ThreeDShield, ThreeDFactory, ThreeDRuler } from '@/components/ThreeDIcons';
 import { IconCheck, IconPlus, IconGear, IconTag, IconVerifiedShield, IconStar } from '@/components/Icons';
@@ -75,12 +76,13 @@ function renderSectorIcon(id: string) {
 
 export default function HomeShoppingSection() {
   const { addToCart } = useCart();
+  const { products: liveProducts } = useLiveProducts();
   const [activeSector, setActiveSector] = useState('all');
   const [addedProductId, setAddedProductId] = useState<string | null>(null);
 
   const filteredProducts = activeSector === 'all'
-    ? PRODUCTS
-    : PRODUCTS.filter((p) => p.sector === activeSector);
+    ? liveProducts
+    : liveProducts.filter((p) => p.sector === activeSector);
 
   const handleQuickAdd = (product: ProductItem) => {
     addToCart(product);
@@ -221,6 +223,7 @@ export default function HomeShoppingSection() {
                     src={prod.image}
                     alt={prod.name}
                     fill
+                    unoptimized={Boolean(prod.image?.startsWith('http'))}
                     style={{ objectFit: 'cover' }}
                   />
                   {prod.badge && (
@@ -396,6 +399,7 @@ export default function HomeShoppingSection() {
                   alt={prod.name}
                   width={460}
                   height={300}
+                  unoptimized={Boolean(prod.image?.startsWith('http'))}
                   style={{
                     width: '100%',
                     height: '100%',
