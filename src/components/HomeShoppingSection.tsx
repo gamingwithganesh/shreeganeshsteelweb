@@ -83,7 +83,7 @@ export default function HomeShoppingSection() {
       id="storefront-section"
       style={{
         backgroundColor: '#ffffff',
-        padding: '7.5rem 0',
+        padding: 'clamp(3.5rem, 8vw, 7.5rem) 0',
         position: 'relative',
         borderTop: '1px solid rgba(0, 0, 0, 0.06)',
       }}
@@ -201,7 +201,7 @@ export default function HomeShoppingSection() {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 300px), 1fr))',
             gap: '2rem',
           }}
         >
