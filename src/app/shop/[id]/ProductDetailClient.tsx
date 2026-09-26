@@ -8,7 +8,7 @@ import { useCart } from '@/context/CartContext';
 import { useLiveProducts } from '@/hooks/useLiveProducts';
 import MeasurementGuideModal from '@/components/MeasurementGuideModal';
 import { ThreeDClock, ThreeDShield, ThreeDTruck, ThreeDStar, ThreeDRuler, ThreeDFactory, ThreeDPhone } from '@/components/ThreeDIcons';
-import { ModernLocationPin } from '@/components/Icons';
+import { ModernLocationPin, IconRuler, IconUpload } from '@/components/Icons';
 import { compressImageToTargetRange } from '@/utils/imageCompressor';
 
 export default function ProductDetailClient({
@@ -141,8 +141,8 @@ function ProductDetailView({ product }: { product: ProductItem }) {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
-            gap: '3.5rem',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))',
+            gap: 'clamp(1.75rem, 4vw, 3.5rem)',
             alignItems: 'start',
             marginBottom: '4rem',
           }}
@@ -153,7 +153,7 @@ function ProductDetailView({ product }: { product: ProductItem }) {
             <div
               style={{
                 position: 'relative',
-                height: '440px',
+                height: 'clamp(280px, 50vw, 440px)',
                 borderRadius: '24px',
                 overflow: 'hidden',
                 backgroundColor: '#0f172a',
@@ -500,7 +500,7 @@ function ProductDetailView({ product }: { product: ProductItem }) {
             <div style={{ marginBottom: '1.75rem', padding: '1rem', backgroundColor: '#f8fafc', borderRadius: '14px', border: '1px solid #e2e8f0' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px', flexWrap: 'wrap', gap: '6px' }}>
                 <label style={{ fontSize: '0.8rem', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span>📐</span>
+                  <IconRuler size={14} color="#0f172a" />
                   <span>Custom Design / Sketch (Optional)</span>
                 </label>
                 <span style={{ fontSize: '0.7rem', color: '#64748b', backgroundColor: '#ffffff', border: '1px solid #cbd5e1', padding: '1px 6px', borderRadius: '4px', fontWeight: 600 }}>
@@ -549,7 +549,22 @@ function ProductDetailView({ product }: { product: ProductItem }) {
                     }}
                     style={{ display: 'none' }}
                   />
-                  <span>{isCompressingDesign ? '⏳ Optimizing to 100KB–200KB...' : '📎 Upload Custom Sketch / Photo'}</span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    {isCompressingDesign ? (
+                      <>
+                        <svg className="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                          <circle cx="12" cy="12" r="10" strokeOpacity="0.25" />
+                          <path d="M12 2a10 10 0 0 1 10 10" />
+                        </svg>
+                        <span>Optimizing to 100KB–200KB...</span>
+                      </>
+                    ) : (
+                      <>
+                        <IconUpload size={14} />
+                        <span>Upload Custom Sketch / Photo</span>
+                      </>
+                    )}
+                  </span>
                 </label>
               ) : (
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.5rem 0.75rem', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px' }}>

@@ -257,10 +257,8 @@ export default function Navbar() {
 
             {/* 2. Center Nav: EXACTLY 5 LINKS (Home, Shop, About, Contact, Blogs) */}
             <nav
-              className="hidden-mobile-nav"
+              className="nav-desktop-links"
               style={{
-                display: 'flex',
-                alignItems: 'center',
                 gap: '0.25rem',
               }}
             >
@@ -340,7 +338,7 @@ export default function Navbar() {
                     position: 'absolute',
                     top: 'calc(100% + 8px)',
                     right: 0,
-                    width: '320px',
+                    width: 'min(360px, calc(100vw - 24px))',
                     backgroundColor: '#ffffff',
                     borderRadius: '16px',
                     border: '1px solid rgba(0, 0, 0, 0.08)',
@@ -386,7 +384,7 @@ export default function Navbar() {
             </div>
 
             {/* Track Order Trigger & Popover (Desktop / Tablet only; mobile has it in drawer) */}
-            <div className="hidden-mobile-nav" style={{ position: 'relative' }} ref={trackContainerRef}>
+            <div className="nav-desktop-actions" style={{ position: 'relative' }} ref={trackContainerRef}>
               <button
                 type="button"
                 onClick={() => {
@@ -582,7 +580,7 @@ export default function Navbar() {
                 <circle cx="20" cy="21" r="1" />
                 <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
               </svg>
-              <span className="hidden-mobile-nav">Cart</span>
+              <span className="nav-desktop-actions">Cart</span>
               {totalCartCount > 0 && (
                 <span
                   style={{
@@ -600,7 +598,7 @@ export default function Navbar() {
             </Link>
 
             {/* 4. Desktop Single Unified Login Button / Logged In User Pill */}
-            <div className="hidden-mobile-nav" style={{ display: 'inline-flex', alignItems: 'center' }}>
+            <div className="nav-desktop-actions">
             {currentUser ? (
               <div style={{ position: 'relative' }} ref={userMenuRef}>
                 <button
@@ -789,7 +787,7 @@ export default function Navbar() {
             {/* Mobile Hamburger Button */}
             <button
               type="button"
-              className="show-mobile-nav"
+              className="nav-mobile-toggle"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               style={{
                 width: '36px',
@@ -797,7 +795,6 @@ export default function Navbar() {
                 borderRadius: '8px',
                 border: '1px solid rgba(0, 0, 0, 0.08)',
                 background: isMobileMenuOpen ? 'rgba(0, 0, 0, 0.06)' : 'transparent',
-                display: 'none', // Shown on mobile via CSS
                 alignItems: 'center',
                 justifyContent: 'center',
                 cursor: 'pointer',

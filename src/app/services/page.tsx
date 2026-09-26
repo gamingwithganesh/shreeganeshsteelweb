@@ -2,7 +2,7 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import { SERVICES } from '@/data/services';
 import ServiceIcon from '@/components/ServiceIcon';
-import { IconCheck, IconPhone, IconMicrophone } from '@/components/Icons';
+import { IconCheck, IconPhone, IconMicrophone, IconBolt } from '@/components/Icons';
 import { ThreeDClock, ThreeDMicroscope, ThreeDShield, ThreeDRuler, ThreeDTruck, ThreeDBolt, ThreeDFactory } from '@/components/ThreeDIcons';
 
 export const metadata: Metadata = {
@@ -170,8 +170,10 @@ export default function ServicesPage() {
                 }}
               >
                 {/* Project selector dropdown (as in Screenshot 1) */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', fontWeight: 700, color: '#0f172a', marginBottom: '1.25rem' }}>
-                  <span>📁</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', fontWeight: 700, color: '#0f172a', marginBottom: '1.25rem' }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                  </svg>
                   <span>SG-CAD-PROJECT // Villa Gate</span>
                   <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>▾</span>
                 </div>
@@ -242,11 +244,11 @@ export default function ServicesPage() {
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.78rem', fontWeight: 700, color: '#0f172a' }}>
-                    <span>🔲</span>
+                    <IconCheck size={14} color="#0f172a" />
                     <span>Anti-Sag Pivot Ball Bearings</span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.78rem', color: '#64748b' }}>
-                    <span>⚡</span>
+                    <IconBolt size={14} color="#64748b" />
                     <span>Motorization Automation Track</span>
                   </div>
                 </div>
@@ -930,8 +932,9 @@ export default function ServicesPage() {
               </div>
 
               {/* Bottom live status log */}
-              <div style={{ position: 'relative', zIndex: 2, fontSize: '0.75rem', color: '#64748b' }}>
-                ⚡ Certified AWS D1.1 Field Welding • ISO 9001 Protocol
+              <div style={{ position: 'relative', zIndex: 2, fontSize: '0.75rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <IconBolt size={14} color="#64748b" />
+                <span>Certified AWS D1.1 Field Welding • ISO 9001 Protocol</span>
               </div>
             </div>
           </section>

@@ -34,8 +34,8 @@ export default function Home() {
           position: 'relative',
           minHeight: '82vh',
           marginTop: '-76px',
-          paddingTop: '160px',
-          paddingBottom: '5.5rem',
+          paddingTop: 'clamp(115px, 16vh, 160px)',
+          paddingBottom: 'clamp(3rem, 7vw, 5.5rem)',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -52,20 +52,22 @@ export default function Home() {
             style={{
               display: 'inline-flex',
               alignItems: 'center',
+              justifyContent: 'center',
               gap: '8px',
               backgroundColor: '#f1f3f5',
               border: '1px solid rgba(0, 0, 0, 0.08)',
-              padding: '7px 20px',
+              padding: '7px clamp(12px, 3vw, 20px)',
               borderRadius: '9999px',
-              fontSize: '0.825rem',
+              fontSize: 'clamp(0.72rem, 2.4vw, 0.825rem)',
               fontWeight: 700,
               color: '#111827',
               marginBottom: '1.75rem',
               boxShadow: '0 2px 8px rgba(0, 0, 0, 0.03)',
               letterSpacing: '0.04em',
+              maxWidth: '100%',
             }}
           >
-            <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10b981', display: 'inline-block' }} />
+            <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10b981', display: 'inline-block', flexShrink: 0 }} />
             <span>SHREE GANESH STEEL • PRECISION FABRICATION &amp; WELDING</span>
           </div>
 

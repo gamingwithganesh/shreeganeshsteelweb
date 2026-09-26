@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { BLOGS, BlogPost } from '@/data/blogs';
-import { IconSearch } from '@/components/Icons';
+import { IconSearch, IconCart } from '@/components/Icons';
 
 // Showcase items that pair Welding Insights with Shop Products (Top Hero Carousel)
 interface ShowcaseItem {
@@ -338,7 +338,8 @@ export default function BlogsPage() {
                   gap: '6px',
                 }}
               >
-                <span>🛒 Available in Shop:</span>
+                <IconCart size={13} color="#000000" />
+                <span>Available in Shop:</span>
                 <span>{activeShowcase.startingPrice}</span>
               </div>
 
@@ -458,7 +459,8 @@ export default function BlogsPage() {
                   gap: '6px',
                 }}
               >
-                <span>🛒 Available in Shop:</span>
+                <IconCart size={13} color="#000000" />
+                <span>Available in Shop:</span>
                 <span>{nextShowcase.startingPrice}</span>
               </div>
 

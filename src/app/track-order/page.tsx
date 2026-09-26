@@ -7,7 +7,7 @@ import { useCart, StoredOrder } from '@/context/CartContext';
 import OrderTrackerTimeline from '@/components/OrderTrackerTimeline';
 import OrderDetailsModal from '@/components/OrderDetailsModal';
 import { ThreeDShield, ThreeDFactory, ThreeDTruck, ThreeDPhone } from '@/components/ThreeDIcons';
-import { IconSearch, IconRuler, IconBolt, IconShield, IconTruck } from '@/components/Icons';
+import { IconSearch, IconRuler, IconBolt, IconShield, IconTruck, IconDocument } from '@/components/Icons';
 
 function TrackOrderContent() {
   const searchParams = useSearchParams();
@@ -390,7 +390,7 @@ function TrackOrderContent() {
             <span style={{ color: '#0f172a', fontWeight: 600 }}>Live Fabrication Tracking</span>
           </nav>
 
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div>
             <Link
               href="/shop"
               style={{
@@ -409,27 +409,11 @@ function TrackOrderContent() {
               onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#e2e8f0')}
               onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#f1f5f9')}
             >
-              ← Back to Shop
-            </Link>
-            <Link
-              href="/"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '6px 14px',
-                borderRadius: '8px',
-                backgroundColor: '#000000',
-                color: '#ffffff',
-                fontSize: '0.85rem',
-                fontWeight: 600,
-                textDecoration: 'none',
-                transition: 'all 0.15s ease',
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#1e293b')}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#000000')}
-            >
-              🏠 Home
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12" />
+                <polyline points="12 19 5 12 12 5" />
+              </svg>
+              <span>Back to Catalog</span>
             </Link>
           </div>
         </div>
@@ -568,9 +552,10 @@ function TrackOrderContent() {
               <button
                 onClick={() => setIsInvoiceOpen(true)}
                 className="btn-secondary"
-                style={{ padding: '0.6rem 1.25rem', fontSize: '0.825rem', fontWeight: 700 }}
+                style={{ padding: '0.6rem 1.25rem', fontSize: '0.825rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
-                📄 View Bill / Receipt
+                <IconDocument size={15} />
+                <span>View Bill / Receipt</span>
               </button>
             </div>
 
@@ -760,7 +745,11 @@ function TrackOrderContent() {
                   onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#1e293b')}
                   onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#000000')}
                 >
-                  🏠 Return to Home
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                    <polyline points="9 22 9 12 15 12 15 22" />
+                  </svg>
+                  <span>Return to Home</span>
                 </Link>
               </div>
             </div>

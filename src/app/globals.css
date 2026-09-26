@@ -334,11 +334,41 @@ h6 {
   }
 }
 
-@media (max-width: 768px) {
-  .hidden-mobile-nav {
+/* Navigation Responsive Utilities (Break at 1024px for tablet/mobile drawer) */
+.nav-desktop-links {
+  display: flex !important;
+  align-items: center;
+}
+
+.nav-desktop-actions {
+  display: inline-flex !important;
+  align-items: center;
+}
+
+.nav-mobile-toggle {
+  display: none !important;
+}
+
+.hidden-mobile-nav {
+  display: flex !important;
+}
+
+.show-mobile-nav {
+  display: none !important;
+}
+
+@media (max-width: 1023px) {
+  .nav-desktop-links,
+  .nav-desktop-actions,
+  .hidden-mobile-nav,
+  .desktop-nav,
+  .desktop-cta {
     display: none !important;
   }
-  .show-mobile-nav {
+
+  .nav-mobile-toggle,
+  .show-mobile-nav,
+  .mobile-toggle {
     display: inline-flex !important;
   }
 }

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useCart, StoredOrder } from '@/context/CartContext';
 import OrderDetailsModal from '@/components/OrderDetailsModal';
 import { ThreeDShield, ThreeDFactory, ThreeDTruck, ThreeDPhone, ThreeDClock } from '@/components/ThreeDIcons';
-import { IconLogOut } from '@/components/Icons';
+import { IconLogOut, IconDocument } from '@/components/Icons';
 
 export default function ProfilePage() {
   const { userOrders, selectedCity, logoutUser } = useCart();
@@ -214,9 +214,13 @@ export default function ProfilePage() {
                         fontWeight: 700,
                         fontSize: '0.825rem',
                         cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
                       }}
                     >
-                      📄 View Bill / Receipt
+                      <IconDocument size={15} />
+                      <span>View Bill / Receipt</span>
                     </button>
 
                     <Link

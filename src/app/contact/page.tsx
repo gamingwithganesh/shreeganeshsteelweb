@@ -3,7 +3,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { IconPhone, IconChat } from '@/components/Icons';
+import { IconPhone, IconChat, IconBolt } from '@/components/Icons';
 import LocationSection from '@/components/LocationSection';
 
 function ContactContent() {
@@ -309,7 +309,7 @@ function ContactContent() {
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.5rem' }}>
-                <span style={{ fontSize: '1.1rem' }}>⚡</span>
+                <IconBolt size={18} color="#f59e0b" />
                 <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#ffffff', margin: 0 }}>
                   Emergency On-Site Welding
                 </h3>

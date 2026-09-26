@@ -8,7 +8,7 @@ import { useCart, VIDARBHA_CITIES, StoredOrder } from '@/context/CartContext';
 import PaymentModal from '@/components/PaymentModal';
 import OrderDetailsModal from '@/components/OrderDetailsModal';
 import { ThreeDSuccess } from '@/components/ThreeDIcons';
-import { IconPrinter, IconTruck, IconChat } from '@/components/Icons';
+import { IconPrinter, IconTruck, IconChat, IconUpload, IconRuler } from '@/components/Icons';
 import { compressImageToTargetRange } from '@/utils/imageCompressor';
 
 export default function CartPage() {
@@ -250,7 +250,14 @@ export default function CartPage() {
                 marginBottom: '1.75rem',
               }}
             >
-              <span style={{ fontSize: '1.6rem' }}>🧾</span>
+              <div style={{ width: '36px', height: '36px', borderRadius: '8px', backgroundColor: '#dcfce7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#166534" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                  <line x1="16" y1="13" x2="8" y2="13" />
+                  <line x1="16" y1="17" x2="8" y2="17" />
+                </svg>
+              </div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 800, color: '#166534', fontSize: '0.9rem', marginBottom: '2px' }}>
                   Official Copy of Bill / Handover Receipt Ready
@@ -446,7 +453,8 @@ export default function CartPage() {
                 />
                 <div>
                   <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#166534', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span>📐 Custom Design Attached (100KB – 200KB Optimized)</span>
+                    <IconRuler size={14} color="#166534" />
+                    <span>Custom Design Attached (100KB – 200KB Optimized)</span>
                   </div>
                   <div style={{ fontSize: '0.78rem', color: '#15803d', marginTop: '2px' }}>
                     File: {placedOrder.siteInfo.customDesignFileName || placedOrder.customDesignFileName || 'custom_design.jpg'}
@@ -1020,7 +1028,7 @@ export default function CartPage() {
               <div style={{ borderTop: '1px solid #f3f4f6', paddingTop: '1.25rem', marginTop: '1rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem', flexWrap: 'wrap', gap: '6px' }}>
                   <label style={{ fontSize: '0.85rem', fontWeight: 700, color: '#000000', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span>📐</span>
+                    <IconRuler size={14} color="#000000" />
                     <span>Upload Custom Design / Blueprint / Sketch (Optional)</span>
                   </label>
                   <span style={{ fontSize: '0.72rem', color: '#6b7280', backgroundColor: '#f3f4f6', padding: '2px 8px', borderRadius: '4px', fontWeight: 600 }}>
@@ -1056,8 +1064,15 @@ export default function CartPage() {
                       onChange={handleDesignUpload}
                       style={{ display: 'none' }}
                     />
-                    <div style={{ fontSize: '1.6rem', marginBottom: '4px' }}>
-                      {isCompressingDesign ? '⏳' : '📤'}
+                    <div style={{ marginBottom: '6px', color: '#0f172a' }}>
+                      {isCompressingDesign ? (
+                        <svg className="animate-spin" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                          <circle cx="12" cy="12" r="10" strokeOpacity="0.25" />
+                          <path d="M12 2a10 10 0 0 1 10 10" />
+                        </svg>
+                      ) : (
+                        <IconUpload size={24} color="#0f172a" />
+                      )}
                     </div>
                     <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#000000' }}>
                       {isCompressingDesign ? 'Optimizing image to 100 KB – 200 KB...' : 'Click to Upload Custom Design or Photo'}
