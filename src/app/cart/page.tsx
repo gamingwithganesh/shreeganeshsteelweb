@@ -989,7 +989,7 @@ export default function CartPage() {
                     onChange={() => handleSiteInfoChange('deliveryMethod', 'workshop_dispatch')}
                     style={{ accentColor: '#000000' }}
                   />
-                  <span>Workshop Delivery to Site ({selectedCity.name})</span>
+                  <span>Workshop Delivery to Site ({selectedCity.name}) — <span style={{ color: '#6b7280', fontStyle: 'italic' }}>Charge depends on location</span></span>
                 </label>
 
                 <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.825rem', color: '#1f2937' }}>
@@ -1174,8 +1174,8 @@ export default function CartPage() {
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', color: '#6b7280' }}>
                   <span>Delivery ({selectedCity.name})</span>
-                  <span style={{ fontWeight: 600, color: '#111827' }}>
-                    {deliveryCharge === 0 ? 'Free' : `₹${deliveryCharge.toLocaleString()}`}
+                  <span style={{ fontWeight: 600, color: projectSiteInfo.deliveryMethod === 'factory_pickup' ? '#16a34a' : '#374151', fontStyle: projectSiteInfo.deliveryMethod === 'factory_pickup' ? 'normal' : 'italic' }}>
+                    {projectSiteInfo.deliveryMethod === 'factory_pickup' ? 'Free (Self Pickup)' : 'Depends on Location'}
                   </span>
                 </div>
 
