@@ -20,7 +20,8 @@ import {
   IconVerifiedShield, 
   IconSearch, 
   IconPlus, 
-  IconCheck 
+  IconCheck,
+  IconMenu 
 } from '@/components/Icons';
 
 function ShopContent() {
@@ -343,6 +344,59 @@ function ShopContent() {
 
           {/* Quick Search & Sort Bar for Desktop */}
           <div className="shop-controls-actions">
+            {/* Desktop Hamburger Filter Button */}
+            <button
+              onClick={() => setIsMobileFilterOpen(true)}
+              className="desktop-filter-hamburger-btn"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '0.62rem 1.15rem',
+                borderRadius: '12px',
+                border: activeFilterCount > 0 ? '1.5px solid #000000' : '1px solid #cbd5e1',
+                backgroundColor: activeFilterCount > 0 ? '#000000' : '#ffffff',
+                color: activeFilterCount > 0 ? '#ffffff' : '#0f172a',
+                fontSize: '0.85rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+                whiteSpace: 'nowrap',
+                boxShadow: activeFilterCount > 0 ? '0 4px 14px rgba(0, 0, 0, 0.15)' : 'none',
+              }}
+              onMouseEnter={(e) => {
+                if (activeFilterCount === 0) {
+                  e.currentTarget.style.borderColor = '#000000';
+                  e.currentTarget.style.backgroundColor = '#f8fafc';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (activeFilterCount === 0) {
+                  e.currentTarget.style.borderColor = '#cbd5e1';
+                  e.currentTarget.style.backgroundColor = '#ffffff';
+                }
+              }}
+              aria-label="Filter Catalog"
+            >
+              <IconMenu size={18} color={activeFilterCount > 0 ? '#ffffff' : '#0f172a'} />
+              <span>Filter Catalog</span>
+              {activeFilterCount > 0 && (
+                <span
+                  style={{
+                    backgroundColor: '#ffffff',
+                    color: '#000000',
+                    fontSize: '0.68rem',
+                    fontWeight: 800,
+                    padding: '1px 6px',
+                    borderRadius: '9999px',
+                    lineHeight: 1.2,
+                  }}
+                >
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
+
             <div className="shop-search-box">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.5" style={{ flexShrink: 0 }}>
                 <circle cx="11" cy="11" r="8" />
@@ -821,110 +875,8 @@ function ShopContent() {
           )}
         </div>
 
-        {/* DESKTOP VIEW (≥ 768px): 2-Column Sidebar + Product Grid */}
+        {/* DESKTOP VIEW (≥ 768px): Full-Width Product Grid with Hamburger-Triggered Filter Drawer */}
         <div className="desktop-products-view shop-grid-container">
-          {/* Left Sidebar Filters */}
-          <aside
-            style={{
-              backgroundColor: '#ffffff',
-              borderRadius: '20px',
-              border: '1px solid #e2e8f0',
-              padding: '1.75rem',
-              boxShadow: '0 10px 25px -10px rgba(0, 0, 0, 0.04)',
-              position: 'sticky',
-              top: '110px',
-            }}
-            className="desktop-filter-sidebar"
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-              <span style={{ fontWeight: 800, color: '#0f172a', fontSize: '1rem' }}>Filter Catalog</span>
-              <button
-                onClick={clearAllFilters}
-                style={{ background: 'none', border: 'none', color: '#000000', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer' }}
-              >
-                Reset All
-              </button>
-            </div>
-
-            {/* Category Filter */}
-            <div style={{ marginBottom: '1.5rem' }}>
-              <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
-                Fabrication Category
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                {CATEGORIES.map((cat) => {
-                  const isSelected = selectedCategory === cat;
-                  return (
-                    <button
-                      key={cat}
-                      onClick={() => setSelectedCategory(cat)}
-                      style={{
-                        padding: '6px 10px',
-                        borderRadius: '8px',
-                        textAlign: 'left',
-                        fontSize: '0.825rem',
-                        fontWeight: isSelected ? 700 : 500,
-                        backgroundColor: isSelected ? '#f1f5f9' : 'transparent',
-                        color: isSelected ? '#000000' : '#334155',
-                        border: 'none',
-                        cursor: 'pointer',
-                        transition: 'all 0.15s ease',
-                      }}
-                    >
-                      {cat}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Material Grade Filter */}
-            <div style={{ marginBottom: '1.5rem', borderTop: '1px solid #f1f5f9', paddingTop: '1.25rem' }}>
-              <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
-                Steel &amp; Material Grade
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                {MATERIAL_GRADES.map((mat) => {
-                  const isSelected = selectedMaterial === mat;
-                  return (
-                    <button
-                      key={mat}
-                      onClick={() => setSelectedMaterial(mat)}
-                      style={{
-                        padding: '6px 10px',
-                        borderRadius: '8px',
-                        textAlign: 'left',
-                        fontSize: '0.825rem',
-                        fontWeight: isSelected ? 700 : 500,
-                        backgroundColor: isSelected ? '#f1f5f9' : 'transparent',
-                        color: isSelected ? '#000000' : '#334155',
-                        border: 'none',
-                        cursor: 'pointer',
-                        transition: 'all 0.15s ease',
-                      }}
-                    >
-                      {mat}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Stock Availability Toggle */}
-            <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '1.25rem' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.825rem', fontWeight: 600, color: '#334155' }}>
-                <input
-                  type="checkbox"
-                  checked={inStockOnly}
-                  onChange={(e) => setInStockOnly(e.target.checked)}
-                  style={{ accentColor: '#000000', width: '16px', height: '16px' }}
-                />
-                <span>Ready-To-Install Standard Sizes Only</span>
-              </label>
-            </div>
-          </aside>
-
-          {/* Right Column: Product Cards Grid */}
           <div style={{ minWidth: 0, width: '100%' }}>
             {filteredProducts.length > 0 ? (
               <div className="shop-products-grid">
@@ -1171,18 +1123,9 @@ function ShopContent() {
         </div>
       )}
 
-      {/* Mobile Filter Drawer / Bottom Sheet */}
+      {/* Filter Drawer / Off-Canvas Panel (Responsive: Left Slide-Over on Desktop, Bottom Sheet on Mobile) */}
       {isMobileFilterOpen && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 9999,
-            display: 'flex',
-            alignItems: 'flex-end',
-            justifyContent: 'center',
-          }}
-        >
+        <div className="filter-drawer-wrapper">
           {/* Dark Backdrop */}
           <div
             onClick={() => setIsMobileFilterOpen(false)}
@@ -1195,28 +1138,12 @@ function ShopContent() {
             }}
           />
 
-          {/* Bottom Sheet Modal Container */}
-          <div
-            className="animate-drawer-slide-up"
-            style={{
-              position: 'relative',
-              width: '100%',
-              maxWidth: '560px',
-              backgroundColor: '#ffffff',
-              borderTopLeftRadius: '24px',
-              borderTopRightRadius: '24px',
-              maxHeight: '85vh',
-              display: 'flex',
-              flexDirection: 'column',
-              boxShadow: '0 -10px 40px rgba(0, 0, 0, 0.25)',
-              overflow: 'hidden',
-              zIndex: 10000,
-            }}
-          >
+          {/* Drawer Container (Side drawer on desktop, bottom sheet on mobile) */}
+          <div className="filter-drawer-container">
             {/* Sheet Handle & Header */}
             <div
               style={{
-                padding: '12px 20px 14px',
+                padding: '16px 20px 14px',
                 borderBottom: '1px solid #f1f5f9',
                 display: 'flex',
                 flexDirection: 'column',
@@ -1224,12 +1151,13 @@ function ShopContent() {
               }}
             >
               <div
+                className="mobile-only-handle"
                 style={{
                   width: '36px',
                   height: '4px',
                   borderRadius: '2px',
                   backgroundColor: '#cbd5e1',
-                  margin: '0 auto',
+                  margin: '0 auto 4px auto',
                 }}
               />
               <div
@@ -1239,7 +1167,8 @@ function ShopContent() {
                   alignItems: 'center',
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <IconMenu size={20} color="#0f172a" />
                   <span style={{ fontWeight: 800, fontSize: '1.1rem', color: '#0f172a' }}>
                     Filter Catalog
                   </span>

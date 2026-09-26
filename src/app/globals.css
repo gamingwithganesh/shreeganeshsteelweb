@@ -345,16 +345,15 @@ h6 {
 
 /* Fabrication Catalog & E-Commerce Responsive Styles */
 .shop-grid-container {
-  display: grid;
-  grid-template-columns: 270px 1fr;
-  gap: 2rem;
-  align-items: flex-start;
+  display: block;
+  width: 100%;
 }
 
 .shop-products-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(285px, 1fr));
+  gap: 1.75rem;
+  width: 100%;
 }
 
 .no-scrollbar {
@@ -489,6 +488,63 @@ h6 {
 
 .animate-drawer-slide-up {
   animation: slideUpDrawer 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0.8;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.filter-drawer-wrapper {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.filter-drawer-container {
+  position: relative;
+  width: 100%;
+  max-width: 560px;
+  background-color: #ffffff;
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  z-index: 10000;
+  animation: slideUpDrawer 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@media (min-width: 768px) {
+  .filter-drawer-wrapper {
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+  }
+
+  .filter-drawer-container {
+    width: 440px !important;
+    max-width: 90vw !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    border-radius: 0 24px 24px 0 !important;
+    box-shadow: 15px 0 50px rgba(0, 0, 0, 0.25) !important;
+    animation: slideInLeft 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  }
+
+  .mobile-only-handle {
+    display: none !important;
+  }
 }
 
 /* Indian E-Commerce (Flipkart Style) Mobile Listing Styles */
