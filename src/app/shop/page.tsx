@@ -15,7 +15,8 @@ function ShopContent() {
   const initialSearch = searchParams.get('search') || '';
   const initialSector = searchParams.get('sector') || 'All Sectors';
 
-  const { addToCart, selectedCity, setIsLocationModalOpen } = useCart();
+  const { addToCart, cart, setIsCartOpen, selectedCity, setIsLocationModalOpen } = useCart();
+  const cartItemCount = cart.reduce((total, item) => total + (item.quantity || 1), 0);
 
   const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory);
   const [selectedSector, setSelectedSector] = useState<string>(initialSector);
@@ -24,6 +25,34 @@ function ShopContent() {
   const [inStockOnly, setInStockOnly] = useState<boolean>(false);
   const [sortBy, setSortBy] = useState<'default' | 'price-asc' | 'price-desc' | 'rating'>('default');
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState<boolean>(false);
+  const [isSortModalOpen, setIsSortModalOpen] = useState<boolean>(false);
+  const [wishlist, setWishlist] = useState<string[]>([]);
+
+  const toggleWishlist = (id: string) => {
+    setWishlist((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  const getMarketPrice = (priceNum: number) => {
+    const mrp = Math.round((priceNum * 1.25) / 100) * 100;
+    return `₹${mrp.toLocaleString('en-IN')}`;
+  };
+
+  const getDiscountPercent = (priceNum: number) => {
+    const mrp = Math.round((priceNum * 1.25) / 100) * 100;
+    const discount = Math.round(((mrp - priceNum) / mrp) * 100);
+    return `${discount}%`;
+  };
+
+  const getSortLabel = (val: string) => {
+    switch (val) {
+      case 'price-asc': return 'Price: Low to High';
+      case 'price-desc': return 'Price: High to Low';
+      case 'rating': return 'Top Rated';
+      default: return 'Featured';
+    }
+  };
 
   const filteredProducts = useMemo(() => {
     let list = PRODUCTS.filter((item) => {
@@ -63,7 +92,7 @@ function ShopContent() {
   }, [selectedCategory, selectedSector, selectedMaterial, inStockOnly]);
 
   useEffect(() => {
-    if (isMobileFilterOpen) {
+    if (isMobileFilterOpen || isSortModalOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
@@ -71,7 +100,7 @@ function ShopContent() {
     return () => {
       document.body.style.overflow = '';
     };
-  }, [isMobileFilterOpen]);
+  }, [isMobileFilterOpen, isSortModalOpen]);
 
   const clearAllFilters = () => {
     setSelectedCategory('All');
@@ -83,24 +112,166 @@ function ShopContent() {
   };
 
   return (
-    <div style={{ padding: '2rem 0 5rem', backgroundColor: '#ffffff', minHeight: '100vh' }}>
+    <div style={{ padding: '0.75rem 0 5rem', backgroundColor: '#ffffff', minHeight: '100vh' }}>
       <div className="container-custom">
-        {/* Breadcrumbs */}
-        <nav className="breadcrumbs" style={{ flexWrap: 'wrap', gap: '0.4rem' }}>
-          <Link href="/">Home</Link>
-          <span>/</span>
-          <span style={{ color: '#0f172a', fontWeight: 600 }}>Fabrication Catalog &amp; E-Commerce</span>
-        </nav>
+        {/* Mobile App Header (Flipkart-Style E-Commerce Nav on < 768px) */}
+        <div className="mobile-ecommerce-header">
+          <Link href="/" aria-label="Go to home" style={{ color: '#0f172a', display: 'flex', alignItems: 'center', padding: '4px' }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+          </Link>
+
+          <div className="mobile-search-pill">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.5" style={{ flexShrink: 0 }}>
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input
+              type="text"
+              placeholder="Search gates, railings, sheds..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                style={{ background: 'none', border: 'none', color: '#94a3b8', fontSize: '0.8rem', padding: '2px', cursor: 'pointer' }}
+              >
+                ✕
+              </button>
+            )}
+          </div>
+
+          <button
+            onClick={() => {
+              if (wishlist.length > 0) {
+                // User can toggle view of wishlisted
+              }
+            }}
+            style={{ position: 'relative', background: 'none', border: 'none', cursor: 'pointer', padding: '6px', color: '#0f172a' }}
+            aria-label="Wishlist"
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill={wishlist.length > 0 ? '#ef4444' : 'none'} stroke={wishlist.length > 0 ? '#ef4444' : 'currentColor'} strokeWidth="2">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+            </svg>
+            {wishlist.length > 0 && (
+              <span style={{ position: 'absolute', top: '0', right: '0', backgroundColor: '#ef4444', color: '#ffffff', fontSize: '0.62rem', fontWeight: 800, width: '16px', height: '16px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {wishlist.length}
+              </span>
+            )}
+          </button>
+
+          <button
+            onClick={() => setIsCartOpen(true)}
+            style={{ position: 'relative', background: 'none', border: 'none', cursor: 'pointer', padding: '6px', color: '#0f172a' }}
+            aria-label="Open Cart"
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="9" cy="21" r="1" />
+              <circle cx="20" cy="21" r="1" />
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+            </svg>
+            {cartItemCount > 0 && (
+              <span style={{ position: 'absolute', top: '0', right: '0', backgroundColor: '#ef4444', color: '#ffffff', fontSize: '0.62rem', fontWeight: 800, width: '16px', height: '16px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {cartItemCount}
+              </span>
+            )}
+          </button>
+        </div>
+
+        {/* Sticky Sort & Filter Dual Bar (Mobile Only) */}
+        <div className="mobile-sort-filter-bar">
+          <button
+            onClick={() => setIsSortModalOpen(true)}
+            className="sort-filter-btn"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M7 15l5 5 5-5" />
+              <path d="M7 9l5-5 5 5" />
+            </svg>
+            <span>Sort: {getSortLabel(sortBy)}</span>
+          </button>
+
+          <div className="sort-filter-divider" />
+
+          <button
+            onClick={() => setIsMobileFilterOpen(true)}
+            className="sort-filter-btn"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+            </svg>
+            <span>Filter</span>
+            {activeFilterCount > 0 && (
+              <span className="filter-badge">{activeFilterCount}</span>
+            )}
+          </button>
+        </div>
+
+        {/* Quick Filter Carousel (Flipkart Style on Mobile) */}
+        <div className="quick-chips-row no-scrollbar">
+          <button
+            onClick={() => setSortBy(sortBy === 'price-asc' ? 'default' : 'price-asc')}
+            className={`quick-chip ${sortBy === 'price-asc' ? 'active' : ''}`}
+          >
+            <span>🏷 Direct Factory Rates</span>
+          </button>
+
+          <button
+            onClick={() => setInStockOnly(!inStockOnly)}
+            className={`quick-chip ${inStockOnly ? 'active' : ''}`}
+          >
+            <span>📦 Ready In Stock</span>
+          </button>
+
+          <button
+            onClick={() => setSelectedMaterial(selectedMaterial === 'SS Grade 304' ? 'All Materials' : 'SS Grade 304')}
+            className={`quick-chip ${selectedMaterial === 'SS Grade 304' ? 'active' : ''}`}
+          >
+            <span>🛡 SS Grade 304</span>
+          </button>
+
+          <button
+            onClick={() => setSelectedCategory(selectedCategory === 'Gates & Entrances' ? 'All' : 'Gates & Entrances')}
+            className={`quick-chip ${selectedCategory === 'Gates & Entrances' ? 'active' : ''}`}
+          >
+            <span>🚪 Gates &amp; Entrances</span>
+          </button>
+
+          <button
+            onClick={() => setSelectedCategory(selectedCategory === 'Industrial Sheds & PEB' ? 'All' : 'Industrial Sheds & PEB')}
+            className={`quick-chip ${selectedCategory === 'Industrial Sheds & PEB' ? 'active' : ''}`}
+          >
+            <span>🏗 PEB &amp; Sheds</span>
+          </button>
+
+          <button
+            onClick={() => setSortBy(sortBy === 'rating' ? 'default' : 'rating')}
+            className={`quick-chip ${sortBy === 'rating' ? 'active' : ''}`}
+          >
+            <span>⭐ 4.5+ Rated</span>
+          </button>
+        </div>
+
+        {/* Desktop Breadcrumbs (Hidden on Mobile) */}
+        <div className="desktop-shop-header">
+          <nav className="breadcrumbs" style={{ flexWrap: 'wrap', gap: '0.4rem' }}>
+            <Link href="/">Home</Link>
+            <span>/</span>
+            <span style={{ color: '#0f172a', fontWeight: 600 }}>Fabrication Catalog &amp; E-Commerce</span>
+          </nav>
+        </div>
 
         {/* Top Delivery Hub Banner */}
         <div className="shop-delivery-banner">
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
-            <ThreeDFactory size={28} />
+            <ThreeDFactory size={26} />
             <div>
-              <div style={{ fontWeight: 800, fontSize: 'clamp(0.92rem, 2.5vw, 1rem)' }}>
+              <div style={{ fontWeight: 800, fontSize: 'clamp(0.88rem, 2.5vw, 0.98rem)' }}>
                 Workshop Direct Pricing • Direct Transport from Ghatanji
               </div>
-              <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '2px' }}>
+              <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '2px' }}>
                 Showing verified delivery availability to <strong>{selectedCity.name}</strong> ({selectedCity.transitDays})
               </div>
             </div>
@@ -110,13 +281,13 @@ function ShopContent() {
             onClick={() => setIsLocationModalOpen(true)}
             className="delivery-btn"
             style={{
-              padding: '0.55rem 1.4rem',
+              padding: '0.5rem 1.25rem',
               borderRadius: '9999px',
               backgroundColor: '#ffffff',
               color: '#000000',
               fontWeight: 700,
               border: 'none',
-              fontSize: '0.825rem',
+              fontSize: '0.8rem',
               cursor: 'pointer',
               boxShadow: '0 4px 10px rgba(0,0,0,0.12)',
               transition: 'all 0.15s ease',
@@ -124,16 +295,14 @@ function ShopContent() {
               alignItems: 'center',
               gap: '6px',
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#e2e8f0')}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#ffffff')}
           >
             <span>Change City</span>
             <ModernLocationPin size={13} color="#000000" />
           </button>
         </div>
 
-        {/* Search & Sort Controls Bar */}
-        <div className="shop-controls-bar">
+        {/* Desktop Controls Bar (Hidden on Mobile) */}
+        <div className="desktop-shop-header shop-controls-bar">
           <div>
             <h1
               className="font-display"
@@ -152,7 +321,7 @@ function ShopContent() {
             </p>
           </div>
 
-          {/* Quick Search & Sort Bar */}
+          {/* Quick Search & Sort Bar for Desktop */}
           <div className="shop-controls-actions">
             <div className="shop-search-box">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.5" style={{ flexShrink: 0 }}>
@@ -205,44 +374,46 @@ function ShopContent() {
                 <option value="price-desc">Price: High to Low</option>
                 <option value="rating">Top Rated</option>
               </select>
-
-              <button
-                onClick={() => setIsMobileFilterOpen(true)}
-                className="mobile-filter-btn"
-                style={{
-                  padding: '0.65rem 1rem',
-                  borderRadius: '12px',
-                  backgroundColor: '#000000',
-                  color: '#ffffff',
-                  border: 'none',
-                  fontWeight: 700,
-                  fontSize: '0.85rem',
-                  cursor: 'pointer',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '6px',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                <span>Filters</span>
-                <span style={{ fontSize: '0.85rem' }}>⚙</span>
-                {activeFilterCount > 0 && (
-                  <span
-                    style={{
-                      backgroundColor: '#ffffff',
-                      color: '#000000',
-                      borderRadius: '9999px',
-                      padding: '1px 6px',
-                      fontSize: '0.72rem',
-                      fontWeight: 800,
-                    }}
-                  >
-                    {activeFilterCount}
-                  </span>
-                )}
-              </button>
             </div>
           </div>
+        </div>
+
+        {/* Sector Quick Tabs (Desktop View) */}
+        <div
+          className="desktop-shop-header no-scrollbar"
+          style={{
+            display: 'flex',
+            gap: '8px',
+            overflowX: 'auto',
+            paddingBottom: '0.5rem',
+            marginBottom: '2rem',
+            WebkitOverflowScrolling: 'touch',
+          }}
+        >
+          {SECTORS.map((sector) => {
+            const isSelected = selectedSector === sector;
+            return (
+              <button
+                key={sector}
+                onClick={() => setSelectedSector(sector)}
+                style={{
+                  padding: '0.5rem 1.1rem',
+                  borderRadius: '9999px',
+                  border: isSelected ? '1px solid #000000' : '1px solid #e2e8f0',
+                  backgroundColor: isSelected ? '#000000' : '#ffffff',
+                  color: isSelected ? '#ffffff' : '#475569',
+                  fontWeight: 700,
+                  fontSize: '0.825rem',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0,
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                {sector}
+              </button>
+            );
+          })}
         </div>
 
         {/* Active Filters Summary Chips */}
@@ -253,7 +424,8 @@ function ShopContent() {
               alignItems: 'center',
               gap: '8px',
               flexWrap: 'wrap',
-              marginBottom: '1.5rem',
+              marginBottom: '1rem',
+              padding: '0 2px',
             }}
           >
             <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b' }}>Active Filters:</span>
@@ -379,46 +551,247 @@ function ShopContent() {
           </div>
         )}
 
-        {/* Sector Quick Tabs */}
-        <div
-          className="no-scrollbar"
-          style={{
-            display: 'flex',
-            gap: '8px',
-            overflowX: 'auto',
-            paddingBottom: '0.5rem',
-            marginBottom: '2rem',
-            WebkitOverflowScrolling: 'touch',
-          }}
-        >
-          {SECTORS.map((sector) => {
-            const isSelected = selectedSector === sector;
-            return (
-              <button
-                key={sector}
-                onClick={() => setSelectedSector(sector)}
-                style={{
-                  padding: '0.5rem 1.1rem',
-                  borderRadius: '9999px',
-                  border: isSelected ? '1px solid #000000' : '1px solid #e2e8f0',
-                  backgroundColor: isSelected ? '#000000' : '#ffffff',
-                  color: isSelected ? '#ffffff' : '#475569',
-                  fontWeight: 700,
-                  fontSize: '0.825rem',
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                  flexShrink: 0,
-                  transition: 'all 0.15s ease',
-                }}
-              >
-                {sector}
+        {/* MOBILE VIEW (< 768px): Indian E-Commerce (Flipkart Style) Horizontal Product Cards List */}
+        <div className="mobile-products-list">
+          {filteredProducts.length > 0 ? (
+            filteredProducts.map((product) => {
+              const isWishlisted = wishlist.includes(product.id);
+              const marketPrice = getMarketPrice(product.unitPriceNumeric);
+              const discountPercent = getDiscountPercent(product.unitPriceNumeric);
+
+              return (
+                <div key={product.id} className="mobile-product-card">
+                  {/* Top Row: Thumbnail Image + Details */}
+                  <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                    {/* Left Thumbnail with Badge */}
+                    <div
+                      style={{
+                        position: 'relative',
+                        width: '115px',
+                        height: '115px',
+                        flexShrink: 0,
+                        borderRadius: '12px',
+                        overflow: 'hidden',
+                        backgroundColor: '#0f172a',
+                      }}
+                    >
+                      <Image
+                        src={product.image}
+                        alt={product.name}
+                        fill
+                        style={{ objectFit: 'cover' }}
+                      />
+                      {product.badge && (
+                        <span
+                          style={{
+                            position: 'absolute',
+                            top: '4px',
+                            left: '4px',
+                            backgroundColor: '#000000',
+                            color: '#ffffff',
+                            fontSize: '0.58rem',
+                            fontWeight: 800,
+                            padding: '2px 5px',
+                            borderRadius: '4px',
+                          }}
+                        >
+                          {product.badge}
+                        </span>
+                      )}
+                      <span
+                        style={{
+                          position: 'absolute',
+                          bottom: '4px',
+                          left: '4px',
+                          backgroundColor: 'rgba(0,0,0,0.8)',
+                          color: '#ffffff',
+                          fontSize: '0.58rem',
+                          fontWeight: 700,
+                          padding: '1px 5px',
+                          borderRadius: '4px',
+                        }}
+                      >
+                        {product.materialGrade.split(' ')[0]}
+                      </span>
+                    </div>
+
+                    {/* Right Info Details */}
+                    <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+                      {/* Name & Wishlist Heart */}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '6px' }}>
+                        <Link href={`/shop/${product.id}`} style={{ textDecoration: 'none', color: '#0f172a', flex: 1 }}>
+                          <h3
+                            style={{
+                              fontSize: '0.92rem',
+                              fontWeight: 700,
+                              lineHeight: 1.3,
+                              margin: 0,
+                              display: '-webkit-box',
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: 'vertical',
+                              overflow: 'hidden',
+                            }}
+                          >
+                            {product.name}
+                          </h3>
+                        </Link>
+                        <button
+                          onClick={() => toggleWishlist(product.id)}
+                          aria-label="Toggle Wishlist"
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            padding: '2px',
+                            color: isWishlisted ? '#ef4444' : '#cbd5e1',
+                            fontSize: '1.2rem',
+                            lineHeight: 1,
+                            flexShrink: 0,
+                          }}
+                        >
+                          {isWishlisted ? '❤️' : '🤍'}
+                        </button>
+                      </div>
+
+                      {/* Rating & SGS Assured Badge (Flipkart Style) */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px', flexWrap: 'wrap' }}>
+                        <span
+                          style={{
+                            backgroundColor: '#16a34a',
+                            color: '#ffffff',
+                            fontSize: '0.7rem',
+                            fontWeight: 800,
+                            padding: '1px 6px',
+                            borderRadius: '4px',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '2px',
+                          }}
+                        >
+                          <span>★</span>
+                          <span>{product.rating}</span>
+                        </span>
+                        <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                          ({product.reviewsCount})
+                        </span>
+                        {/* Assured Shield Badge */}
+                        <span
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '3px',
+                            fontSize: '0.72rem',
+                            color: '#1d4ed8',
+                            fontWeight: 800,
+                          }}
+                        >
+                          <span>🛡</span>
+                          <span style={{ fontStyle: 'italic', fontWeight: 900 }}>Assured</span>
+                        </span>
+                      </div>
+
+                      {/* Price Row: Discount % + MRP Strikethrough + Direct Price */}
+                      <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', marginTop: '6px', flexWrap: 'wrap' }}>
+                        <span style={{ color: '#16a34a', fontWeight: 800, fontSize: '0.88rem' }}>
+                          ↓ {discountPercent}
+                        </span>
+                        <span style={{ color: '#94a3b8', textDecoration: 'line-through', fontSize: '0.8rem' }}>
+                          {marketPrice}
+                        </span>
+                        <span style={{ color: '#000000', fontWeight: 900, fontSize: '1.15rem' }}>
+                          {product.price}
+                        </span>
+                      </div>
+
+                      {/* Factory Tag & Delivery */}
+                      <div style={{ fontSize: '0.7rem', color: '#15803d', fontWeight: 700, marginTop: '2px' }}>
+                        Workshop Direct • Zero Retail Markup
+                      </div>
+                      <div style={{ fontSize: '0.72rem', color: '#475569', marginTop: '3px' }}>
+                        Delivery in <strong>{product.leadTime}</strong> to {selectedCity.name}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Specification Chips Row (Flipkart-Style Spec Tags) */}
+                  <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', marginTop: '10px' }}>
+                    <span className="spec-tag">{product.materialGrade}</span>
+                    <span className="spec-tag">{product.sector}</span>
+                    <span className="spec-tag">{product.dimensionsText || 'Custom Site Blueprint'}</span>
+                    <span className="spec-tag">0.5mm Laser Precision</span>
+                  </div>
+
+                  {/* Action Buttons Row */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: '12px' }}>
+                    <Link
+                      href={`/shop/${product.id}`}
+                      className="btn-secondary"
+                      style={{
+                        padding: '0.65rem 0.4rem',
+                        justifyContent: 'center',
+                        fontSize: '0.78rem',
+                        fontWeight: 700,
+                        textAlign: 'center',
+                        borderRadius: '10px',
+                      }}
+                    >
+                      Customize ⚙
+                    </Link>
+
+                    <button
+                      onClick={() =>
+                        addToCart({
+                          id: product.id,
+                          name: product.name,
+                          price: product.price,
+                          category: product.category,
+                          image: product.image,
+                          calculatedTotalPrice: product.unitPriceNumeric,
+                          quantity: 1,
+                        })
+                      }
+                      className="btn-primary"
+                      style={{
+                        padding: '0.65rem 0.4rem',
+                        justifyContent: 'center',
+                        fontSize: '0.78rem',
+                        fontWeight: 700,
+                        textAlign: 'center',
+                        borderRadius: '10px',
+                      }}
+                    >
+                      Add to Cart +
+                    </button>
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <div
+              style={{
+                backgroundColor: '#ffffff',
+                borderRadius: '20px',
+                border: '1px solid #e2e8f0',
+                padding: '3rem 1.5rem',
+                textAlign: 'center',
+              }}
+            >
+              <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>🔍</div>
+              <h3 className="font-display" style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a' }}>
+                No Fabrications Found
+              </h3>
+              <p style={{ color: '#64748b', fontSize: '0.85rem', margin: '0.5rem auto 1.25rem' }}>
+                Try clearing filters or search query to view all workshop fabrications.
+              </p>
+              <button onClick={clearAllFilters} className="btn-primary">
+                Clear All Filters
               </button>
-            );
-          })}
+            </div>
+          )}
         </div>
 
-        {/* 2-Column Layout: Sidebar Filters & Product Grid */}
-        <div className="shop-grid-container">
+        {/* DESKTOP VIEW (≥ 768px): 2-Column Sidebar + Product Grid */}
+        <div className="desktop-products-view shop-grid-container">
           {/* Left Sidebar Filters */}
           <aside
             style={{
@@ -524,146 +897,162 @@ function ShopContent() {
           <div style={{ minWidth: 0, width: '100%' }}>
             {filteredProducts.length > 0 ? (
               <div className="shop-products-grid">
-                {filteredProducts.map((product) => (
-                  <div
-                    key={product.id}
-                    className="ice-card"
-                    style={{
-                      borderRadius: '20px',
-                      overflow: 'hidden',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      backgroundColor: '#ffffff',
-                      border: '1px solid #e5e7eb',
-                      width: '100%',
-                      minWidth: 0,
-                    }}
-                  >
-                    {/* Product Image Viewport */}
-                    <div style={{ position: 'relative', height: '220px', width: '100%', backgroundColor: '#0f172a' }}>
-                      <Image
-                        src={product.image}
-                        alt={product.name}
-                        fill
-                        style={{ objectFit: 'cover' }}
-                      />
-                      {product.badge && (
+                {filteredProducts.map((product) => {
+                  const marketPrice = getMarketPrice(product.unitPriceNumeric);
+                  const discountPercent = getDiscountPercent(product.unitPriceNumeric);
+
+                  return (
+                    <div
+                      key={product.id}
+                      className="ice-card"
+                      style={{
+                        borderRadius: '20px',
+                        overflow: 'hidden',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        backgroundColor: '#ffffff',
+                        border: '1px solid #e5e7eb',
+                        width: '100%',
+                        minWidth: 0,
+                      }}
+                    >
+                      {/* Product Image Viewport */}
+                      <div style={{ position: 'relative', height: '220px', width: '100%', backgroundColor: '#0f172a' }}>
+                        <Image
+                          src={product.image}
+                          alt={product.name}
+                          fill
+                          style={{ objectFit: 'cover' }}
+                        />
+                        {product.badge && (
+                          <span
+                            style={{
+                              position: 'absolute',
+                              top: '12px',
+                              left: '12px',
+                              backgroundColor: '#000000',
+                              color: '#ffffff',
+                              padding: '3px 10px',
+                              borderRadius: '9999px',
+                              fontSize: '0.72rem',
+                              fontWeight: 700,
+                              boxShadow: '0 2px 8px rgba(0,0,0,0.25)',
+                            }}
+                          >
+                            {product.badge}
+                          </span>
+                        )}
+
                         <span
                           style={{
                             position: 'absolute',
-                            top: '12px',
+                            bottom: '12px',
                             left: '12px',
-                            backgroundColor: '#000000',
+                            backgroundColor: 'rgba(9, 15, 28, 0.85)',
+                            backdropFilter: 'blur(8px)',
                             color: '#ffffff',
-                            padding: '3px 10px',
-                            borderRadius: '9999px',
-                            fontSize: '0.72rem',
+                            padding: '2px 8px',
+                            borderRadius: '6px',
+                            fontSize: '0.7rem',
                             fontWeight: 700,
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.25)',
                           }}
                         >
-                          {product.badge}
+                          {product.materialGrade}
                         </span>
-                      )}
-
-                      <span
-                        style={{
-                          position: 'absolute',
-                          bottom: '12px',
-                          left: '12px',
-                          backgroundColor: 'rgba(9, 15, 28, 0.85)',
-                          backdropFilter: 'blur(8px)',
-                          color: '#ffffff',
-                          padding: '2px 8px',
-                          borderRadius: '6px',
-                          fontSize: '0.7rem',
-                          fontWeight: 700,
-                        }}
-                      >
-                        {product.materialGrade}
-                      </span>
-                    </div>
-
-                    {/* Card Body */}
-                    <div style={{ padding: 'clamp(1rem, 3.5vw, 1.5rem)', display: 'flex', flexDirection: 'column', flex: 1 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
-                        <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600, textTransform: 'uppercase' }}>
-                          {product.category}
-                        </span>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '0.8rem', fontWeight: 700, color: '#f59e0b' }}>
-                          ★ {product.rating} <span style={{ color: '#94a3b8', fontSize: '0.72rem' }}>({product.reviewsCount})</span>
-                        </div>
                       </div>
 
-                      <h3
-                        className="font-display"
-                        style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.3, marginBottom: '0.5rem' }}
-                      >
-                        <Link href={`/shop/${product.id}`} style={{ color: 'inherit' }}>
-                          {product.name}
-                        </Link>
-                      </h3>
-
-                      <p style={{ color: '#64748b', fontSize: '0.85rem', lineHeight: 1.5, marginBottom: '1.25rem', flex: 1 }}>
-                        {product.description}
-                      </p>
-
-                      <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '1rem', marginTop: 'auto' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0.85rem' }}>
-                          <div>
-                            <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Workshop Price:</span>
-                            <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#000000' }}>
-                              {product.price}
-                            </div>
-                          </div>
-                          <span style={{ fontSize: '0.72rem', color: '#16a34a', fontWeight: 700 }}>
-                            {product.leadTime}
+                      {/* Card Body */}
+                      <div style={{ padding: 'clamp(1rem, 3.5vw, 1.5rem)', display: 'flex', flexDirection: 'column', flex: 1 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
+                          <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600, textTransform: 'uppercase' }}>
+                            {product.category}
                           </span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '0.8rem', fontWeight: 700, color: '#f59e0b' }}>
+                              ★ {product.rating} <span style={{ color: '#94a3b8', fontSize: '0.72rem' }}>({product.reviewsCount})</span>
+                            </div>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '2px', fontSize: '0.7rem', color: '#1d4ed8', fontWeight: 800 }}>
+                              🛡 <span style={{ fontStyle: 'italic', fontWeight: 900 }}>Assured</span>
+                            </span>
+                          </div>
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                          <Link
-                            href={`/shop/${product.id}`}
-                            className="btn-secondary"
-                            style={{
-                              padding: '0.7rem 0.5rem',
-                              justifyContent: 'center',
-                              fontSize: '0.8rem',
-                              fontWeight: 700,
-                              textAlign: 'center',
-                            }}
-                          >
-                            Customize ⚙
+                        <h3
+                          className="font-display"
+                          style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.3, marginBottom: '0.5rem' }}
+                        >
+                          <Link href={`/shop/${product.id}`} style={{ color: 'inherit' }}>
+                            {product.name}
                           </Link>
+                        </h3>
 
-                          <button
-                            onClick={() =>
-                              addToCart({
-                                id: product.id,
-                                name: product.name,
-                                price: product.price,
-                                category: product.category,
-                                image: product.image,
-                                calculatedTotalPrice: product.unitPriceNumeric,
-                                quantity: 1,
-                              })
-                            }
-                            className="btn-primary"
-                            style={{
-                              padding: '0.7rem 0.5rem',
-                              justifyContent: 'center',
-                              fontSize: '0.8rem',
-                              fontWeight: 700,
-                              textAlign: 'center',
-                            }}
-                          >
-                            Add to Cart +
-                          </button>
+                        <p style={{ color: '#64748b', fontSize: '0.85rem', lineHeight: 1.5, marginBottom: '1.25rem', flex: 1 }}>
+                          {product.description}
+                        </p>
+
+                        <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '1rem', marginTop: 'auto' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0.4rem' }}>
+                            <div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <span style={{ color: '#16a34a', fontWeight: 800, fontSize: '0.82rem' }}>↓ {discountPercent}</span>
+                                <span style={{ color: '#94a3b8', textDecoration: 'line-through', fontSize: '0.78rem' }}>{marketPrice}</span>
+                              </div>
+                              <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#000000' }}>
+                                {product.price}
+                              </div>
+                            </div>
+                            <span style={{ fontSize: '0.72rem', color: '#16a34a', fontWeight: 700 }}>
+                              {product.leadTime}
+                            </span>
+                          </div>
+                          <div style={{ fontSize: '0.7rem', color: '#15803d', fontWeight: 600, marginBottom: '0.85rem' }}>
+                            Workshop Direct • Zero Retail Markup
+                          </div>
+
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                            <Link
+                              href={`/shop/${product.id}`}
+                              className="btn-secondary"
+                              style={{
+                                padding: '0.7rem 0.5rem',
+                                justifyContent: 'center',
+                                fontSize: '0.8rem',
+                                fontWeight: 700,
+                                textAlign: 'center',
+                              }}
+                            >
+                              Customize ⚙
+                            </Link>
+
+                            <button
+                              onClick={() =>
+                                addToCart({
+                                  id: product.id,
+                                  name: product.name,
+                                  price: product.price,
+                                  category: product.category,
+                                  image: product.image,
+                                  calculatedTotalPrice: product.unitPriceNumeric,
+                                  quantity: 1,
+                                })
+                              }
+                              className="btn-primary"
+                              style={{
+                                padding: '0.7rem 0.5rem',
+                                justifyContent: 'center',
+                                fontSize: '0.8rem',
+                                fontWeight: 700,
+                                textAlign: 'center',
+                              }}
+                            >
+                              Add to Cart +
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <div
@@ -690,6 +1079,53 @@ function ShopContent() {
           </div>
         </div>
       </div>
+
+      {/* Sort Bottom Sheet Modal (Mobile) */}
+      {isSortModalOpen && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+          <div onClick={() => setIsSortModalOpen(false)} style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(3px)', WebkitBackdropFilter: 'blur(3px)' }} />
+          <div className="animate-drawer-slide-up" style={{ position: 'relative', width: '100%', maxWidth: '500px', backgroundColor: '#ffffff', borderTopLeftRadius: '24px', borderTopRightRadius: '24px', padding: '1.25rem 1.5rem 2rem', zIndex: 10000, boxShadow: '0 -10px 40px rgba(0,0,0,0.2)' }}>
+            <div style={{ width: '36px', height: '4px', borderRadius: '2px', backgroundColor: '#cbd5e1', margin: '0 auto 1rem' }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.75rem' }}>
+              <span style={{ fontWeight: 800, fontSize: '1.1rem', color: '#0f172a' }}>Sort Fabrications</span>
+              <button onClick={() => setIsSortModalOpen(false)} style={{ background: '#f1f5f9', border: 'none', borderRadius: '50%', width: '28px', height: '28px', cursor: 'pointer', fontWeight: 700 }}>✕</button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {[
+                { id: 'default', label: 'Featured (Recommended)' },
+                { id: 'price-asc', label: 'Price: Low to High' },
+                { id: 'price-desc', label: 'Price: High to Low' },
+                { id: 'rating', label: 'Customer Rating: High to Low' },
+              ].map((opt) => {
+                const isSelected = sortBy === opt.id;
+                return (
+                  <button
+                    key={opt.id}
+                    onClick={() => { setSortBy(opt.id as any); setIsSortModalOpen(false); }}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '0.85rem 1rem',
+                      borderRadius: '12px',
+                      border: isSelected ? '2px solid #000000' : '1px solid #e2e8f0',
+                      backgroundColor: isSelected ? '#f8fafc' : '#ffffff',
+                      fontWeight: isSelected ? 800 : 500,
+                      color: isSelected ? '#000000' : '#334155',
+                      fontSize: '0.9rem',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                    }}
+                  >
+                    <span>{opt.label}</span>
+                    {isSelected && <span style={{ color: '#000000', fontWeight: 900 }}>✓</span>}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Mobile Filter Drawer / Bottom Sheet */}
       {isMobileFilterOpen && (
