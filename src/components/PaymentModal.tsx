@@ -525,12 +525,12 @@ export default function PaymentModal({ isOpen, onClose, onOrderPlacedSuccess }: 
                 <div
                   style={{
                     display: 'inline-block',
-                    padding: '1rem',
+                    padding: '1.25rem',
                     backgroundColor: '#ffffff',
-                    border: '2px solid #000000',
-                    borderRadius: '16px',
+                    border: '3px solid #000000',
+                    borderRadius: '20px',
                     marginBottom: '1rem',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
                   }}
                 >
                   {/* Real UPI QR Code */}
@@ -538,9 +538,9 @@ export default function PaymentModal({ isOpen, onClose, onOrderPlacedSuccess }: 
                   <img
                     src="/images/ganesh_upi_qr.png"
                     alt="Scan to Pay – Shree Ganesh Steel & Welding Workshop UPI"
-                    style={{ width: '260px', height: '260px', objectFit: 'contain', display: 'block' }}
+                    style={{ width: '320px', height: '320px', objectFit: 'contain', display: 'block', imageRendering: 'crisp-edges' }}
                   />
-                  <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '8px' }}>Scan with GPay / PhonePe / Paytm</div>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#334155', marginTop: '10px', textAlign: 'center' }}>📷 Scan with GPay / PhonePe / Paytm / Any UPI App</div>
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '1rem' }}>
