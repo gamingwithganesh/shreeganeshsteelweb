@@ -367,6 +367,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       // Also sync to admin orders so the workshop admin sees it immediately
       const savedAdminOrders = localStorage.getItem('sgwwsp_admin_orders_v2');
       const currentAdminOrders = savedAdminOrders ? JSON.parse(savedAdminOrders) : [];
+      const isPickup = newOrder.siteInfo.deliveryMethod === 'factory_pickup';
+      const hasPrimer = newOrder.siteInfo.includeAntiRustPrimer !== false;
+      const hasInstall = Boolean(newOrder.siteInfo.includeInstallation);
+      const deliveryLabel = isPickup ? 'Self Pickup from Workshop (Free)' : `Workshop Delivery to Site (${newOrder.siteInfo.city})`;
+
       const adminOrderEntry = {
         id: `ord-${randomNum}`,
         orderNumber: orderId,
@@ -381,7 +386,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         createdAt: new Date().toLocaleString(),
         targetDate: 'Within 7-10 Days',
         dimensions: newOrder.items[0]?.widthFeet ? `${newOrder.items[0].widthFeet}ft x ${newOrder.items[0].heightFeet}ft` : 'Custom Fit',
-        notes: `Delivery to ${newOrder.siteInfo.siteAddress}, ${newOrder.siteInfo.city}. Advance: ₹${newOrder.advancePaid}, Balance: ₹${newOrder.balanceDue}`,
+        notes: `${deliveryLabel} | ${hasPrimer ? 'Dual-Coat Anti-Rust Primer (+6%)' : 'Raw Finish'} | ${hasInstall ? 'On-Site Installation Included' : 'Supply Only'} | Adv: ₹${newOrder.advancePaid}, Due: ₹${newOrder.balanceDue}`,
         paymentScreenshot: newOrder.paymentScreenshot,
         transactionRef: newOrder.transactionRef,
         customDesignImage: newOrder.siteInfo.customDesignImage || newOrder.customDesignImage,
@@ -391,6 +396,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         siteAddress: newOrder.siteInfo.siteAddress,
         city: newOrder.siteInfo.city,
         itemsSummary: newOrder.items.map((i) => `${i.name} (x${i.quantity || 1})`).join(', '),
+        deliveryMethod: newOrder.siteInfo.deliveryMethod || 'workshop_dispatch',
+        deliveryCharge: newOrder.deliveryCharge || 0,
+        includeAntiRustPrimer: hasPrimer,
+        coatingCharge: newOrder.coatingCharge || 0,
+        includeInstallation: hasInstall,
+        installationCharge: newOrder.installationCharge || 0,
+        items: newOrder.items,
+        siteInfo: newOrder.siteInfo,
       };
       const updatedAdminOrders = [adminOrderEntry, ...currentAdminOrders];
       localStorage.setItem('sgwwsp_admin_orders_v2', JSON.stringify(updatedAdminOrders));

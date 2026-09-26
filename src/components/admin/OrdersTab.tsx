@@ -2,11 +2,12 @@
 
 import React, { useState } from 'react';
 import { useAdmin } from '@/context/AdminContext';
-import { Order, OrderStatus } from '@/data/adminInitialData';
+import { Order, OrderStatus, OrderPriority } from '@/data/adminInitialData';
+import { VIDARBHA_CITIES } from '@/context/CartContext';
 import ConfirmWipeModal from './ConfirmWipeModal';
 
 export default function OrdersTab() {
-  const { orders, updateOrderStatus, wipeAllAppData, seedSampleData } = useAdmin();
+  const { orders, updateOrderStatus, wipeAllAppData, seedSampleData, addOrder } = useAdmin();
 
   // Filters & search
   const [searchTerm, setSearchTerm] = useState('');
@@ -20,6 +21,99 @@ export default function OrdersTab() {
     await wipeAllAppData();
     setIsWiping(false);
     setIsWipeModalOpen(false);
+  };
+
+  // Add Order Modal State
+  const [isAddOrderModalOpen, setIsAddOrderModalOpen] = useState(false);
+  const [newOrderForm, setNewOrderForm] = useState({
+    clientName: '',
+    clientPhone: '',
+    clientEmail: '',
+    city: 'Ghatanji',
+    siteAddress: '',
+    serviceCategory: 'Custom Steel Gate',
+    material: 'Mild Steel IS-2062 (14 Gauge)',
+    dimensions: '12ft Width x 7ft Height',
+    amount: 45000,
+    advancePaid: 15000,
+    deliveryMethod: 'workshop_dispatch' as 'workshop_dispatch' | 'factory_pickup',
+    deliveryCharge: 0,
+    includeAntiRustPrimer: true,
+    coatingCharge: 2700,
+    includeInstallation: true,
+    installationCharge: 3500,
+    priority: 'urgent' as OrderPriority,
+    notes: '',
+  });
+
+  const handleCitySelect = (cityName: string) => {
+    const found = VIDARBHA_CITIES.find((c) => c.name.toLowerCase() === cityName.toLowerCase());
+    const fee = found ? found.baseDeliveryFee : 850;
+    setNewOrderForm((prev) => ({
+      ...prev,
+      city: cityName,
+      deliveryCharge: prev.deliveryMethod === 'factory_pickup' ? 0 : fee,
+    }));
+  };
+
+  const handleDeliveryMethodChange = (method: 'workshop_dispatch' | 'factory_pickup') => {
+    const found = VIDARBHA_CITIES.find((c) => c.name.toLowerCase() === newOrderForm.city.toLowerCase());
+    const fee = found ? found.baseDeliveryFee : 850;
+    setNewOrderForm((prev) => ({
+      ...prev,
+      deliveryMethod: method,
+      deliveryCharge: method === 'factory_pickup' ? 0 : fee,
+    }));
+  };
+
+  const handleCreateOrderSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newOrderForm.clientName.trim() || !newOrderForm.clientPhone.trim()) {
+      setToastMsg('Please enter Client Name and Phone number.');
+      setTimeout(() => setToastMsg(''), 3000);
+      return;
+    }
+
+    const totalAmt = Number(newOrderForm.amount) || 0;
+    const advPaid = Math.min(Number(newOrderForm.advancePaid) || 0, totalAmt);
+    const balance = Math.max(0, totalAmt - advPaid);
+
+    const deliveryDesc =
+      newOrderForm.deliveryMethod === 'factory_pickup'
+        ? 'Self Pickup from Workshop (Free)'
+        : `Workshop Delivery to Site (${newOrderForm.city})`;
+
+    addOrder({
+      clientName: newOrderForm.clientName.trim(),
+      clientPhone: newOrderForm.clientPhone.trim(),
+      clientEmail:
+        newOrderForm.clientEmail.trim() ||
+        `${newOrderForm.clientName.toLowerCase().replace(/[^a-z0-9]/g, '')}@client.in`,
+      serviceCategory: newOrderForm.serviceCategory.trim() || 'Custom Steel Fabrication',
+      material: newOrderForm.material.trim() || 'Mild Steel IS-2062',
+      dimensions: newOrderForm.dimensions.trim() || 'Custom Fit',
+      amount: totalAmt,
+      advancePaid: advPaid,
+      balanceDue: balance,
+      city: newOrderForm.city,
+      siteAddress: newOrderForm.siteAddress.trim() || `${newOrderForm.city}, Vidarbha`,
+      deliveryMethod: newOrderForm.deliveryMethod,
+      deliveryCharge: newOrderForm.deliveryMethod === 'factory_pickup' ? 0 : newOrderForm.deliveryCharge,
+      includeAntiRustPrimer: newOrderForm.includeAntiRustPrimer,
+      coatingCharge: newOrderForm.includeAntiRustPrimer ? newOrderForm.coatingCharge : 0,
+      includeInstallation: newOrderForm.includeInstallation,
+      installationCharge: newOrderForm.includeInstallation ? newOrderForm.installationCharge : 0,
+      status: 'order_confirmed',
+      priority: newOrderForm.priority,
+      targetDate: 'Within 7-10 Days',
+      notes: newOrderForm.notes
+        ? `${deliveryDesc} | ${newOrderForm.notes}`
+        : `${deliveryDesc} | ${newOrderForm.includeAntiRustPrimer ? 'Dual-Coat Anti-Rust Primer (+6%)' : 'Raw Finish'} | ${newOrderForm.includeInstallation ? 'On-Site Installation' : 'Fabrication Only'}`,
+    });
+
+    setToastMsg(`Order for ${newOrderForm.clientName} created successfully!`);
+    setTimeout(() => setToastMsg(''), 3500);
+    setIsAddOrderModalOpen(false);
   };
 
   // Proof Lightbox Preview Modal State
@@ -74,7 +168,13 @@ export default function OrdersTab() {
       (order.city && order.city.toLowerCase().includes(q)) ||
       (order.siteAddress && order.siteAddress.toLowerCase().includes(q)) ||
       (order.transactionRef && order.transactionRef.toLowerCase().includes(q)) ||
-      order.serviceCategory.toLowerCase().includes(q);
+      order.serviceCategory.toLowerCase().includes(q) ||
+      (order.notes && order.notes.toLowerCase().includes(q)) ||
+      (order.deliveryMethod && order.deliveryMethod.toLowerCase().includes(q)) ||
+      (order.deliveryMethod === 'factory_pickup' && 'pickup free'.includes(q)) ||
+      (order.deliveryMethod === 'workshop_dispatch' && 'delivery dispatch'.includes(q)) ||
+      (order.includeAntiRustPrimer && 'primer anti-rust'.includes(q)) ||
+      (order.includeInstallation && 'installation erection'.includes(q));
 
     const simpleStat = toSimpleStatus(order.status);
     const matchesStatus = statusFilter === 'all' || simpleStat === statusFilter || order.status === statusFilter;
@@ -139,6 +239,31 @@ export default function OrdersTab() {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            onClick={() => setIsAddOrderModalOpen(true)}
+            style={{
+              backgroundColor: '#09090b',
+              border: '1px solid #09090b',
+              color: '#ffffff',
+              padding: '8px 16px',
+              borderRadius: '8px',
+              fontSize: '0.8rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+            }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            <span>+ Add Order</span>
+          </button>
+
           <button
             type="button"
             onClick={() => {
@@ -519,6 +644,169 @@ export default function OrdersTab() {
                   </div>
                 </div>
 
+                {/* Logistics & Add-ons Badge Row */}
+                <div
+                  style={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: '8px',
+                    padding: '10px 12px',
+                    backgroundColor: '#fafafa',
+                    borderRadius: '10px',
+                    border: '1px solid #f4f4f5',
+                    alignItems: 'center',
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: '0.68rem',
+                      fontWeight: 800,
+                      color: '#71717a',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                      marginRight: '2px',
+                    }}
+                  >
+                    Delivery &amp; Add-ons:
+                  </span>
+
+                  {/* 1. Delivery Badge */}
+                  {order.deliveryMethod === 'factory_pickup' ? (
+                    <span
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '4px 10px',
+                        borderRadius: '6px',
+                        fontSize: '0.74rem',
+                        fontWeight: 700,
+                        backgroundColor: '#ffffff',
+                        color: '#09090b',
+                        border: '1px solid #d4d4d8',
+                      }}
+                    >
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                        <polyline points="9 22 9 12 15 12 15 22" />
+                      </svg>
+                      Self Pickup from Workshop (Free)
+                    </span>
+                  ) : (
+                    <span
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '4px 10px',
+                        borderRadius: '6px',
+                        fontSize: '0.74rem',
+                        fontWeight: 700,
+                        backgroundColor: '#09090b',
+                        color: '#ffffff',
+                      }}
+                    >
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="1" y="3" width="15" height="13" />
+                        <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
+                        <circle cx="5.5" cy="18.5" r="2.5" />
+                        <circle cx="18.5" cy="18.5" r="2.5" />
+                      </svg>
+                      Workshop Delivery to Site ({order.city || 'Ghatanji'})
+                      {order.deliveryCharge && order.deliveryCharge > 0
+                        ? ` • ₹${order.deliveryCharge.toLocaleString('en-IN')}`
+                        : ' • Free Delivery'}
+                    </span>
+                  )}
+
+                  {/* 2. Anti-Rust Primer Badge */}
+                  {order.includeAntiRustPrimer || (order.coatingCharge && order.coatingCharge > 0) ? (
+                    <span
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '4px 10px',
+                        borderRadius: '6px',
+                        fontSize: '0.74rem',
+                        fontWeight: 700,
+                        backgroundColor: '#ffffff',
+                        color: '#09090b',
+                        border: '1px solid #d4d4d8',
+                      }}
+                    >
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                        <polyline points="9 12 11 14 15 10" />
+                      </svg>
+                      Include Dual-Coat Anti-Rust Primer (+6%)
+                      {order.coatingCharge && order.coatingCharge > 0
+                        ? ` • ₹${order.coatingCharge.toLocaleString('en-IN')}`
+                        : ''}
+                    </span>
+                  ) : (
+                    <span
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                        padding: '3px 8px',
+                        borderRadius: '6px',
+                        fontSize: '0.72rem',
+                        fontWeight: 500,
+                        backgroundColor: 'transparent',
+                        color: '#a1a1aa',
+                        border: '1px dashed #e4e4e7',
+                      }}
+                    >
+                      Anti-Rust Primer: Excluded (Raw Finish)
+                    </span>
+                  )}
+
+                  {/* 3. On-Site Installation Badge */}
+                  {order.includeInstallation || (order.installationCharge && order.installationCharge > 0) ? (
+                    <span
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '4px 10px',
+                        borderRadius: '6px',
+                        fontSize: '0.74rem',
+                        fontWeight: 700,
+                        backgroundColor: '#ffffff',
+                        color: '#09090b',
+                        border: '1px solid #d4d4d8',
+                      }}
+                    >
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+                      </svg>
+                      Include On-Site Installation
+                      {order.installationCharge && order.installationCharge > 0
+                        ? ` • ₹${order.installationCharge.toLocaleString('en-IN')}`
+                        : ''}
+                    </span>
+                  ) : (
+                    <span
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                        padding: '3px 8px',
+                        borderRadius: '6px',
+                        fontSize: '0.72rem',
+                        fontWeight: 500,
+                        backgroundColor: 'transparent',
+                        color: '#a1a1aa',
+                        border: '1px dashed #e4e4e7',
+                      }}
+                    >
+                      Installation: Excluded (Fabrication Only)
+                    </span>
+                  )}
+                </div>
+
                 {/* Items & Notes */}
                 {(order.itemsSummary || order.serviceCategory || order.notes) && (
                   <div style={{ fontSize: '0.78rem', color: '#71717a', borderTop: '1px solid #f4f4f5', paddingTop: '8px' }}>
@@ -629,6 +917,431 @@ export default function OrdersTab() {
                 Close
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add New Workshop Order Modal */}
+      {isAddOrderModalOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+            backdropFilter: 'blur(4px)',
+            zIndex: 3000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '16px',
+          }}
+          onClick={() => setIsAddOrderModalOpen(false)}
+        >
+          <div
+            style={{
+              backgroundColor: '#ffffff',
+              borderRadius: '16px',
+              border: '1px solid #e4e4e7',
+              maxWidth: '620px',
+              width: '100%',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '16px 20px',
+                borderBottom: '1px solid #e4e4e7',
+                position: 'sticky',
+                top: 0,
+                backgroundColor: '#ffffff',
+                zIndex: 2,
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span
+                  style={{
+                    backgroundColor: '#09090b',
+                    color: '#ffffff',
+                    padding: '4px 8px',
+                    borderRadius: '6px',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                  }}
+                >
+                  NEW
+                </span>
+                <h2 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#09090b', margin: 0 }}>
+                  Add Workshop Order
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAddOrderModalOpen(false)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '1.2rem',
+                  color: '#71717a',
+                  cursor: 'pointer',
+                  padding: '4px',
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Form */}
+            <form onSubmit={handleCreateOrderSubmit} style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {/* Section 1: Client Information */}
+              <div>
+                <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#09090b', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.04em' }}>
+                  1. Client Details
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '10px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#52525b', marginBottom: '4px' }}>
+                      Client Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Ramesh Patel"
+                      value={newOrderForm.clientName}
+                      onChange={(e) => setNewOrderForm({ ...newOrderForm, clientName: e.target.value })}
+                      style={{
+                        width: '100%',
+                        padding: '8px 12px',
+                        borderRadius: '8px',
+                        border: '1px solid #d4d4d8',
+                        fontSize: '0.825rem',
+                        outline: 'none',
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#52525b', marginBottom: '4px' }}>
+                      Phone Number *
+                    </label>
+                    <input
+                      type="tel"
+                      required
+                      placeholder="e.g. 94230 32182"
+                      value={newOrderForm.clientPhone}
+                      onChange={(e) => setNewOrderForm({ ...newOrderForm, clientPhone: e.target.value })}
+                      style={{
+                        width: '100%',
+                        padding: '8px 12px',
+                        borderRadius: '8px',
+                        border: '1px solid #d4d4d8',
+                        fontSize: '0.825rem',
+                        outline: 'none',
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '10px', marginTop: '10px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#52525b', marginBottom: '4px' }}>
+                      Operational City
+                    </label>
+                    <select
+                      value={newOrderForm.city}
+                      onChange={(e) => handleCitySelect(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '8px 12px',
+                        borderRadius: '8px',
+                        border: '1px solid #d4d4d8',
+                        fontSize: '0.825rem',
+                        outline: 'none',
+                        backgroundColor: '#ffffff',
+                      }}
+                    >
+                      {VIDARBHA_CITIES.map((c) => (
+                        <option key={c.name} value={c.name}>
+                          {c.name} ({c.transitDays}) {c.baseDeliveryFee > 0 ? `+₹${c.baseDeliveryFee}` : '(Free/HQ)'}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#52525b', marginBottom: '4px' }}>
+                      Site Installation Address
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Plot 24, MIDC Road"
+                      value={newOrderForm.siteAddress}
+                      onChange={(e) => setNewOrderForm({ ...newOrderForm, siteAddress: e.target.value })}
+                      style={{
+                        width: '100%',
+                        padding: '8px 12px',
+                        borderRadius: '8px',
+                        border: '1px solid #d4d4d8',
+                        fontSize: '0.825rem',
+                        outline: 'none',
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 2: Fabrication Specs */}
+              <div>
+                <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#09090b', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.04em' }}>
+                  2. Fabrication Item &amp; Specifications
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '10px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#52525b', marginBottom: '4px' }}>
+                      Product / Service Name
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Architectural CNC Laser Cut Gate"
+                      value={newOrderForm.serviceCategory}
+                      onChange={(e) => setNewOrderForm({ ...newOrderForm, serviceCategory: e.target.value })}
+                      style={{
+                        width: '100%',
+                        padding: '8px 12px',
+                        borderRadius: '8px',
+                        border: '1px solid #d4d4d8',
+                        fontSize: '0.825rem',
+                        outline: 'none',
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#52525b', marginBottom: '4px' }}>
+                      Material &amp; Gauge
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Mild Steel IS-2062 (14 Gauge)"
+                      value={newOrderForm.material}
+                      onChange={(e) => setNewOrderForm({ ...newOrderForm, material: e.target.value })}
+                      style={{
+                        width: '100%',
+                        padding: '8px 12px',
+                        borderRadius: '8px',
+                        border: '1px solid #d4d4d8',
+                        fontSize: '0.825rem',
+                        outline: 'none',
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '10px', marginTop: '10px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#52525b', marginBottom: '4px' }}>
+                      Dimensions
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. 12ft Width x 7ft Height"
+                      value={newOrderForm.dimensions}
+                      onChange={(e) => setNewOrderForm({ ...newOrderForm, dimensions: e.target.value })}
+                      style={{
+                        width: '100%',
+                        padding: '8px 12px',
+                        borderRadius: '8px',
+                        border: '1px solid #d4d4d8',
+                        fontSize: '0.825rem',
+                        outline: 'none',
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#52525b', marginBottom: '4px' }}>
+                      Total Amount (₹)
+                    </label>
+                    <input
+                      type="number"
+                      value={newOrderForm.amount}
+                      onChange={(e) => setNewOrderForm({ ...newOrderForm, amount: Number(e.target.value) || 0 })}
+                      style={{
+                        width: '100%',
+                        padding: '8px 12px',
+                        borderRadius: '8px',
+                        border: '1px solid #d4d4d8',
+                        fontSize: '0.825rem',
+                        outline: 'none',
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#52525b', marginBottom: '4px' }}>
+                      Advance Paid (₹)
+                    </label>
+                    <input
+                      type="number"
+                      value={newOrderForm.advancePaid}
+                      onChange={(e) => setNewOrderForm({ ...newOrderForm, advancePaid: Number(e.target.value) || 0 })}
+                      style={{
+                        width: '100%',
+                        padding: '8px 12px',
+                        borderRadius: '8px',
+                        border: '1px solid #d4d4d8',
+                        fontSize: '0.825rem',
+                        outline: 'none',
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 3: Logistics & Delivery Method (Radio Selection) */}
+              <div style={{ backgroundColor: '#f8fafc', padding: '12px 14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#09090b', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.04em' }}>
+                  3. Logistics &amp; Delivery Method
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.825rem', color: '#09090b', fontWeight: 600 }}>
+                    <input
+                      type="radio"
+                      name="adminDeliveryMethod"
+                      checked={newOrderForm.deliveryMethod === 'workshop_dispatch'}
+                      onChange={() => handleDeliveryMethodChange('workshop_dispatch')}
+                      style={{ accentColor: '#09090b' }}
+                    />
+                    <span>Workshop Delivery to Site ({newOrderForm.city})</span>
+                    {newOrderForm.deliveryCharge > 0 && (
+                      <span style={{ fontSize: '0.75rem', color: '#71717a', fontWeight: 400 }}>
+                        (Fee: ₹{newOrderForm.deliveryCharge})
+                      </span>
+                    )}
+                  </label>
+
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.825rem', color: '#09090b', fontWeight: 600 }}>
+                    <input
+                      type="radio"
+                      name="adminDeliveryMethod"
+                      checked={newOrderForm.deliveryMethod === 'factory_pickup'}
+                      onChange={() => handleDeliveryMethodChange('factory_pickup')}
+                      style={{ accentColor: '#09090b' }}
+                    />
+                    <span>Self Pickup from Workshop (Free)</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Section 4: Workshop Add-ons (Checkboxes) */}
+              <div style={{ backgroundColor: '#f8fafc', padding: '12px 14px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#09090b', textTransform: 'uppercase', marginBottom: '8px', letterSpacing: '0.04em' }}>
+                  4. Customer Chosen Add-ons
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.825rem', color: '#09090b', fontWeight: 600 }}>
+                    <input
+                      type="checkbox"
+                      checked={newOrderForm.includeAntiRustPrimer}
+                      onChange={(e) => setNewOrderForm({ ...newOrderForm, includeAntiRustPrimer: e.target.checked })}
+                      style={{ accentColor: '#09090b', width: '16px', height: '16px' }}
+                    />
+                    <span>Include Dual-Coat Anti-Rust Primer (+6%)</span>
+                  </label>
+
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.825rem', color: '#09090b', fontWeight: 600 }}>
+                    <input
+                      type="checkbox"
+                      checked={newOrderForm.includeInstallation}
+                      onChange={(e) => setNewOrderForm({ ...newOrderForm, includeInstallation: e.target.checked })}
+                      style={{ accentColor: '#09090b', width: '16px', height: '16px' }}
+                    />
+                    <span>Include On-Site Installation</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Section 5: Notes & Priority */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '10px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#52525b', marginBottom: '4px' }}>
+                    Priority
+                  </label>
+                  <select
+                    value={newOrderForm.priority}
+                    onChange={(e) => setNewOrderForm({ ...newOrderForm, priority: e.target.value as OrderPriority })}
+                    style={{
+                      width: '100%',
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid #d4d4d8',
+                      fontSize: '0.825rem',
+                      outline: 'none',
+                      backgroundColor: '#ffffff',
+                    }}
+                  >
+                    <option value="urgent">Urgent</option>
+                    <option value="standard">Standard</option>
+                    <option value="low">Low</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#52525b', marginBottom: '4px' }}>
+                    Workshop Notes
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Automated gate motor track mounting"
+                    value={newOrderForm.notes}
+                    onChange={(e) => setNewOrderForm({ ...newOrderForm, notes: e.target.value })}
+                    style={{
+                      width: '100%',
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid #d4d4d8',
+                      fontSize: '0.825rem',
+                      outline: 'none',
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Modal Actions */}
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', borderTop: '1px solid #e4e4e7', paddingTop: '14px' }}>
+                <button
+                  type="button"
+                  onClick={() => setIsAddOrderModalOpen(false)}
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    border: '1px solid #e4e4e7',
+                    backgroundColor: '#ffffff',
+                    color: '#52525b',
+                    fontSize: '0.825rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  style={{
+                    padding: '8px 20px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    backgroundColor: '#09090b',
+                    color: '#ffffff',
+                    fontSize: '0.825rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Create Order
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

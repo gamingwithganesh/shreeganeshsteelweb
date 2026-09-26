@@ -158,10 +158,10 @@ export default function OrderDetailsModal({ order, isOpen = true, onClose }: Ord
               Project Installation Site
             </div>
             <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#0f172a', marginTop: '2px' }}>
-              {order.siteInfo.siteAddress}, {order.siteInfo.city}
+              {order.siteInfo?.siteAddress || 'Site Address'}, {order.siteInfo?.city || 'Ghatanji'}
             </div>
             <div style={{ fontSize: '0.8rem', color: '#0f172a', fontWeight: 600, marginTop: '2px' }}>
-              Delivery: {order.siteInfo.deliveryMethod === 'factory_pickup' ? 'Self Pickup at Ghatanji' : 'Workshop Flatbed Truck'}
+              Delivery: {order.siteInfo?.deliveryMethod === 'factory_pickup' ? 'Self Pickup from Workshop (Free)' : `Workshop Delivery to Site (${order.siteInfo?.city || 'Ghatanji'})`}
             </div>
           </div>
         </div>
@@ -231,16 +231,22 @@ export default function OrderDetailsModal({ order, isOpen = true, onClose }: Ord
             <span style={{ fontWeight: 700, color: '#0f172a' }}>₹{order.subtotal.toLocaleString()}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b' }}>
-            <span>Anti-Rust Primer &amp; Finish Coating:</span>
-            <span>{order.coatingCharge > 0 ? `₹${order.coatingCharge.toLocaleString()}` : 'Not Included (₹0)'}</span>
+            <span>Dual-Coat Anti-Rust Primer (+6%):</span>
+            <span style={{ fontWeight: 600, color: order.coatingCharge > 0 || order.siteInfo?.includeAntiRustPrimer ? '#0f172a' : '#94a3b8' }}>
+              {order.coatingCharge > 0 ? `₹${order.coatingCharge.toLocaleString()}` : order.siteInfo?.includeAntiRustPrimer ? 'Included' : 'Excluded (₹0)'}
+            </span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b' }}>
-            <span>Truck Logistics to {order.siteInfo.city}:</span>
-            <span>₹{order.deliveryCharge.toLocaleString()}</span>
+            <span>Logistics &amp; Delivery ({order.siteInfo?.city || 'Ghatanji'}):</span>
+            <span style={{ fontWeight: 600, color: '#0f172a' }}>
+              {order.siteInfo?.deliveryMethod === 'factory_pickup' ? 'Self Pickup (Free ₹0)' : `₹${(order.deliveryCharge || 0).toLocaleString()}`}
+            </span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b' }}>
-            <span>On-Site Erection &amp; Welding:</span>
-            <span>₹{order.installationCharge.toLocaleString()}</span>
+            <span>On-Site Erection &amp; Installation:</span>
+            <span style={{ fontWeight: 600, color: order.installationCharge > 0 || order.siteInfo?.includeInstallation ? '#0f172a' : '#94a3b8' }}>
+              {order.installationCharge > 0 ? `₹${order.installationCharge.toLocaleString()}` : order.siteInfo?.includeInstallation ? 'Included' : 'Not Requested (₹0)'}
+            </span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '2px solid #e2e8f0', paddingTop: '0.5rem', fontSize: '1.05rem', fontWeight: 800, color: '#000000' }}>
             <span>Total Project Value:</span>

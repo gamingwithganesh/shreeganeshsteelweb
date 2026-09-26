@@ -131,6 +131,14 @@ export interface Order {
   siteAddress?: string;
   city?: string;
   itemsSummary?: string;
+  deliveryMethod?: 'workshop_dispatch' | 'factory_pickup';
+  deliveryCharge?: number;
+  includeAntiRustPrimer?: boolean;
+  coatingCharge?: number;
+  includeInstallation?: boolean;
+  installationCharge?: number;
+  items?: any[];
+  siteInfo?: any;
 }
 
 export type MachineStatus = 'operational' | 'scheduled_service' | 'maintenance_required';
@@ -178,6 +186,14 @@ export const INITIAL_ORDERS: Order[] = [
     createdAt: '2026-09-10',
     targetDate: '2026-09-22',
     dimensions: '14ft Width x 8ft Height',
+    city: 'Yavatmal',
+    siteAddress: 'Plot 45, MIDC Industrial Area, Yavatmal',
+    deliveryMethod: 'workshop_dispatch',
+    deliveryCharge: 850,
+    includeAntiRustPrimer: true,
+    coatingCharge: 5100,
+    includeInstallation: true,
+    installationCharge: 6500,
     notes: 'Dual swing gate with automated track mounting plates and primer undercoat.',
   },
   {
@@ -196,6 +212,14 @@ export const INITIAL_ORDERS: Order[] = [
     createdAt: '2026-09-08',
     targetDate: '2026-09-20',
     dimensions: '42 Running Feet',
+    city: 'Ghatanji',
+    siteAddress: 'Joshi Clinic, Main Market Road, Ghatanji',
+    deliveryMethod: 'factory_pickup',
+    deliveryCharge: 0,
+    includeAntiRustPrimer: false,
+    coatingCharge: 0,
+    includeInstallation: true,
+    installationCharge: 8500,
     notes: 'Spigot base brackets with 12mm toughened laminated glass panels.',
   },
   {
@@ -214,6 +238,14 @@ export const INITIAL_ORDERS: Order[] = [
     createdAt: '2026-09-14',
     targetDate: '2026-09-18',
     dimensions: '120 units custom flange profiles',
+    city: 'Ghatanji',
+    siteAddress: 'Workshop Plant Yard, Ghatanji',
+    deliveryMethod: 'factory_pickup',
+    deliveryCharge: 0,
+    includeAntiRustPrimer: true,
+    coatingCharge: 2880,
+    includeInstallation: false,
+    installationCharge: 0,
     notes: 'Tolerance: +/-0.1mm. High pressure nitrogen cut for clean edges.',
   },
   {
@@ -232,6 +264,14 @@ export const INITIAL_ORDERS: Order[] = [
     createdAt: '2026-09-05',
     targetDate: '2026-10-05',
     dimensions: '40ft x 60ft Clear Span',
+    city: 'Pandharkawada',
+    siteAddress: 'Deshmukh Agro Farm, NH-44 Crossing, Pandharkawada',
+    deliveryMethod: 'workshop_dispatch',
+    deliveryCharge: 950,
+    includeAntiRustPrimer: true,
+    coatingCharge: 19200,
+    includeInstallation: true,
+    installationCharge: 25000,
     notes: 'Site inspection completed. Foundation bolts aligned for column erection.',
   },
   {
@@ -250,6 +290,14 @@ export const INITIAL_ORDERS: Order[] = [
     createdAt: '2026-09-16',
     targetDate: '2026-09-30',
     dimensions: '6 Dining Tables + 12 High Bar Stools',
+    city: 'Yavatmal',
+    siteAddress: 'Cafe Boulevard, Civil Lines, Yavatmal',
+    deliveryMethod: 'workshop_dispatch',
+    deliveryCharge: 850,
+    includeAntiRustPrimer: true,
+    coatingCharge: 3720,
+    includeInstallation: false,
+    installationCharge: 0,
     notes: 'Waiting for final wood stain selection from client.',
   },
   {

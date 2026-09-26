@@ -486,7 +486,18 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       createdAt: today,
     };
 
-    setOrders((prev) => [newOrder, ...prev]);
+    setOrders((prev) => {
+      const updated = [newOrder, ...prev];
+      try {
+        localStorage.setItem(ORDERS_KEY, JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('storage'));
+      window.dispatchEvent(new CustomEvent('sgwwsp_order_created', { detail: newOrder }));
+    }
   };
 
   const updateOrder = (id: string, updated: Partial<Order>) => {
