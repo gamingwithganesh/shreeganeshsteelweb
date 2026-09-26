@@ -197,13 +197,13 @@ export default function Navbar() {
           }}
         >
           {/* 1. Left: Brand Logo */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '2.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', flexShrink: 0 }}>
             <Link
               href="/"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '10px',
+                gap: '8px',
                 textDecoration: 'none',
                 flexShrink: 0,
               }}
@@ -229,10 +229,10 @@ export default function Navbar() {
                 </svg>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', whiteSpace: 'nowrap' }}>
                 <span
                   style={{
-                    fontSize: '1.05rem',
+                    fontSize: 'clamp(0.95rem, 3.2vw, 1.05rem)',
                     fontWeight: 700,
                     color: '#0f172a',
                     letterSpacing: '-0.025em',
@@ -242,7 +242,7 @@ export default function Navbar() {
                 </span>
                 <span
                   style={{
-                    fontSize: '1.05rem',
+                    fontSize: 'clamp(0.95rem, 3.2vw, 1.05rem)',
                     fontWeight: 400,
                     color: '#64748b',
                     letterSpacing: '-0.025em',
@@ -597,7 +597,8 @@ export default function Navbar() {
               )}
             </Link>
 
-            {/* 4. Single Unified Login Button / Logged In User Pill */}
+            {/* 4. Desktop Single Unified Login Button / Logged In User Pill */}
+            <div className="hidden-mobile-nav" style={{ display: 'inline-flex', alignItems: 'center' }}>
             {currentUser ? (
               <div style={{ position: 'relative' }} ref={userMenuRef}>
                 <button
@@ -781,6 +782,7 @@ export default function Navbar() {
                 <span>Login</span>
               </button>
             )}
+            </div>
 
             {/* Mobile Hamburger Button */}
             <button
@@ -832,6 +834,84 @@ export default function Navbar() {
               zIndex: 99,
             }}
           >
+            {/* Mobile User Profile or Login Trigger */}
+            <div style={{ paddingBottom: '0.75rem', borderBottom: '1px solid #f1f5f9', marginBottom: '0.5rem' }}>
+              {currentUser ? (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#f8fafc', padding: '10px 14px', borderRadius: '12px' }}>
+                  <div>
+                    <div style={{ fontSize: '0.875rem', fontWeight: 700, color: '#0f172a' }}>{currentUser.name}</div>
+                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{currentUser.phone || currentUser.email}</div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <Link
+                      href="/cart"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      style={{ fontSize: '0.75rem', fontWeight: 600, color: '#0f172a', textDecoration: 'none', backgroundColor: '#ffffff', border: '1px solid #e2e8f0', padding: '5px 10px', borderRadius: '8px' }}
+                    >
+                      Orders
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        logoutUser();
+                      }}
+                      style={{ fontSize: '0.75rem', fontWeight: 600, color: '#ef4444', backgroundColor: '#ffffff', border: '1px solid #fecaca', padding: '5px 10px', borderRadius: '8px', cursor: 'pointer' }}
+                    >
+                      Logout
+                    </button>
+                  </div>
+                </div>
+              ) : (currentAdmin || (pathname && pathname.startsWith('/admin'))) ? (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#f8fafc', padding: '10px 14px', borderRadius: '12px' }}>
+                  <div>
+                    <div style={{ fontSize: '0.875rem', fontWeight: 700, color: '#0f172a' }}>{currentAdmin?.name || 'Ganesh Shende'} (Admin)</div>
+                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{currentAdmin?.email || 'admin@sgwwsp.com'}</div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      handleAdminLogout();
+                    }}
+                    style={{ fontSize: '0.75rem', fontWeight: 600, color: '#ef4444', backgroundColor: '#ffffff', border: '1px solid #fecaca', padding: '5px 10px', borderRadius: '8px', cursor: 'pointer' }}
+                  >
+                    Logout
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    setIsAuthModalOpen(true);
+                  }}
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    backgroundColor: '#000000',
+                    color: '#ffffff',
+                    padding: '11px',
+                    borderRadius: '12px',
+                    fontSize: '0.875rem',
+                    fontWeight: 600,
+                    border: 'none',
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                  }}
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg>
+                  <span>Login / Register Account</span>
+                </button>
+              )}
+            </div>
+
             {/* Quick Mobile Track Order by ID */}
             <form
               onSubmit={(e) => handleTrackSubmit(e)}

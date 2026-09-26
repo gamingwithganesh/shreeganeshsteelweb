@@ -150,16 +150,16 @@ h6 {
   max-width: 1240px;
   margin-left: auto;
   margin-right: auto;
-  padding-left: 1.5rem;
-  padding-right: 1.5rem;
+  padding-left: 1.125rem;
+  padding-right: 1.125rem;
   width: 100%;
   box-sizing: border-box;
 }
 
 @media (min-width: 640px) {
   .container-custom {
-    padding-left: 2rem;
-    padding-right: 2rem;
+    padding-left: 1.75rem;
+    padding-right: 1.75rem;
   }
 }
 
