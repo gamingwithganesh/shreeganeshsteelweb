@@ -496,8 +496,8 @@ export default function PaymentModal({ isOpen, onClose, onOrderPlacedSuccess }: 
             <div style={{ display: 'flex', gap: '8px', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.75rem', marginBottom: '1.5rem' }}>
               {[
                 { id: 'upi', label: 'UPI & QR Code' },
-                { id: 'bank_transfer', label: 'Bank Transfer (NEFT)' },
-                { id: 'card', label: 'Credit / Debit Card' },
+                // { id: 'bank_transfer', label: 'Bank Transfer (NEFT)' }, // temporarily hidden
+                // { id: 'card', label: 'Credit / Debit Card' }, // temporarily hidden
                 { id: 'advance_token', label: 'Cash at Site' },
               ].map((tab) => (
                 <button
