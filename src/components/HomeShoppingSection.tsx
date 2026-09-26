@@ -373,6 +373,7 @@ export default function HomeShoppingSection() {
                 boxShadow: '0 4px 20px -5px rgba(0, 0, 0, 0.04)',
                 transition: 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease',
                 position: 'relative',
+                minWidth: 0,
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-6px)';
@@ -570,6 +571,7 @@ export default function HomeShoppingSection() {
                     paddingTop: '1.25rem',
                     borderTop: '1px solid #f1f5f9',
                     gap: '12px',
+                    flexWrap: 'wrap',
                   }}
                 >
                   <div>
@@ -585,7 +587,7 @@ export default function HomeShoppingSection() {
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
                     <Link
                       href={`/shop/${prod.id}`}
                       style={{

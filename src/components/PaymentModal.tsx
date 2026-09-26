@@ -28,6 +28,7 @@ export default function PaymentModal({ isOpen, onClose, onOrderPlacedSuccess }: 
   const [isCompressingScreenshot, setIsCompressingScreenshot] = useState(false);
   const [transactionRef, setTransactionRef] = useState('');
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
+  const [toastError, setToastError] = useState('');
 
   // Card input states
   const [cardNumber, setCardNumber] = useState('');
@@ -156,6 +157,13 @@ export default function PaymentModal({ isOpen, onClose, onOrderPlacedSuccess }: 
   };
 
   const handleConfirmPayment = () => {
+    // Block if payment proof is required but not uploaded
+    if ((paymentMethod === 'upi' || paymentMethod === 'bank_transfer') && !paymentScreenshot) {
+      setToastError('Please upload your payment screenshot/proof before confirming the order.');
+      setTimeout(() => setToastError(''), 4000);
+      return;
+    }
+
     setProcessing(true);
 
     setTimeout(() => {
@@ -517,32 +525,22 @@ export default function PaymentModal({ isOpen, onClose, onOrderPlacedSuccess }: 
                 <div
                   style={{
                     display: 'inline-block',
-                    padding: '1.25rem',
+                    padding: '1rem',
                     backgroundColor: '#ffffff',
-                    border: '2px dashed #000000',
+                    border: '2px solid #000000',
                     borderRadius: '16px',
                     marginBottom: '1rem',
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
                   }}
                 >
-                  {/* Dynamic SVG QR code */}
-                  <svg width="180" height="180" viewBox="0 0 100 100" fill="black">
-                    <path d="M0,0 h30 v30 h-30 z M5,5 v20 h20 v-20 z M10,10 h10 v10 h-10 z" />
-                    <path d="M70,0 h30 v30 h-30 z M75,5 v20 h20 v-20 z M80,10 h10 v10 h-10 z" />
-                    <path d="M0,70 h30 v30 h-30 z M5,75 v20 h20 v-20 z M10,80 h10 v10 h-10 z" />
-                    <rect x="40" y="10" width="8" height="8" />
-                    <rect x="52" y="10" width="8" height="8" />
-                    <rect x="40" y="24" width="20" height="8" />
-                    <rect x="10" y="40" width="10" height="15" />
-                    <rect x="25" y="40" width="8" height="8" />
-                    <rect x="40" y="40" width="12" height="12" fill="#000000" />
-                    <rect x="60" y="40" width="8" height="20" />
-                    <rect x="75" y="40" width="15" height="8" />
-                    <rect x="40" y="60" width="10" height="10" />
-                    <rect x="60" y="70" width="15" height="10" />
-                    <rect x="70" y="85" width="20" height="10" />
-                    <rect x="40" y="80" width="8" height="15" />
-                  </svg>
-                  <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '6px' }}>Scan with GPay / PhonePe / Paytm</div>
+                  {/* Real UPI QR Code */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/images/ganesh_upi_qr.png"
+                    alt="Scan to Pay – Shree Ganesh Steel & Welding Workshop UPI"
+                    style={{ width: '200px', height: '200px', objectFit: 'contain', display: 'block' }}
+                  />
+                  <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '8px' }}>Scan with GPay / PhonePe / Paytm</div>
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '1rem' }}>
@@ -634,6 +632,7 @@ export default function PaymentModal({ isOpen, onClose, onOrderPlacedSuccess }: 
                     <span style={{ fontWeight: 800, fontSize: '0.9rem', color: '#0f172a' }}>
                       Upload Payment Proof / Transfer Screenshot
                     </span>
+                    <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#dc2626', background: '#fef2f2', padding: '2px 7px', borderRadius: '5px', border: '1px solid #fecaca' }}>Required</span>
                   </div>
                   <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b', background: '#f1f5f9', padding: '2px 8px', borderRadius: '6px' }}>
                     For Quick Admin Verification
@@ -846,6 +845,32 @@ export default function PaymentModal({ isOpen, onClose, onOrderPlacedSuccess }: 
                 <p style={{ color: '#b45309', fontSize: '0.825rem', lineHeight: 1.5, marginTop: '4px' }}>
                   Book your fabrication order now. Our site engineer will visit your project site in {projectSiteInfo.city || 'Vidarbha'} to take final laser dimensions, collect the advance token in cash, and issue an official physical receipt.
                 </p>
+              </div>
+            )}
+
+            {/* Toast Error */}
+            {toastError && (
+              <div
+                style={{
+                  backgroundColor: '#fef2f2',
+                  border: '1px solid #fecaca',
+                  borderRadius: '10px',
+                  padding: '10px 16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  marginBottom: '1rem',
+                  color: '#dc2626',
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="12" />
+                  <line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
+                {toastError}
               </div>
             )}
 

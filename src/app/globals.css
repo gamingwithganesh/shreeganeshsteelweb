@@ -749,6 +749,11 @@ h6 {
   gap: 2rem;
 }
 
+.home-products-desktop-grid > * {
+  min-width: 0;
+  box-sizing: border-box;
+}
+
 .home-products-mobile-grid {
   display: none;
 }

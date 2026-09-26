@@ -7,7 +7,7 @@ import { VIDARBHA_CITIES } from '@/context/CartContext';
 import ConfirmWipeModal from './ConfirmWipeModal';
 
 export default function OrdersTab() {
-  const { orders, updateOrderStatus, wipeAllAppData, seedSampleData, addOrder } = useAdmin();
+  const { orders, updateOrderStatus, deleteOrder, updateOrder, wipeAllAppData, seedSampleData, addOrder } = useAdmin();
 
   // Filters & search
   const [searchTerm, setSearchTerm] = useState('');
@@ -15,6 +15,13 @@ export default function OrdersTab() {
   const [toastMsg, setToastMsg] = useState('');
   const [isWipeModalOpen, setIsWipeModalOpen] = useState(false);
   const [isWiping, setIsWiping] = useState(false);
+
+  // Delete confirmation
+  const [deletingOrderId, setDeletingOrderId] = useState<string | null>(null);
+
+  // Edit Order Modal State
+  const [editingOrder, setEditingOrder] = useState<Order | null>(null);
+  const [editForm, setEditForm] = useState<Partial<Order>>({});
 
   const handleConfirmWipe = async () => {
     setIsWiping(true);
@@ -193,6 +200,48 @@ export default function OrdersTab() {
       delivered: 'Delivered / Picked Up Done',
     };
     setToastMsg(`Order updated to: ${labelMap[newStatus] || newStatus}`);
+    setTimeout(() => setToastMsg(''), 3000);
+  };
+
+  const handleDeleteOrder = (orderId: string) => {
+    deleteOrder(orderId);
+    setDeletingOrderId(null);
+    setToastMsg('Order deleted successfully.');
+    setTimeout(() => setToastMsg(''), 3000);
+  };
+
+  const handleOpenEdit = (order: Order) => {
+    setEditingOrder(order);
+    setEditForm({
+      clientName: order.clientName,
+      clientPhone: order.clientPhone,
+      clientEmail: order.clientEmail,
+      serviceCategory: order.serviceCategory,
+      city: order.city,
+      siteAddress: order.siteAddress,
+      amount: order.amount,
+      advancePaid: order.advancePaid,
+      balanceDue: order.balanceDue,
+      notes: order.notes,
+      material: order.material,
+      dimensions: order.dimensions,
+    });
+  };
+
+  const handleEditSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingOrder) return;
+    const totalAmt = Number(editForm.amount) || 0;
+    const advPaid = Math.min(Number(editForm.advancePaid) || 0, totalAmt);
+    updateOrder(editingOrder.id, {
+      ...editForm,
+      amount: totalAmt,
+      advancePaid: advPaid,
+      balanceDue: Math.max(0, totalAmt - advPaid),
+    });
+    setEditingOrder(null);
+    setEditForm({});
+    setToastMsg('Order updated successfully.');
     setTimeout(() => setToastMsg(''), 3000);
   };
 
@@ -484,7 +533,7 @@ export default function OrdersTab() {
                     </span>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                     <span style={{ fontSize: '0.75rem', color: '#71717a', fontWeight: 600 }}>Status:</span>
                     <select
                       value={toSimpleStatus(order.status)}
@@ -508,6 +557,85 @@ export default function OrdersTab() {
                       <option value="out_for_delivery">5. Out for Delivery / Ready to Pick Up</option>
                       <option value="delivered">6. Delivered / Picked Up Done</option>
                     </select>
+
+                    {/* Edit Button */}
+                    <button
+                      type="button"
+                      onClick={() => handleOpenEdit(order)}
+                      title="Edit Order"
+                      style={{
+                        padding: '5px 10px',
+                        borderRadius: '6px',
+                        border: '1px solid #e4e4e7',
+                        backgroundColor: '#ffffff',
+                        color: '#09090b',
+                        fontSize: '0.74rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                      }}
+                    >
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                      </svg>
+                      Edit
+                    </button>
+
+                    {/* Delete Button or Confirm */}
+                    {deletingOrderId === order.id ? (
+                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '4px 8px', borderRadius: '6px', border: '1px solid #fecdd3', backgroundColor: '#fff1f2' }}>
+                        <span style={{ fontSize: '0.72rem', fontWeight: 600, color: '#9f1239' }}>Confirm delete?</span>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteOrder(order.id)}
+                          style={{
+                            padding: '2px 8px', borderRadius: '4px', border: 'none',
+                            backgroundColor: '#e11d48', color: '#ffffff', fontSize: '0.72rem',
+                            fontWeight: 700, cursor: 'pointer',
+                          }}
+                        >Yes, Delete</button>
+                        <button
+                          type="button"
+                          onClick={() => setDeletingOrderId(null)}
+                          style={{
+                            padding: '2px 8px', borderRadius: '4px', border: '1px solid #e4e4e7',
+                            backgroundColor: '#ffffff', color: '#71717a', fontSize: '0.72rem',
+                            fontWeight: 600, cursor: 'pointer',
+                          }}
+                        >Cancel</button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setDeletingOrderId(order.id)}
+                        title="Delete Order"
+                        style={{
+                          padding: '5px 10px',
+                          borderRadius: '6px',
+                          border: '1px solid #fecdd3',
+                          backgroundColor: '#fff1f2',
+                          color: '#e11d48',
+                          fontSize: '0.74rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '5px',
+                        }}
+                      >
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="3 6 5 6 21 6" />
+                          <path d="M19 6l-1 14H6L5 6" />
+                          <path d="M10 11v6" />
+                          <path d="M14 11v6" />
+                          <path d="M9 6V4h6v2" />
+                        </svg>
+                        Delete
+                      </button>
+                    )}
                   </div>
                 </div>
 
@@ -821,6 +949,152 @@ export default function OrdersTab() {
           })
         )}
       </div>
+
+      {/* Edit Order Modal */}
+      {editingOrder && (
+        <div
+          style={{
+            position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.55)',
+            backdropFilter: 'blur(4px)', zIndex: 4000,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px',
+          }}
+          onClick={() => setEditingOrder(null)}
+        >
+          <div
+            style={{
+              backgroundColor: '#ffffff', borderRadius: '20px', border: '1px solid #e4e4e7',
+              width: '100%', maxWidth: '560px', maxHeight: '90vh', overflowY: 'auto',
+              boxShadow: '0 25px 50px -12px rgba(0,0,0,0.35)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div style={{ padding: '18px 24px', borderBottom: '1px solid #f4f4f5', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <div style={{ fontWeight: 800, fontSize: '1rem', color: '#09090b' }}>Edit Order</div>
+                <div style={{ fontSize: '0.78rem', color: '#71717a', marginTop: '2px', fontFamily: 'monospace' }}>{editingOrder.orderNumber}</div>
+              </div>
+              <button type="button" onClick={() => setEditingOrder(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#71717a', fontSize: '1.1rem' }}>✕</button>
+            </div>
+
+            {/* Edit Form */}
+            <form onSubmit={handleEditSubmit} style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#52525b', marginBottom: '4px' }}>Client Name *</label>
+                  <input
+                    type="text" required
+                    value={editForm.clientName || ''}
+                    onChange={(e) => setEditForm({ ...editForm, clientName: e.target.value })}
+                    style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid #e4e4e7', fontSize: '0.85rem', outline: 'none' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#52525b', marginBottom: '4px' }}>Phone *</label>
+                  <input
+                    type="text" required
+                    value={editForm.clientPhone || ''}
+                    onChange={(e) => setEditForm({ ...editForm, clientPhone: e.target.value })}
+                    style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid #e4e4e7', fontSize: '0.85rem', outline: 'none' }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#52525b', marginBottom: '4px' }}>Email</label>
+                <input
+                  type="email"
+                  value={editForm.clientEmail || ''}
+                  onChange={(e) => setEditForm({ ...editForm, clientEmail: e.target.value })}
+                  style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid #e4e4e7', fontSize: '0.85rem', outline: 'none' }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#52525b', marginBottom: '4px' }}>Service / Category</label>
+                  <input
+                    type="text"
+                    value={editForm.serviceCategory || ''}
+                    onChange={(e) => setEditForm({ ...editForm, serviceCategory: e.target.value })}
+                    style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid #e4e4e7', fontSize: '0.85rem', outline: 'none' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#52525b', marginBottom: '4px' }}>City</label>
+                  <input
+                    type="text"
+                    value={editForm.city || ''}
+                    onChange={(e) => setEditForm({ ...editForm, city: e.target.value })}
+                    style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid #e4e4e7', fontSize: '0.85rem', outline: 'none' }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#52525b', marginBottom: '4px' }}>Site Address</label>
+                <input
+                  type="text"
+                  value={editForm.siteAddress || ''}
+                  onChange={(e) => setEditForm({ ...editForm, siteAddress: e.target.value })}
+                  style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid #e4e4e7', fontSize: '0.85rem', outline: 'none' }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#52525b', marginBottom: '4px' }}>Total Amount (₹)</label>
+                  <input
+                    type="number" min={0}
+                    value={editForm.amount ?? ''}
+                    onChange={(e) => setEditForm({ ...editForm, amount: Number(e.target.value) })}
+                    style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid #e4e4e7', fontSize: '0.85rem', outline: 'none' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#52525b', marginBottom: '4px' }}>Advance Paid (₹)</label>
+                  <input
+                    type="number" min={0}
+                    value={editForm.advancePaid ?? ''}
+                    onChange={(e) => setEditForm({ ...editForm, advancePaid: Number(e.target.value) })}
+                    style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid #e4e4e7', fontSize: '0.85rem', outline: 'none' }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#52525b', marginBottom: '4px' }}>Notes</label>
+                <textarea
+                  rows={2}
+                  value={editForm.notes || ''}
+                  onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })}
+                  style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1px solid #e4e4e7', fontSize: '0.85rem', resize: 'vertical', outline: 'none' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', paddingTop: '6px' }}>
+                <button
+                  type="button"
+                  onClick={() => setEditingOrder(null)}
+                  style={{
+                    padding: '9px 18px', borderRadius: '8px', border: '1px solid #e4e4e7',
+                    backgroundColor: '#ffffff', color: '#52525b', fontSize: '0.85rem',
+                    fontWeight: 600, cursor: 'pointer',
+                  }}
+                >Cancel</button>
+                <button
+                  type="submit"
+                  style={{
+                    padding: '9px 20px', borderRadius: '8px', border: 'none',
+                    backgroundColor: '#09090b', color: '#ffffff', fontSize: '0.85rem',
+                    fontWeight: 700, cursor: 'pointer',
+                  }}
+                >Save Changes</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Proof Lightbox Modal */}
       {inspectingProof && (
