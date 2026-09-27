@@ -348,7 +348,7 @@ export default function ProductsTab() {
         }}
       >
         {/* Category Pills */}
-        <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '4px' }}>
+        <div className="admin-tab-scroll" style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '4px' }}>
           {categories.map((cat) => {
             const isCatActive = selectedCategory === cat;
             const count = cat === 'all' ? products.length : products.filter((p) => p.category === cat).length;
@@ -870,7 +870,7 @@ export default function ProductsTab() {
                 </select>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+              <div className="admin-form-grid-2">
                 <div>
                   <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#09090b', marginBottom: '4px' }}>
                     Pricing Model
@@ -1233,7 +1233,7 @@ export default function ProductsTab() {
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+              <div className="admin-form-grid-2">
                 <div>
                   <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#09090b', marginBottom: '4px' }}>
                     Pricing Model

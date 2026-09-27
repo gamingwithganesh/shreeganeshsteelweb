@@ -784,3 +784,120 @@ h6 {
     transform: scale(0.98);
   }
 }
+
+/* ==========================================================================
+   ADMIN PANEL RESPONSIVE STYLES (Smartphones, iPads & Tablets)
+   ========================================================================== */
+
+.admin-layout-wrapper {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.admin-sidebar-desktop {
+  display: flex;
+  flex-direction: column;
+  width: 240px;
+  flex-shrink: 0;
+  background-color: #09090b;
+  border-radius: 16px;
+  padding: 20px 14px;
+  min-height: 760px;
+  border: 1px solid #27272a;
+  position: sticky;
+  top: 24px;
+}
+
+.admin-topbar-mobile {
+  display: none;
+}
+
+.admin-main-content {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+}
+
+/* Horizontal scroll container with hidden scrollbars for clean touch feel */
+.admin-tab-scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 2px 0;
+}
+
+.admin-tab-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Form grid responsive helpers */
+.admin-form-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.admin-form-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+/* Responsive breakpoint for Tablets & iPads (<= 1024px) */
+@media (max-width: 1024px) {
+  .admin-layout-wrapper {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+
+  .admin-sidebar-desktop {
+    display: none !important;
+  }
+
+  .admin-topbar-mobile {
+    display: flex !important;
+    flex-direction: column;
+    background-color: #09090b;
+    border-radius: 16px;
+    padding: 14px 16px;
+    border: 1px solid #27272a;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    width: 100%;
+    margin-bottom: 8px;
+  }
+
+  .admin-form-grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Responsive breakpoint for Mobile Smartphones (<= 640px) */
+@media (max-width: 640px) {
+  .admin-form-grid-2,
+  .admin-form-grid-3 {
+    grid-template-columns: 1fr !important;
+  }
+
+  .admin-header-responsive {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+
+  .admin-header-responsive-actions {
+    width: 100% !important;
+    justify-content: flex-start !important;
+    flex-wrap: wrap !important;
+  }
+
+  .admin-card-compact {
+    padding: 14px !important;
+    border-radius: 14px !important;
+  }
+}

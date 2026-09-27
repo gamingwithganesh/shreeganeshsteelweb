@@ -156,7 +156,7 @@ export default function SettingsTab() {
             </label>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '12px', marginBottom: '12px' }}>
+          <div className="admin-form-grid-2" style={{ marginBottom: '12px' }}>
             <div>
               <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#71717a', marginBottom: '4px' }}>
                 Banner Text
@@ -198,7 +198,7 @@ export default function SettingsTab() {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+          <div className="admin-form-grid-2">
             <div>
               <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#71717a', marginBottom: '4px' }}>
                 Coupon Code
@@ -254,7 +254,7 @@ export default function SettingsTab() {
             Featured Hero Cards
           </h2>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '14px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 250px), 1fr))', gap: '14px' }}>
             {formSettings.promoCards.map((card, idx) => (
               <div
                 key={card.id || idx}

@@ -433,7 +433,7 @@ export default function OrdersTab() {
         </div>
 
         {/* Filter Pills */}
-        <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', alignItems: 'center' }}>
+        <div className="admin-tab-scroll" style={{ display: 'flex', gap: '6px', overflowX: 'auto', alignItems: 'center' }}>
           {[
             { id: 'all', label: 'All' },
             { id: 'order_confirmed', label: 'Order Confirmed' },
@@ -643,8 +643,8 @@ export default function OrdersTab() {
                 <div
                   style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-                    gap: '14px',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 140px), 1fr))',
+                    gap: '12px',
                   }}
                 >
                   {/* Client */}
@@ -979,7 +979,7 @@ export default function OrdersTab() {
 
             {/* Edit Form */}
             <form onSubmit={handleEditSubmit} style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div className="admin-form-grid-2">
                 <div>
                   <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#52525b', marginBottom: '4px' }}>Client Name *</label>
                   <input
@@ -1010,7 +1010,7 @@ export default function OrdersTab() {
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div className="admin-form-grid-2">
                 <div>
                   <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#52525b', marginBottom: '4px' }}>Service / Category</label>
                   <input
@@ -1041,7 +1041,7 @@ export default function OrdersTab() {
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div className="admin-form-grid-2">
                 <div>
                   <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#52525b', marginBottom: '4px' }}>Total Amount (₹)</label>
                   <input

@@ -65,13 +65,13 @@ function AdminDashboardContent() {
         </div>
       )}
 
-      <div className="container-custom" style={{ maxWidth: '1440px' }}>
-        <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-start' }}>
-          {/* Left Dark Sidebar Card */}
+      <div className="container-custom" style={{ maxWidth: '1440px', padding: '0 12px' }}>
+        <div className="admin-layout-wrapper">
+          {/* Left Dark Sidebar Card (Desktop) + Mobile Topbar (Tablet & Mobile) */}
           <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
           {/* Right Main Content Area */}
-          <main style={{ flex: 1, minWidth: 0 }}>
+          <main className="admin-main-content">
             {activeTab === 'overview' && (
               <OverviewDashboardTab onNavigateTab={(tab) => setActiveTab(tab)} />
             )}

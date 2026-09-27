@@ -169,8 +169,8 @@ export default function OverviewDashboardTab({ onNavigateTab }: OverviewDashboar
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-          gap: '16px',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 250px), 1fr))',
+          gap: '14px',
         }}
       >
         {/* Card 1: TOTAL SALES REVENUE */}
