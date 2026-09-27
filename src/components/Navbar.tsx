@@ -711,23 +711,72 @@ export default function Navbar() {
                       position: 'absolute',
                       top: 'calc(100% + 8px)',
                       right: 0,
-                      width: '200px',
+                      width: '220px',
                       backgroundColor: '#ffffff',
                       borderRadius: '14px',
                       border: '1px solid rgba(0, 0, 0, 0.08)',
                       boxShadow: '0 20px 35px -10px rgba(0, 0, 0, 0.15)',
-                      padding: '8px',
+                      padding: '10px',
                       zIndex: 150,
                     }}
                   >
-                    <div style={{ padding: '6px 10px', borderBottom: '1px solid #f1f5f9' }}>
-                      <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#0f172a' }}>{currentAdmin?.name || 'Ganesh Shende'}</div>
+                    <div style={{ padding: '6px 10px', borderBottom: '1px solid #f1f5f9', marginBottom: '6px' }}>
+                      <div style={{ fontSize: '0.825rem', fontWeight: 700, color: '#0f172a' }}>{currentAdmin?.name || 'Ganesh Shende'}</div>
                       <div style={{ fontSize: '0.7rem', color: '#64748b' }}>{currentAdmin?.email || 'ganeshb.shende0@gmail.com'}</div>
+                      <span style={{ display: 'inline-block', fontSize: '0.65rem', fontWeight: 700, backgroundColor: '#f1f5f9', color: '#09090b', padding: '1px 6px', borderRadius: '4px', marginTop: '3px' }}>
+                        Workshop Admin
+                      </span>
                     </div>
+
+                    {/* Primary Button: Open Admin Panel */}
+                    <Link
+                      href="/admin"
+                      onClick={() => setIsUserMenuOpen(false)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: '8px',
+                        padding: '8px 10px',
+                        fontSize: '0.825rem',
+                        fontWeight: 700,
+                        color: '#ffffff',
+                        backgroundColor: '#000000',
+                        textDecoration: 'none',
+                        borderRadius: '8px',
+                        marginBottom: '4px',
+                        transition: 'background 0.15s ease',
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#18181b')}
+                      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#000000')}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                          <rect x="3" y="3" width="7" height="7" rx="1.5" />
+                          <rect x="14" y="3" width="7" height="7" rx="1.5" />
+                          <rect x="14" y="14" width="7" height="7" rx="1.5" />
+                          <rect x="3" y="14" width="7" height="7" rx="1.5" />
+                        </svg>
+                        <span>Admin Panel</span>
+                      </div>
+                      <span style={{ fontSize: '0.75rem' }}>→</span>
+                    </Link>
+
                     <Link
                       href="/"
                       onClick={() => setIsUserMenuOpen(false)}
-                      style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '7px 10px', fontSize: '0.825rem', color: '#334155', textDecoration: 'none', borderRadius: '6px', marginTop: '4px' }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '7px 10px',
+                        fontSize: '0.825rem',
+                        fontWeight: 500,
+                        color: '#334155',
+                        textDecoration: 'none',
+                        borderRadius: '8px',
+                        transition: 'background 0.15s ease',
+                      }}
                       onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f8fafc')}
                       onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                     >
@@ -735,17 +784,41 @@ export default function Navbar() {
                         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
                         <polyline points="9 22 9 12 15 12 15 22" />
                       </svg>
-                      <span>Storefront</span>
+                      <span>Storefront Home</span>
                     </Link>
+
                     <button
                       type="button"
                       onClick={() => {
                         setIsUserMenuOpen(false);
                         handleAdminLogout();
                       }}
-                      style={{ width: '100%', display: 'block', padding: '7px 10px', fontSize: '0.825rem', color: '#ef4444', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', borderTop: '1px solid #f1f5f9', marginTop: '4px' }}
+                      style={{
+                        width: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '7px 10px',
+                        fontSize: '0.825rem',
+                        fontWeight: 600,
+                        color: '#ef4444',
+                        background: 'transparent',
+                        border: 'none',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        borderTop: '1px solid #f1f5f9',
+                        marginTop: '4px',
+                        borderRadius: '6px',
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#fef2f2')}
+                      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                     >
-                      Logout
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                        <polyline points="16 17 21 12 16 7" />
+                        <line x1="21" y1="12" x2="9" y2="12" />
+                      </svg>
+                      <span>Logout</span>
                     </button>
                   </div>
                 )}
@@ -862,21 +935,50 @@ export default function Navbar() {
                   </div>
                 </div>
               ) : (currentAdmin || (pathname && pathname.startsWith('/admin'))) ? (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#f8fafc', padding: '10px 14px', borderRadius: '12px' }}>
-                  <div>
-                    <div style={{ fontSize: '0.875rem', fontWeight: 700, color: '#0f172a' }}>{currentAdmin?.name || 'Ganesh Shende'} (Admin)</div>
-                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{currentAdmin?.email || 'admin@sgwwsp.com'}</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', backgroundColor: '#f8fafc', padding: '12px 14px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div>
+                      <div style={{ fontSize: '0.875rem', fontWeight: 700, color: '#0f172a' }}>{currentAdmin?.name || 'Ganesh Shende'} (Admin)</div>
+                      <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{currentAdmin?.email || 'ganeshb.shende0@gmail.com'}</div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        handleAdminLogout();
+                      }}
+                      style={{ fontSize: '0.75rem', fontWeight: 600, color: '#ef4444', backgroundColor: '#ffffff', border: '1px solid #fecaca', padding: '5px 10px', borderRadius: '8px', cursor: 'pointer' }}
+                    >
+                      Logout
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      handleAdminLogout();
+
+                  <Link
+                    href="/admin"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      backgroundColor: '#000000',
+                      color: '#ffffff',
+                      padding: '10px 14px',
+                      borderRadius: '10px',
+                      fontSize: '0.85rem',
+                      fontWeight: 700,
+                      textDecoration: 'none',
                     }}
-                    style={{ fontSize: '0.75rem', fontWeight: 600, color: '#ef4444', backgroundColor: '#ffffff', border: '1px solid #fecaca', padding: '5px 10px', borderRadius: '8px', cursor: 'pointer' }}
                   >
-                    Logout
-                  </button>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="3" width="7" height="7" rx="1.5" />
+                      <rect x="14" y="3" width="7" height="7" rx="1.5" />
+                      <rect x="14" y="14" width="7" height="7" rx="1.5" />
+                      <rect x="3" y="14" width="7" height="7" rx="1.5" />
+                    </svg>
+                    <span>Open Admin Panel</span>
+                    <span>→</span>
+                  </Link>
                 </div>
               ) : (
                 <button
