@@ -5,8 +5,15 @@ import type { Metadata } from 'next';
 import { ThreeDFactory, ThreeDClock, ThreeDStar } from '@/components/ThreeDIcons';
 
 export const metadata: Metadata = {
-  title: 'About Our Workshop | Shree Ganesh Steel and Welding Workshop',
-  description: 'Learn about our 25+ years of steel craftsmanship, master welders, 8,500 sq.ft fabrication facility, and ISO-standard metallurgical quality.',
+  title: 'About Shree Ganesh Steel & Welding Workshop | 25+ Years Experience in Ghatanji & Vidarbha',
+  description:
+    'Learn about Shree Ganesh Steel and Welding Workshop (Shri Ganesh Welding Workshop) - 25+ years of master fabrication in Ghatanji, Yavatmal, Nagpur & Vidarbha. ISO-certified steel craftsmanship.',
+  keywords: [
+    'about shree ganesh steel',
+    'shri ganesh welding workshop ghatanji',
+    'steel fabrication history yavatmal',
+    'master welders vidarbha',
+  ],
 };
 
 export default function AboutPage() {

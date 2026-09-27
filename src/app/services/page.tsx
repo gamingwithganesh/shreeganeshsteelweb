@@ -6,8 +6,17 @@ import { IconCheck, IconPhone, IconMicrophone, IconBolt } from '@/components/Ico
 import { ThreeDClock, ThreeDMicroscope, ThreeDShield, ThreeDRuler, ThreeDTruck, ThreeDBolt, ThreeDFactory } from '@/components/ThreeDIcons';
 
 export const metadata: Metadata = {
-  title: 'Fabrication & Welding Services | Shree Ganesh Steel Workshop',
-  description: 'Full-spectrum metal fabrication: architectural iron gates, stainless steel railings, industrial PEB sheds, CNC laser cutting, and mobile emergency welding.',
+  title: 'Steel Fabrication & Welding Services in Vidarbha | Ghatanji, Yavatmal, Nagpur',
+  description:
+    'Full-spectrum custom steel fabrication & certified welding services in Ghatanji, Yavatmal, Pandharkawada, Nagpur, Wardha, Akola. Architectural laser cut gates, SS railings, PEB industrial sheds, and mobile welding repairs.',
+  keywords: [
+    'steel fabrication services ghatanji',
+    'welding services yavatmal',
+    'metal workshop nagpur',
+    'peb shed fabrication wardha',
+    'stainless steel railing akola',
+    'laser cutting services vidarbha',
+  ],
 };
 
 export default function ServicesPage() {

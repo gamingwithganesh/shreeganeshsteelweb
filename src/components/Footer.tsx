@@ -237,9 +237,43 @@ export default function Footer() {
         </div>
 
         {/* ========================================================
-            2. Monumental Giant Wordmark matching Reference Screenshot:
-               'Shree Ganesh Steel' spanning full width edge-to-edge
+            Local SEO Keyword Hub & Regional Service Coverage
            ======================================================== */}
+        <div
+          style={{
+            borderTop: '1px solid rgba(0, 0, 0, 0.06)',
+            padding: '2rem 0 1rem',
+            marginTop: '1.5rem',
+            fontSize: '0.8rem',
+            color: '#64748b',
+            lineHeight: 1.7,
+          }}
+        >
+          <div style={{ marginBottom: '1.25rem' }}>
+            <h3 style={{ fontSize: '0.875rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Vidarbha &amp; Maharashtra Fabrication Service Hubs
+            </h3>
+            <p style={{ margin: 0 }}>
+              <strong>Direct Workshop Supply &amp; On-Site Steel Installation in:</strong>{' '}
+              <span>Ghatanji</span> • <span>Yavatmal</span> • <span>Pandharkawada (Kelapur)</span> • <span>Nagpur</span> • <span>Wardha</span> • <span>Akola</span> • <span>Amravati</span> • <span>Pusad</span> • <span>Chandrapur</span> • <span>Wani</span> • <span>Hinganghat</span> • <span>Digras</span> • <span>Darwha</span> • <span>Umarkhed</span> • <span>Ralegaon</span> • <span>Arni</span>.
+            </p>
+          </div>
+
+          <div>
+            <h3 style={{ fontSize: '0.875rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Popular Steel Fabrication &amp; Welding Specializations
+            </h3>
+            <p style={{ margin: 0 }}>
+              <strong>Shree Ganesh Steel and Welding Workshop (Shri Ganesh Welding Works Shop):</strong>{' '}
+              Custom CNC Laser Cut Main Gates • Stainless Steel SS 304 Railings • Heavy Industrial PEB Sheds &amp; Warehouses • Commercial Glass &amp; Steel Facades • Agricultural Cultivators, Trolleys &amp; Ploughs • Structural Steel Trusses • Automatic Sliding Gates • Precision Metal Blueprint Fabrication.
+            </p>
+          </div>
+        </div>
+
+        {/* ========================================================
+            2. Monumental Giant Wordmark matching Reference Screenshot:
+                'Shree Ganesh Steel' spanning full width edge-to-edge
+            ======================================================== */}
         <div
           style={{
             padding: 'clamp(2rem, 4vw, 3rem) 0 clamp(1.5rem, 3vw, 2.5rem) 0',
