@@ -211,9 +211,114 @@ export default function HomeShoppingSection() {
           </div>
         </div>
 
-        {/* MOBILE VIEW (< 768px): 2-Column E-Commerce Grid (Flipkart Style matching user reference) */}
-        <div className="home-products-mobile-grid">
-          {filteredProducts.map((prod) => {
+        {filteredProducts.length === 0 ? (
+          <div
+            style={{
+              backgroundColor: '#fafafa',
+              borderRadius: '24px',
+              border: '1px dashed #cbd5e1',
+              padding: 'clamp(2.5rem, 6vw, 4.5rem) 1.5rem',
+              textAlign: 'center',
+              maxWidth: '640px',
+              margin: '0 auto',
+            }}
+          >
+            {/* Empty Basket Icon */}
+            <div
+              style={{
+                width: '76px',
+                height: '76px',
+                borderRadius: '50%',
+                backgroundColor: '#ffffff',
+                border: '1px solid #e2e8f0',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 1.25rem auto',
+                boxShadow: '0 4px 14px rgba(0, 0, 0, 0.04)',
+              }}
+            >
+              <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 7h16l-1.5 12.5a2 2 0 0 1-2 1.5H7.5a2 2 0 0 1-2-1.5L4 7z" />
+                <path d="M9 7V4a3 3 0 0 1 6 0v3" />
+                <line x1="9" y1="11" x2="9" y2="15" />
+                <line x1="15" y1="11" x2="15" y2="15" />
+                <line x1="12" y1="11" x2="12" y2="15" />
+              </svg>
+            </div>
+
+            <h3
+              className="font-display"
+              style={{
+                fontSize: 'clamp(1.2rem, 3vw, 1.45rem)',
+                fontWeight: 700,
+                color: '#0f172a',
+                marginBottom: '0.6rem',
+                letterSpacing: '-0.02em',
+              }}
+            >
+              Catalog Is Currently Empty
+            </h3>
+
+            <p
+              style={{
+                color: '#64748b',
+                fontSize: '0.925rem',
+                lineHeight: 1.6,
+                maxWidth: '460px',
+                margin: '0 auto 1.75rem auto',
+              }}
+            >
+              {activeSector !== 'all'
+                ? 'No fabrications found in this category. Switch back to all categories or submit your custom requirement.'
+                : 'All products have been cleared or our engineering team is currently updating workshop inventory. You can request custom steel fabrication directly.'}
+            </p>
+
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
+              {activeSector !== 'all' && (
+                <button
+                  type="button"
+                  onClick={() => setActiveSector('all')}
+                  style={{
+                    padding: '0.75rem 1.4rem',
+                    borderRadius: '9999px',
+                    border: '1px solid #cbd5e1',
+                    backgroundColor: '#ffffff',
+                    color: '#0f172a',
+                    fontWeight: 600,
+                    fontSize: '0.875rem',
+                    cursor: 'pointer',
+                  }}
+                >
+                  View All Categories
+                </button>
+              )}
+              <Link
+                href="/orders/create"
+                style={{
+                  padding: '0.75rem 1.6rem',
+                  borderRadius: '9999px',
+                  backgroundColor: '#000000',
+                  color: '#ffffff',
+                  fontWeight: 600,
+                  fontSize: '0.875rem',
+                  textDecoration: 'none',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                }}
+              >
+                <span>Request Custom Fabrication</span>
+                <span>→</span>
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* MOBILE VIEW (< 768px): 2-Column E-Commerce Grid (Flipkart Style matching user reference) */}
+            <div className="home-products-mobile-grid">
+              {filteredProducts.map((prod) => {
             const isAdded = addedProductId === prod.id;
             return (
               <div key={prod.id} className="home-mobile-product-card">
@@ -664,6 +769,8 @@ export default function HomeShoppingSection() {
             </div>
           ))}
         </div>
+          </>
+        )}
 
         {/* E-Commerce Guarantee Strip with Modern Spacing */}
         <div

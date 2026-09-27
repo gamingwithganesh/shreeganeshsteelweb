@@ -9,9 +9,9 @@ export function getStoredProducts(): ProductItem[] {
   if (typeof window === 'undefined') return PRODUCTS;
   try {
     const raw = localStorage.getItem(PRODUCTS_STORAGE_KEY);
-    if (raw) {
+    if (raw !== null) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) {
+      if (Array.isArray(parsed)) {
         return parsed;
       }
     }
@@ -22,7 +22,7 @@ export function getStoredProducts(): ProductItem[] {
 }
 
 export function useLiveProducts() {
-  const [products, setProducts] = useState<ProductItem[]>(PRODUCTS);
+  const [products, setProducts] = useState<ProductItem[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
   const refreshProducts = useCallback(() => {
@@ -35,35 +35,22 @@ export function useLiveProducts() {
     refreshProducts();
     setIsLoaded(true);
 
-    // 2. Fetch server-side products if available in MongoDB Atlas
-    fetch('/api/products')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success && Array.isArray(data.products) && data.products.length > 0) {
-          setProducts((current) => {
-            const currentIds = new Set(current.map((p) => p.id));
-            const merged = [...current];
-            let hasNew = false;
-            for (const serverP of data.products) {
-              if (!currentIds.has(serverP.id)) {
-                merged.push(serverP);
-                hasNew = true;
-              }
-            }
-            if (hasNew) {
-              try {
-                localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(merged));
-              } catch (e) {}
-              return merged;
-            }
-            return current;
-          });
-        }
-      })
-      .catch((err) => {
-        // Silently catch network failures and continue using localStorage/static PRODUCTS
-        console.debug('Products API background sync notice:', err);
-      });
+    // 2. Only fetch server-side products if localStorage has never been set
+    const raw = typeof window !== 'undefined' ? localStorage.getItem(PRODUCTS_STORAGE_KEY) : null;
+    if (raw === null) {
+      fetch('/api/products')
+        .then((res) => res.json())
+        .then((data) => {
+          const currentRaw = localStorage.getItem(PRODUCTS_STORAGE_KEY);
+          if (currentRaw === null && data.success && Array.isArray(data.products)) {
+            setProducts(data.products);
+            try {
+              localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(data.products));
+            } catch (e) {}
+          }
+        })
+        .catch(() => {});
+    }
 
     // 3. Real-time reactivity across same-tab and multi-tab admin actions
     const handleStorage = (e?: StorageEvent) => {

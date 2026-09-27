@@ -855,25 +855,68 @@ function ShopContent() {
           ) : (
             <div
               style={{
-                backgroundColor: '#ffffff',
+                backgroundColor: '#fafafa',
                 borderRadius: '20px',
-                border: '1px solid #e2e8f0',
+                border: '1px dashed #cbd5e1',
                 padding: '3rem 1.5rem',
                 textAlign: 'center',
               }}
             >
-              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.75rem' }}>
-                <IconSearch size={40} color="#94a3b8" />
+              <div
+                style={{
+                  width: '68px',
+                  height: '68px',
+                  borderRadius: '50%',
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #e2e8f0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 1rem auto',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.04)',
+                }}
+              >
+                <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 7h16l-1.5 12.5a2 2 0 0 1-2 1.5H7.5a2 2 0 0 1-2-1.5L4 7z" />
+                  <path d="M9 7V4a3 3 0 0 1 6 0v3" />
+                  <line x1="9" y1="11" x2="9" y2="15" />
+                  <line x1="15" y1="11" x2="15" y2="15" />
+                  <line x1="12" y1="11" x2="12" y2="15" />
+                </svg>
               </div>
-              <h3 className="font-display" style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a' }}>
-                No Fabrications Found
+              <h3 className="font-display" style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0f172a' }}>
+                {liveProducts.length === 0 ? 'Catalog Is Currently Empty' : 'No Fabrications Found'}
               </h3>
-              <p style={{ color: '#64748b', fontSize: '0.85rem', margin: '0.5rem auto 1.25rem' }}>
-                Try clearing filters or search query to view all workshop fabrications.
+              <p style={{ color: '#64748b', fontSize: '0.85rem', maxWidth: '380px', margin: '0.4rem auto 1.25rem' }}>
+                {liveProducts.length === 0
+                  ? 'All products have been cleared or workshop inventory is updating. Submit custom steel fabrication requirements directly.'
+                  : 'Try clearing active filters or search queries to view all workshop fabrications.'}
               </p>
-              <button onClick={clearAllFilters} className="btn-primary">
-                Clear All Filters
-              </button>
+              <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                {liveProducts.length > 0 && (
+                  <button onClick={clearAllFilters} className="btn-primary" style={{ padding: '0.6rem 1.2rem', fontSize: '0.82rem' }}>
+                    Clear All Filters
+                  </button>
+                )}
+                <Link
+                  href="/orders/create"
+                  style={{
+                    backgroundColor: '#000000',
+                    color: '#ffffff',
+                    padding: '0.6rem 1.2rem',
+                    borderRadius: '9999px',
+                    fontSize: '0.82rem',
+                    fontWeight: 700,
+                    textDecoration: 'none',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                  }}
+                >
+                  <span>Custom Fabrication</span>
+                  <span>→</span>
+                </Link>
+              </div>
             </div>
           )}
         </div>
@@ -1055,25 +1098,69 @@ function ShopContent() {
             ) : (
               <div
                 style={{
-                  backgroundColor: '#ffffff',
-                  borderRadius: '20px',
-                  border: '1px solid #e2e8f0',
+                  backgroundColor: '#fafafa',
+                  borderRadius: '24px',
+                  border: '1px dashed #cbd5e1',
                   padding: '4rem 2rem',
                   textAlign: 'center',
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
-                  <IconSearch size={48} color="#94a3b8" />
+                <div
+                  style={{
+                    width: '76px',
+                    height: '76px',
+                    borderRadius: '50%',
+                    backgroundColor: '#ffffff',
+                    border: '1px solid #e2e8f0',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: '0 auto 1.25rem auto',
+                    boxShadow: '0 4px 14px rgba(0, 0, 0, 0.04)',
+                  }}
+                >
+                  <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M4 7h16l-1.5 12.5a2 2 0 0 1-2 1.5H7.5a2 2 0 0 1-2-1.5L4 7z" />
+                    <path d="M9 7V4a3 3 0 0 1 6 0v3" />
+                    <line x1="9" y1="11" x2="9" y2="15" />
+                    <line x1="15" y1="11" x2="15" y2="15" />
+                    <line x1="12" y1="11" x2="12" y2="15" />
+                  </svg>
                 </div>
                 <h3 className="font-display" style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0f172a' }}>
-                  No Fabrications Found Matching Criteria
+                  {liveProducts.length === 0 ? 'Catalog Is Currently Empty' : 'No Fabrications Found Matching Criteria'}
                 </h3>
-                <p style={{ color: '#64748b', fontSize: '0.9rem', maxWidth: '420px', margin: '0.5rem auto 1.5rem' }}>
-                  Try resetting your category or steel material filters, or contact our engineering desk for custom blueprints.
+                <p style={{ color: '#64748b', fontSize: '0.9rem', maxWidth: '440px', margin: '0.5rem auto 1.5rem' }}>
+                  {liveProducts.length === 0
+                    ? 'All items have been cleared or our engineering team is updating inventory. You can submit custom blueprints or site fabrication requests directly.'
+                    : 'Try resetting your category or steel material filters, or contact our engineering desk for custom blueprints.'}
                 </p>
-                <button onClick={clearAllFilters} className="btn-primary">
-                  Clear All Filters
-                </button>
+                <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                  {liveProducts.length > 0 && (
+                    <button onClick={clearAllFilters} className="btn-primary" style={{ padding: '0.75rem 1.6rem' }}>
+                      Clear All Filters
+                    </button>
+                  )}
+                  <Link
+                    href="/orders/create"
+                    style={{
+                      backgroundColor: '#000000',
+                      color: '#ffffff',
+                      padding: '0.75rem 1.6rem',
+                      borderRadius: '9999px',
+                      fontSize: '0.875rem',
+                      fontWeight: 700,
+                      textDecoration: 'none',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      boxShadow: '0 4px 14px rgba(0,0,0,0.15)',
+                    }}
+                  >
+                    <span>Request Custom Fabrication</span>
+                    <span>→</span>
+                  </Link>
+                </div>
               </div>
             )}
           </div>

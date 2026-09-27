@@ -178,7 +178,7 @@ export default function Navbar() {
         style={{
           position: 'sticky',
           top: 0,
-          zIndex: 100,
+          zIndex: 1000,
           backgroundColor: 'rgba(255, 255, 255, 0.95)',
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
