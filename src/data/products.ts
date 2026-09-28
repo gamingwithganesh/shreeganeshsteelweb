@@ -32,6 +32,8 @@ export interface ProductItem {
   defaultDimensions: {
     widthFeet: number;
     heightFeet: number;
+    lengthFeet?: number;
+    breadthFeet?: number;
     depthInches?: number;
   };
   dimensionsText: string;

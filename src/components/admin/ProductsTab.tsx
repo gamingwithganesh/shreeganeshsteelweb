@@ -58,6 +58,13 @@ export default function ProductsTab() {
   const [materialGrade, setMaterialGrade] = useState<ProductItem['materialGrade']>('Mild Steel (MS)');
   const [priceType, setPriceType] = useState<'per_sqft' | 'per_unit' | 'per_ft'>('per_sqft');
   const [unitPriceNumeric, setUnitPriceNumeric] = useState(320);
+  
+  // Dimensions State (L, H, B)
+  const [lengthFeet, setLengthFeet] = useState<number>(10);
+  const [heightFeet, setHeightFeet] = useState<number>(6);
+  const [breadthFeet, setBreadthFeet] = useState<number>(3);
+  const [dimensionsText, setDimensionsText] = useState('Standard: 10ft (L) x 6ft (H) x 3ft (B) — Custom sizes built to order');
+  
   const [leadTime, setLeadTime] = useState('7 - 12 days');
   const [description, setDescription] = useState('');
   const [imageBase64, setImageBase64] = useState('/images/product_gate.jpg');
@@ -72,7 +79,6 @@ export default function ProductsTab() {
 
   const [isCompressing, setIsCompressing] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
-
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const editFileInputRef = useRef<HTMLInputElement | null>(null);
@@ -152,6 +158,14 @@ export default function ProductsTab() {
     'Agro & Utility Fabrications',
   ];
 
+  const materialGrades: Array<ProductItem['materialGrade']> = [
+    'Mild Steel (MS)',
+    'SS Grade 304',
+    'SS Grade 316 Marine',
+    'Hot-Dip Galvanized (GI)',
+    'Corten Steel',
+  ];
+
   const filteredProducts = products.filter((p) => {
     const matchesCat = selectedCategory === 'all' || p.category === selectedCategory;
     const q = searchQuery.toLowerCase().trim();
@@ -174,6 +188,10 @@ export default function ProductsTab() {
         ? `₹${unitPriceNumeric} / running ft`
         : `₹${unitPriceNumeric.toLocaleString('en-IN')}`;
 
+    const finalDimensionsText =
+      dimensionsText.trim() ||
+      `Standard: ${lengthFeet}ft (L) x ${heightFeet}ft (H) x ${breadthFeet}ft (B) — Custom sizes built to order`;
+
     addProduct({
       name: name.trim(),
       category,
@@ -183,14 +201,14 @@ export default function ProductsTab() {
       unitPriceNumeric,
       material,
       materialGrade,
-      leadTime,
+      leadTime: leadTime.trim() || '7 - 12 days',
       rating: '4.9',
       image: imageBase64,
       galleryImages: [imageBase64],
       reviewsCount: 12,
       description: description.trim() || 'Custom engineered structural metal fabrication.',
       fullDescription: description.trim() || 'Custom engineered structural metal fabrication with precision welding.',
-      dimensionsText: '10ft x 6ft',
+      dimensionsText: finalDimensionsText,
       inStockStandard: true,
       features: [
         'Anti-corrosion multi-stage primer undercoat',
@@ -199,8 +217,14 @@ export default function ProductsTab() {
       ],
       availableGauges: ['16 Gauge (1.6 mm)', '14 Gauge (2.0 mm)', '12 Gauge (2.5 mm)'],
       availableFinishes: ['Zinc Epoxy Anti-Rust Primer', 'Matte Black Powder Coating', 'Gloss Polyurethane (PU) Coat'],
-      defaultDimensions: { widthFeet: 10, heightFeet: 6 },
+      defaultDimensions: {
+        widthFeet: breadthFeet || lengthFeet,
+        heightFeet: heightFeet,
+        lengthFeet: lengthFeet,
+        breadthFeet: breadthFeet,
+      },
       specs: [
+        { label: 'Standard Dimensions (L×H×B)', value: `${lengthFeet}ft (L) x ${heightFeet}ft (H) x ${breadthFeet}ft (B)` },
         { label: 'Standard Gauge', value: '14 Gauge (2.0mm)' },
         { label: 'Weld Technology', value: 'TIG / MIG Argon Purged' },
       ],
@@ -210,11 +234,43 @@ export default function ProductsTab() {
     setIsAddModalOpen(false);
     setName('');
     setDescription('');
+    setLengthFeet(10);
+    setHeightFeet(6);
+    setBreadthFeet(3);
+    setDimensionsText('Standard: 10ft (L) x 6ft (H) x 3ft (B) — Custom sizes built to order');
     setAddImageMode('file');
     setImageUrlInput('');
     setImageLoadError(false);
     setToastMsg(`Product added successfully.`);
     setTimeout(() => setToastMsg(''), 3000);
+  };
+
+  const openEditModal = (product: ProductItem) => {
+    const l = product.defaultDimensions?.lengthFeet ?? product.defaultDimensions?.widthFeet ?? 10;
+    const h = product.defaultDimensions?.heightFeet ?? 6;
+    const b = product.defaultDimensions?.breadthFeet ?? product.defaultDimensions?.depthInches ?? product.defaultDimensions?.widthFeet ?? 3;
+    const dText = product.dimensionsText || `Standard: ${l}ft (L) x ${h}ft (H) x ${b}ft (B)`;
+
+    setEditingProduct({
+      ...product,
+      dimensionsText: dText,
+      defaultDimensions: {
+        ...product.defaultDimensions,
+        lengthFeet: l,
+        heightFeet: h,
+        breadthFeet: b,
+        widthFeet: b,
+      },
+    });
+
+    if (product.image?.startsWith('http')) {
+      setEditImageMode('url');
+      setEditImageUrlInput(product.image);
+    } else {
+      setEditImageMode('file');
+      setEditImageUrlInput('');
+    }
+    setEditImageLoadError(false);
   };
 
   const handleEditSave = (e: React.FormEvent) => {
@@ -228,9 +284,23 @@ export default function ProductsTab() {
         ? `₹${editingProduct.unitPriceNumeric} / running ft`
         : `₹${editingProduct.unitPriceNumeric.toLocaleString('en-IN')}`;
 
+    const l = editingProduct.defaultDimensions?.lengthFeet ?? editingProduct.defaultDimensions?.widthFeet ?? 10;
+    const h = editingProduct.defaultDimensions?.heightFeet ?? 6;
+    const b = editingProduct.defaultDimensions?.breadthFeet ?? 3;
+    const finalDimensionsText =
+      editingProduct.dimensionsText?.trim() || `Standard: ${l}ft (L) x ${h}ft (H) x ${b}ft (B) — Custom sizes built to order`;
+
     updateProduct(editingProduct.id, {
       ...editingProduct,
       price: formattedPrice,
+      dimensionsText: finalDimensionsText,
+      defaultDimensions: {
+        ...editingProduct.defaultDimensions,
+        widthFeet: b || l,
+        heightFeet: h,
+        lengthFeet: l,
+        breadthFeet: b,
+      },
     });
 
     setEditingProduct(null);
@@ -408,7 +478,7 @@ export default function ProductsTab() {
           </svg>
           <input
             type="text"
-            placeholder="Search products by name or material..."
+            placeholder="Search products by name, category, or material..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{
@@ -433,7 +503,7 @@ export default function ProductsTab() {
         }}
       >
         <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '680px' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '780px' }}>
             <thead>
               <tr style={{ backgroundColor: '#fafafa', borderBottom: '1px solid #e4e4e7' }}>
                 <th style={{ padding: '10px 18px', fontSize: '0.7rem', fontWeight: 700, color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
@@ -446,6 +516,9 @@ export default function ProductsTab() {
                   MATERIAL
                 </th>
                 <th style={{ padding: '10px 14px', fontSize: '0.7rem', fontWeight: 700, color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  MEASUREMENTS (L × H × B)
+                </th>
+                <th style={{ padding: '10px 14px', fontSize: '0.7rem', fontWeight: 700, color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                   PRICE
                 </th>
                 <th style={{ padding: '10px 18px', fontSize: '0.7rem', fontWeight: 700, color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.04em', textAlign: 'right' }}>
@@ -456,110 +529,135 @@ export default function ProductsTab() {
             <tbody>
               {filteredProducts.length === 0 ? (
                 <tr>
-                  <td colSpan={5} style={{ padding: '32px 18px', textAlign: 'center', color: '#71717a', fontSize: '0.825rem' }}>
+                  <td colSpan={6} style={{ padding: '32px 18px', textAlign: 'center', color: '#71717a', fontSize: '0.825rem' }}>
                     No products found.
                   </td>
                 </tr>
               ) : (
-                filteredProducts.map((product) => (
-                  <tr
-                    key={product.id}
-                    style={{
-                      borderBottom: '1px solid #f4f4f5',
-                    }}
-                  >
-                    {/* Item */}
-                    <td style={{ padding: '12px 18px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <div
+                filteredProducts.map((product) => {
+                  const l = product.defaultDimensions?.lengthFeet ?? product.defaultDimensions?.widthFeet ?? 10;
+                  const h = product.defaultDimensions?.heightFeet ?? 6;
+                  const b = product.defaultDimensions?.breadthFeet ?? product.defaultDimensions?.depthInches ?? product.defaultDimensions?.widthFeet ?? 3;
+
+                  return (
+                    <tr
+                      key={product.id}
+                      style={{
+                        borderBottom: '1px solid #f4f4f5',
+                      }}
+                    >
+                      {/* Item */}
+                      <td style={{ padding: '12px 18px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <div
+                            style={{
+                              width: '38px',
+                              height: '38px',
+                              borderRadius: '6px',
+                              overflow: 'hidden',
+                              position: 'relative',
+                              backgroundColor: '#f4f4f5',
+                              flexShrink: 0,
+                            }}
+                          >
+                            <Image
+                              src={product.image}
+                              alt={product.name}
+                              fill
+                              unoptimized={Boolean(product.image?.startsWith('http'))}
+                              style={{ objectFit: 'cover' }}
+                            />
+                          </div>
+                          <div>
+                            <div style={{ fontWeight: 600, color: '#09090b', fontSize: '0.825rem' }}>
+                              {product.name}
+                            </div>
+                            <div style={{ fontSize: '0.7rem', color: '#71717a' }}>
+                              {product.leadTime || '7-12 days'}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Category */}
+                      <td style={{ padding: '12px 14px', fontSize: '0.8rem', color: '#52525b' }}>
+                        {product.category}
+                      </td>
+
+                      {/* Material */}
+                      <td style={{ padding: '12px 14px', fontSize: '0.8rem', color: '#71717a' }}>
+                        {product.materialGrade || product.material}
+                      </td>
+
+                      {/* Measurements (L, H, B) */}
+                      <td style={{ padding: '12px 14px' }}>
+                        <span
                           style={{
-                            width: '36px',
-                            height: '36px',
-                            borderRadius: '6px',
-                            overflow: 'hidden',
-                            position: 'relative',
+                            display: 'inline-block',
                             backgroundColor: '#f4f4f5',
-                            flexShrink: 0,
-                          }}
-                        >
-                          <Image
-                            src={product.image}
-                            alt={product.name}
-                            fill
-                            unoptimized={Boolean(product.image?.startsWith('http'))}
-                            style={{ objectFit: 'cover' }}
-                          />
-                        </div>
-                        <div style={{ fontWeight: 600, color: '#09090b', fontSize: '0.825rem' }}>
-                          {product.name}
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* Category */}
-                    <td style={{ padding: '12px 14px', fontSize: '0.8rem', color: '#52525b' }}>
-                      {product.category}
-                    </td>
-
-                    {/* Material */}
-                    <td style={{ padding: '12px 14px', fontSize: '0.8rem', color: '#71717a' }}>
-                      {product.materialGrade || product.material}
-                    </td>
-
-                    {/* Price */}
-                    <td style={{ padding: '12px 14px', fontWeight: 700, color: '#09090b', fontSize: '0.825rem' }}>
-                      {product.price}
-                    </td>
-
-                    {/* Actions */}
-                    <td style={{ padding: '12px 18px', textAlign: 'right' }}>
-                      <div style={{ display: 'inline-flex', gap: '6px' }}>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEditingProduct({ ...product });
-                            if (product.image?.startsWith('http')) {
-                              setEditImageMode('url');
-                              setEditImageUrlInput(product.image);
-                            } else {
-                              setEditImageMode('file');
-                              setEditImageUrlInput('');
-                            }
-                            setEditImageLoadError(false);
-                          }}
-                          style={{
-                            padding: '4px 10px',
-                            borderRadius: '6px',
-                            border: '1px solid #e4e4e7',
-                            backgroundColor: '#ffffff',
                             color: '#09090b',
                             fontSize: '0.74rem',
-                            fontWeight: 600,
-                            cursor: 'pointer',
-                          }}
-                        >
-                          Edit
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleDelete(product.id, product.name)}
-                          style={{
-                            padding: '4px 10px',
+                            fontWeight: 700,
+                            padding: '3px 8px',
                             borderRadius: '6px',
                             border: '1px solid #e4e4e7',
-                            backgroundColor: '#ffffff',
-                            color: '#dc2626',
-                            fontSize: '0.74rem',
-                            fontWeight: 600,
-                            cursor: 'pointer',
+                            whiteSpace: 'nowrap',
                           }}
                         >
-                          Delete
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                          {l}ft (L) × {h}ft (H) × {b}ft (B)
+                        </span>
+                        {product.dimensionsText && (
+                          <div style={{ fontSize: '0.68rem', color: '#71717a', marginTop: '2px', maxWidth: '200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {product.dimensionsText}
+                          </div>
+                        )}
+                      </td>
+
+                      {/* Price */}
+                      <td style={{ padding: '12px 14px', fontWeight: 700, color: '#09090b', fontSize: '0.825rem' }}>
+                        {product.price}
+                      </td>
+
+                      {/* Actions */}
+                      <td style={{ padding: '12px 18px', textAlign: 'right' }}>
+                        <div style={{ display: 'inline-flex', gap: '6px' }}>
+                          <button
+                            type="button"
+                            onClick={() => openEditModal(product)}
+                            style={{
+                              padding: '4px 10px',
+                              borderRadius: '6px',
+                              border: '1px solid #e4e4e7',
+                              backgroundColor: '#ffffff',
+                              color: '#09090b',
+                              fontSize: '0.74rem',
+                              fontWeight: 600,
+                              cursor: 'pointer',
+                            }}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(product.id, product.name)}
+                            style={{
+                              padding: '4px 10px',
+                              borderRadius: '6px',
+                              border: '1px solid #e4e4e7',
+                              backgroundColor: '#ffffff',
+                              color: '#dc2626',
+                              fontSize: '0.74rem',
+                              fontWeight: 600,
+                              cursor: 'pointer',
+                            }}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
@@ -587,7 +685,7 @@ export default function ProductsTab() {
               backgroundColor: '#ffffff',
               borderRadius: '16px',
               border: '1px solid #e4e4e7',
-              maxWidth: '480px',
+              maxWidth: '540px',
               width: '100%',
               maxHeight: '90vh',
               overflowY: 'auto',
@@ -596,9 +694,14 @@ export default function ProductsTab() {
             onClick={(e) => e.stopPropagation()}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#09090b', margin: 0 }}>
-                Add Product
-              </h3>
+              <div>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#09090b', margin: 0 }}>
+                  Add Product
+                </h3>
+                <p style={{ fontSize: '0.75rem', color: '#71717a', margin: '2px 0 0 0' }}>
+                  Create new steel & fabrication item with standard L, H, B measurements.
+                </p>
+              </div>
               <button
                 type="button"
                 onClick={() => setIsAddModalOpen(false)}
@@ -610,6 +713,7 @@ export default function ProductsTab() {
             </div>
 
             <form onSubmit={handleCreateProduct} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              {/* Product Picture */}
               <div>
                 <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#09090b', marginBottom: '8px' }}>
                   Product Picture
@@ -691,7 +795,6 @@ export default function ProductsTab() {
                         flexShrink: 0,
                       }}
                     >
-                      {/* Standard img tag avoids Next.js parse crashes on local drafts */}
                       <img
                         src={imageBase64 || '/images/product_gate.jpg'}
                         alt="Preview"
@@ -824,52 +927,56 @@ export default function ProductsTab() {
                 )}
               </div>
 
-              <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#09090b', marginBottom: '4px' }}>
-                  Product Name
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Modern Swing Gate"
-                  style={{
-                    width: '100%',
-                    padding: '8px 12px',
-                    borderRadius: '8px',
-                    border: '1px solid #e4e4e7',
-                    fontSize: '0.825rem',
-                    color: '#09090b',
-                    outline: 'none',
-                  }}
-                />
+              {/* Product Name & Category */}
+              <div className="admin-form-grid-2">
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#09090b', marginBottom: '4px' }}>
+                    Product Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="e.g. Modern Swing Gate"
+                    style={{
+                      width: '100%',
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid #e4e4e7',
+                      fontSize: '0.825rem',
+                      color: '#09090b',
+                      outline: 'none',
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#09090b', marginBottom: '4px' }}>
+                    Category
+                  </label>
+                  <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value as any)}
+                    style={{
+                      width: '100%',
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid #e4e4e7',
+                      fontSize: '0.825rem',
+                      color: '#09090b',
+                      outline: 'none',
+                      backgroundColor: '#ffffff',
+                    }}
+                  >
+                    {categories.filter((c) => c !== 'all').map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
-              <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#09090b', marginBottom: '4px' }}>
-                  Category
-                </label>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value as any)}
-                  style={{
-                    width: '100%',
-                    padding: '8px 12px',
-                    borderRadius: '8px',
-                    border: '1px solid #e4e4e7',
-                    fontSize: '0.825rem',
-                    color: '#09090b',
-                    outline: 'none',
-                    backgroundColor: '#ffffff',
-                  }}
-                >
-                  {categories.filter((c) => c !== 'all').map((c) => (
-                    <option key={c} value={c}>{c}</option>
-                  ))}
-                </select>
-              </div>
-
+              {/* Pricing Model & Unit Price */}
               <div className="admin-form-grid-2">
                 <div>
                   <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#09090b', marginBottom: '4px' }}>
@@ -897,11 +1004,12 @@ export default function ProductsTab() {
 
                 <div>
                   <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#09090b', marginBottom: '4px' }}>
-                    Unit Price (₹)
+                    Unit Price (₹) *
                   </label>
                   <input
                     type="number"
                     required
+                    min={1}
                     value={unitPriceNumeric}
                     onChange={(e) => setUnitPriceNumeric(Number(e.target.value))}
                     style={{
@@ -917,7 +1025,223 @@ export default function ProductsTab() {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '8px' }}>
+              {/* SECTION: Product Measurements (L, H, B) */}
+              <div
+                style={{
+                  backgroundColor: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '12px',
+                  padding: '14px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '10px',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
+                  <label style={{ fontSize: '0.78rem', fontWeight: 800, color: '#09090b', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span>📐 Product Measurements (L, H, B)</span>
+                  </label>
+                  <span
+                    style={{
+                      fontSize: '0.72rem',
+                      fontWeight: 700,
+                      backgroundColor: '#09090b',
+                      color: '#ffffff',
+                      padding: '2px 8px',
+                      borderRadius: '6px',
+                    }}
+                  >
+                    {lengthFeet}ft (L) × {heightFeet}ft (H) × {breadthFeet}ft (B)
+                  </span>
+                </div>
+
+                <div className="admin-form-grid-3">
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#334155', marginBottom: '3px' }}>
+                      Length (L) <span style={{ color: '#64748b', fontWeight: 500 }}>(ft)</span> *
+                    </label>
+                    <input
+                      type="number"
+                      step={0.5}
+                      min={0.1}
+                      required
+                      value={lengthFeet}
+                      onChange={(e) => {
+                        const val = Number(e.target.value) || 0;
+                        setLengthFeet(val);
+                        setDimensionsText(`Standard: ${val}ft (L) x ${heightFeet}ft (H) x ${breadthFeet}ft (B) — Custom sizes built to order`);
+                      }}
+                      placeholder="e.g. 10"
+                      style={{
+                        width: '100%',
+                        padding: '8px 10px',
+                        borderRadius: '8px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.825rem',
+                        fontWeight: 600,
+                        color: '#09090b',
+                        backgroundColor: '#ffffff',
+                        outline: 'none',
+                      }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#334155', marginBottom: '3px' }}>
+                      Height (H) <span style={{ color: '#64748b', fontWeight: 500 }}>(ft)</span> *
+                    </label>
+                    <input
+                      type="number"
+                      step={0.5}
+                      min={0.1}
+                      required
+                      value={heightFeet}
+                      onChange={(e) => {
+                        const val = Number(e.target.value) || 0;
+                        setHeightFeet(val);
+                        setDimensionsText(`Standard: ${lengthFeet}ft (L) x ${val}ft (H) x ${breadthFeet}ft (B) — Custom sizes built to order`);
+                      }}
+                      placeholder="e.g. 6"
+                      style={{
+                        width: '100%',
+                        padding: '8px 10px',
+                        borderRadius: '8px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.825rem',
+                        fontWeight: 600,
+                        color: '#09090b',
+                        backgroundColor: '#ffffff',
+                        outline: 'none',
+                      }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#334155', marginBottom: '3px' }}>
+                      Breadth / Width (B) <span style={{ color: '#64748b', fontWeight: 500 }}>(ft)</span> *
+                    </label>
+                    <input
+                      type="number"
+                      step={0.5}
+                      min={0.1}
+                      required
+                      value={breadthFeet}
+                      onChange={(e) => {
+                        const val = Number(e.target.value) || 0;
+                        setBreadthFeet(val);
+                        setDimensionsText(`Standard: ${lengthFeet}ft (L) x ${heightFeet}ft (H) x ${val}ft (B) — Custom sizes built to order`);
+                      }}
+                      placeholder="e.g. 3"
+                      style={{
+                        width: '100%',
+                        padding: '8px 10px',
+                        borderRadius: '8px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.825rem',
+                        fontWeight: 600,
+                        color: '#09090b',
+                        backgroundColor: '#ffffff',
+                        outline: 'none',
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#334155', marginBottom: '3px' }}>
+                    Dimensions Display Text <span style={{ color: '#64748b', fontWeight: 400 }}>(Shown in Shop catalog & quotations)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={dimensionsText}
+                    onChange={(e) => setDimensionsText(e.target.value)}
+                    placeholder="e.g. Standard: 10ft (L) x 6ft (H) x 3ft (B) — Custom sizes built to order"
+                    style={{
+                      width: '100%',
+                      padding: '7px 10px',
+                      borderRadius: '8px',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '0.78rem',
+                      color: '#09090b',
+                      backgroundColor: '#ffffff',
+                      outline: 'none',
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Material & Grade */}
+              <div className="admin-form-grid-2">
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#09090b', marginBottom: '4px' }}>
+                    Material Grade
+                  </label>
+                  <select
+                    value={materialGrade}
+                    onChange={(e) => setMaterialGrade(e.target.value as any)}
+                    style={{
+                      width: '100%',
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid #e4e4e7',
+                      fontSize: '0.825rem',
+                      color: '#09090b',
+                      outline: 'none',
+                      backgroundColor: '#ffffff',
+                    }}
+                  >
+                    {materialGrades.map((g) => (
+                      <option key={g} value={g}>{g}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#09090b', marginBottom: '4px' }}>
+                    Lead Time
+                  </label>
+                  <input
+                    type="text"
+                    value={leadTime}
+                    onChange={(e) => setLeadTime(e.target.value)}
+                    placeholder="e.g. 7 - 12 days"
+                    style={{
+                      width: '100%',
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid #e4e4e7',
+                      fontSize: '0.825rem',
+                      color: '#09090b',
+                      outline: 'none',
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Description */}
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#09090b', marginBottom: '4px' }}>
+                  Description
+                </label>
+                <textarea
+                  rows={2}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Structural specifications, gauge thickness, finish details..."
+                  style={{
+                    width: '100%',
+                    padding: '8px 12px',
+                    borderRadius: '8px',
+                    border: '1px solid #e4e4e7',
+                    fontSize: '0.825rem',
+                    color: '#09090b',
+                    outline: 'none',
+                    fontFamily: 'inherit',
+                  }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '6px' }}>
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
@@ -976,7 +1300,7 @@ export default function ProductsTab() {
               backgroundColor: '#ffffff',
               borderRadius: '16px',
               border: '1px solid #e4e4e7',
-              maxWidth: '480px',
+              maxWidth: '540px',
               width: '100%',
               maxHeight: '90vh',
               overflowY: 'auto',
@@ -985,9 +1309,14 @@ export default function ProductsTab() {
             onClick={(e) => e.stopPropagation()}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#09090b', margin: 0 }}>
-                Edit Product
-              </h3>
+              <div>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#09090b', margin: 0 }}>
+                  Edit Product
+                </h3>
+                <p style={{ fontSize: '0.75rem', color: '#71717a', margin: '2px 0 0 0' }}>
+                  Update pricing, measurements (L, H, B), or specifications.
+                </p>
+              </div>
               <button
                 type="button"
                 onClick={() => setEditingProduct(null)}
@@ -999,6 +1328,7 @@ export default function ProductsTab() {
             </div>
 
             <form onSubmit={handleEditSave} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              {/* Product Picture */}
               <div>
                 <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#09090b', marginBottom: '8px' }}>
                   Product Picture
@@ -1212,27 +1542,55 @@ export default function ProductsTab() {
                 )}
               </div>
 
-              <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#09090b', marginBottom: '4px' }}>
-                  Product Name
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={editingProduct.name}
-                  onChange={(e) => setEditingProduct({ ...editingProduct, name: e.target.value })}
-                  style={{
-                    width: '100%',
-                    padding: '8px 12px',
-                    borderRadius: '8px',
-                    border: '1px solid #e4e4e7',
-                    fontSize: '0.825rem',
-                    color: '#09090b',
-                    outline: 'none',
-                  }}
-                />
+              {/* Product Name & Category */}
+              <div className="admin-form-grid-2">
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#09090b', marginBottom: '4px' }}>
+                    Product Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={editingProduct.name}
+                    onChange={(e) => setEditingProduct({ ...editingProduct, name: e.target.value })}
+                    style={{
+                      width: '100%',
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid #e4e4e7',
+                      fontSize: '0.825rem',
+                      color: '#09090b',
+                      outline: 'none',
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#09090b', marginBottom: '4px' }}>
+                    Category
+                  </label>
+                  <select
+                    value={editingProduct.category}
+                    onChange={(e) => setEditingProduct({ ...editingProduct, category: e.target.value as any })}
+                    style={{
+                      width: '100%',
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid #e4e4e7',
+                      fontSize: '0.825rem',
+                      color: '#09090b',
+                      outline: 'none',
+                      backgroundColor: '#ffffff',
+                    }}
+                  >
+                    {categories.filter((c) => c !== 'all').map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
+              {/* Pricing Model & Unit Price */}
               <div className="admin-form-grid-2">
                 <div>
                   <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#09090b', marginBottom: '4px' }}>
@@ -1260,11 +1618,12 @@ export default function ProductsTab() {
 
                 <div>
                   <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#09090b', marginBottom: '4px' }}>
-                    Unit Price (₹)
+                    Unit Price (₹) *
                   </label>
                   <input
                     type="number"
                     required
+                    min={1}
                     value={editingProduct.unitPriceNumeric}
                     onChange={(e) => setEditingProduct({ ...editingProduct, unitPriceNumeric: Number(e.target.value) })}
                     style={{
@@ -1280,7 +1639,254 @@ export default function ProductsTab() {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '8px' }}>
+              {/* SECTION: Product Measurements (L, H, B) for Edit */}
+              <div
+                style={{
+                  backgroundColor: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '12px',
+                  padding: '14px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '10px',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
+                  <label style={{ fontSize: '0.78rem', fontWeight: 800, color: '#09090b', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span>📐 Product Measurements (L, H, B)</span>
+                  </label>
+                  <span
+                    style={{
+                      fontSize: '0.72rem',
+                      fontWeight: 700,
+                      backgroundColor: '#09090b',
+                      color: '#ffffff',
+                      padding: '2px 8px',
+                      borderRadius: '6px',
+                    }}
+                  >
+                    {editingProduct.defaultDimensions?.lengthFeet ?? editingProduct.defaultDimensions?.widthFeet ?? 10}ft (L) × {editingProduct.defaultDimensions?.heightFeet ?? 6}ft (H) × {editingProduct.defaultDimensions?.breadthFeet ?? 3}ft (B)
+                  </span>
+                </div>
+
+                <div className="admin-form-grid-3">
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#334155', marginBottom: '3px' }}>
+                      Length (L) <span style={{ color: '#64748b', fontWeight: 500 }}>(ft)</span> *
+                    </label>
+                    <input
+                      type="number"
+                      step={0.5}
+                      min={0.1}
+                      required
+                      value={editingProduct.defaultDimensions?.lengthFeet ?? editingProduct.defaultDimensions?.widthFeet ?? 10}
+                      onChange={(e) => {
+                        const val = Number(e.target.value) || 0;
+                        const currentH = editingProduct.defaultDimensions?.heightFeet ?? 6;
+                        const currentB = editingProduct.defaultDimensions?.breadthFeet ?? 3;
+                        setEditingProduct({
+                          ...editingProduct,
+                          dimensionsText: `Standard: ${val}ft (L) x ${currentH}ft (H) x ${currentB}ft (B) — Custom sizes built to order`,
+                          defaultDimensions: {
+                            ...editingProduct.defaultDimensions,
+                            lengthFeet: val,
+                            widthFeet: currentB || val,
+                            heightFeet: currentH,
+                            breadthFeet: currentB,
+                          },
+                        });
+                      }}
+                      placeholder="e.g. 10"
+                      style={{
+                        width: '100%',
+                        padding: '8px 10px',
+                        borderRadius: '8px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.825rem',
+                        fontWeight: 600,
+                        color: '#09090b',
+                        backgroundColor: '#ffffff',
+                        outline: 'none',
+                      }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#334155', marginBottom: '3px' }}>
+                      Height (H) <span style={{ color: '#64748b', fontWeight: 500 }}>(ft)</span> *
+                    </label>
+                    <input
+                      type="number"
+                      step={0.5}
+                      min={0.1}
+                      required
+                      value={editingProduct.defaultDimensions?.heightFeet ?? 6}
+                      onChange={(e) => {
+                        const val = Number(e.target.value) || 0;
+                        const currentL = editingProduct.defaultDimensions?.lengthFeet ?? editingProduct.defaultDimensions?.widthFeet ?? 10;
+                        const currentB = editingProduct.defaultDimensions?.breadthFeet ?? 3;
+                        setEditingProduct({
+                          ...editingProduct,
+                          dimensionsText: `Standard: ${currentL}ft (L) x ${val}ft (H) x ${currentB}ft (B) — Custom sizes built to order`,
+                          defaultDimensions: {
+                            ...editingProduct.defaultDimensions,
+                            heightFeet: val,
+                            lengthFeet: currentL,
+                            breadthFeet: currentB,
+                            widthFeet: currentB || currentL,
+                          },
+                        });
+                      }}
+                      placeholder="e.g. 6"
+                      style={{
+                        width: '100%',
+                        padding: '8px 10px',
+                        borderRadius: '8px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.825rem',
+                        fontWeight: 600,
+                        color: '#09090b',
+                        backgroundColor: '#ffffff',
+                        outline: 'none',
+                      }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#334155', marginBottom: '3px' }}>
+                      Breadth / Width (B) <span style={{ color: '#64748b', fontWeight: 500 }}>(ft)</span> *
+                    </label>
+                    <input
+                      type="number"
+                      step={0.5}
+                      min={0.1}
+                      required
+                      value={editingProduct.defaultDimensions?.breadthFeet ?? 3}
+                      onChange={(e) => {
+                        const val = Number(e.target.value) || 0;
+                        const currentL = editingProduct.defaultDimensions?.lengthFeet ?? editingProduct.defaultDimensions?.widthFeet ?? 10;
+                        const currentH = editingProduct.defaultDimensions?.heightFeet ?? 6;
+                        setEditingProduct({
+                          ...editingProduct,
+                          dimensionsText: `Standard: ${currentL}ft (L) x ${currentH}ft (H) x ${val}ft (B) — Custom sizes built to order`,
+                          defaultDimensions: {
+                            ...editingProduct.defaultDimensions,
+                            breadthFeet: val,
+                            widthFeet: val,
+                            lengthFeet: currentL,
+                            heightFeet: currentH,
+                          },
+                        });
+                      }}
+                      placeholder="e.g. 3"
+                      style={{
+                        width: '100%',
+                        padding: '8px 10px',
+                        borderRadius: '8px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.825rem',
+                        fontWeight: 600,
+                        color: '#09090b',
+                        backgroundColor: '#ffffff',
+                        outline: 'none',
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#334155', marginBottom: '3px' }}>
+                    Dimensions Display Text <span style={{ color: '#64748b', fontWeight: 400 }}>(Shown in Shop catalog & quotations)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={editingProduct.dimensionsText || ''}
+                    onChange={(e) => setEditingProduct({ ...editingProduct, dimensionsText: e.target.value })}
+                    placeholder="e.g. Standard: 10ft (L) x 6ft (H) x 3ft (B) — Custom sizes built to order"
+                    style={{
+                      width: '100%',
+                      padding: '7px 10px',
+                      borderRadius: '8px',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '0.78rem',
+                      color: '#09090b',
+                      backgroundColor: '#ffffff',
+                      outline: 'none',
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Material & Grade */}
+              <div className="admin-form-grid-2">
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#09090b', marginBottom: '4px' }}>
+                    Material Grade
+                  </label>
+                  <select
+                    value={editingProduct.materialGrade || 'Mild Steel (MS)'}
+                    onChange={(e) => setEditingProduct({ ...editingProduct, materialGrade: e.target.value as any })}
+                    style={{
+                      width: '100%',
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid #e4e4e7',
+                      fontSize: '0.825rem',
+                      color: '#09090b',
+                      outline: 'none',
+                      backgroundColor: '#ffffff',
+                    }}
+                  >
+                    {materialGrades.map((g) => (
+                      <option key={g} value={g}>{g}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#09090b', marginBottom: '4px' }}>
+                    Lead Time
+                  </label>
+                  <input
+                    type="text"
+                    value={editingProduct.leadTime || ''}
+                    onChange={(e) => setEditingProduct({ ...editingProduct, leadTime: e.target.value })}
+                    style={{
+                      width: '100%',
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid #e4e4e7',
+                      fontSize: '0.825rem',
+                      color: '#09090b',
+                      outline: 'none',
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Description */}
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#09090b', marginBottom: '4px' }}>
+                  Description
+                </label>
+                <textarea
+                  rows={2}
+                  value={editingProduct.description || ''}
+                  onChange={(e) => setEditingProduct({ ...editingProduct, description: e.target.value })}
+                  style={{
+                    width: '100%',
+                    padding: '8px 12px',
+                    borderRadius: '8px',
+                    border: '1px solid #e4e4e7',
+                    fontSize: '0.825rem',
+                    color: '#09090b',
+                    outline: 'none',
+                    fontFamily: 'inherit',
+                  }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '6px' }}>
                 <button
                   type="button"
                   onClick={() => setEditingProduct(null)}
@@ -1310,7 +1916,7 @@ export default function ProductsTab() {
                     cursor: 'pointer',
                   }}
                 >
-                  Update
+                  Update Product
                 </button>
               </div>
             </form>
