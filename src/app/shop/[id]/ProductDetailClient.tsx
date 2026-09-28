@@ -52,11 +52,22 @@ function ProductDetailView({ product }: { product: ProductItem }) {
   const gallery = product.galleryImages && product.galleryImages.length > 0 ? product.galleryImages : [product.image];
   const [activeImage, setActiveImage] = useState<string>(gallery[0]);
 
+  // Helper to safely parse any dimensional input (e.g. "2", "2.5", "2.5f", "2.5ft")
+  const parseDim = (val: string | number, fallback: number): number => {
+    if (typeof val === 'number') return isNaN(val) || val <= 0 ? fallback : val;
+    const match = val.toString().trim().replace(',', '.').match(/[-+]?[0-9]*\.?[0-9]+/);
+    if (!match) return fallback;
+    const num = parseFloat(match[0]);
+    return isNaN(num) || num <= 0 ? fallback : num;
+  };
+
   // Sizing & Customization states
   const defaultW = product.defaultDimensions?.widthFeet || 10;
   const defaultH = product.defaultDimensions?.heightFeet || 6;
-  const [widthFeet, setWidthFeet] = useState<number>(defaultW);
-  const [heightFeet, setHeightFeet] = useState<number>(defaultH);
+  const [widthInput, setWidthInput] = useState<string>(String(defaultW));
+  const [heightInput, setHeightInput] = useState<string>(String(defaultH));
+  const widthFeet = parseDim(widthInput, defaultW);
+  const heightFeet = parseDim(heightInput, defaultH);
   const [selectedGauge, setSelectedGauge] = useState<string>(
     product.availableGauges?.[0] || '14 Gauge (2.0 mm)'
   );
@@ -383,12 +394,11 @@ function ProductDetailView({ product }: { product: ProductItem }) {
                     Width (Feet)
                   </label>
                   <input
-                    type="number"
-                    min={2}
-                    max={60}
-                    step={0.5}
-                    value={widthFeet}
-                    onChange={(e) => setWidthFeet(parseFloat(e.target.value) || 2)}
+                    type="text"
+                    inputMode="decimal"
+                    value={widthInput}
+                    onChange={(e) => setWidthInput(e.target.value)}
+                    placeholder="e.g. 2 or 2.5"
                     style={{
                       width: '100%',
                       padding: '0.65rem 0.85rem',
@@ -406,12 +416,11 @@ function ProductDetailView({ product }: { product: ProductItem }) {
                     Height (Feet)
                   </label>
                   <input
-                    type="number"
-                    min={2}
-                    max={40}
-                    step={0.5}
-                    value={heightFeet}
-                    onChange={(e) => setHeightFeet(parseFloat(e.target.value) || 2)}
+                    type="text"
+                    inputMode="decimal"
+                    value={heightInput}
+                    onChange={(e) => setHeightInput(e.target.value)}
+                    placeholder="e.g. 2.5 or 6"
                     style={{
                       width: '100%',
                       padding: '0.65rem 0.85rem',

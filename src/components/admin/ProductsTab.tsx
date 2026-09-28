@@ -14,6 +14,19 @@ import {
   IconInfo,
 } from '@/components/Icons';
 
+// Helper to safely parse any dimensional input (e.g. "2", "2.5", "2.5f", "2.5ft", "2,5", "0.75")
+function parseDimensionValue(input: string | number | undefined | null): number {
+  if (input === undefined || input === null) return 0;
+  if (typeof input === 'number') return isNaN(input) ? 0 : input;
+  const str = input.toString().trim().replace(',', '.');
+  if (!str) return 0;
+  // Match first valid float number in the string (handles "2.5f", "2.5 ft", "2.5'", "2.5")
+  const match = str.match(/[-+]?[0-9]*\.?[0-9]+/);
+  if (!match) return 0;
+  const parsed = parseFloat(match[0]);
+  return isNaN(parsed) ? 0 : parsed;
+}
+
 // Helper to convert Google Drive share links to direct embeddable image stream URLs
 function formatGoogleImageUrl(url: string): string {
   const trimmed = url.trim();
@@ -57,12 +70,12 @@ export default function ProductsTab() {
   const [material, setMaterial] = useState('Mild Steel (IS 2062 Grade)');
   const [materialGrade, setMaterialGrade] = useState<ProductItem['materialGrade']>('Mild Steel (MS)');
   const [priceType, setPriceType] = useState<'per_sqft' | 'per_unit' | 'per_ft'>('per_sqft');
-  const [unitPriceNumeric, setUnitPriceNumeric] = useState(320);
+  const [unitPriceNumeric, setUnitPriceNumeric] = useState<string>('320');
   
-  // Dimensions State (L, H, B)
-  const [lengthFeet, setLengthFeet] = useState<number>(10);
-  const [heightFeet, setHeightFeet] = useState<number>(6);
-  const [breadthFeet, setBreadthFeet] = useState<number>(3);
+  // Dimensions State as flexible strings to support decimals like 2, 2.5, 2.75, 2.5f smoothly
+  const [lengthFeet, setLengthFeet] = useState<string>('10');
+  const [heightFeet, setHeightFeet] = useState<string>('6');
+  const [breadthFeet, setBreadthFeet] = useState<string>('3');
   const [dimensionsText, setDimensionsText] = useState('Standard: 10ft (L) x 6ft (H) x 3ft (B) — Custom sizes built to order');
   
   const [leadTime, setLeadTime] = useState('7 - 12 days');
@@ -72,7 +85,11 @@ export default function ProductsTab() {
   const [imageUrlInput, setImageUrlInput] = useState('');
   const [imageLoadError, setImageLoadError] = useState(false);
 
-  // Edit Product Image State
+  // Edit Product Form State
+  const [editLength, setEditLength] = useState<string>('10');
+  const [editHeight, setEditHeight] = useState<string>('6');
+  const [editBreadth, setEditBreadth] = useState<string>('3');
+  const [editPriceInput, setEditPriceInput] = useState<string>('320');
   const [editImageMode, setEditImageMode] = useState<'file' | 'url'>('file');
   const [editImageUrlInput, setEditImageUrlInput] = useState('');
   const [editImageLoadError, setEditImageLoadError] = useState(false);
@@ -177,20 +194,49 @@ export default function ProductsTab() {
     return matchesCat && matchesSearch;
   });
 
+  const handleAddLengthChange = (valStr: string) => {
+    setLengthFeet(valStr);
+    const lDisplay = valStr.trim() || '0';
+    const hDisplay = heightFeet.trim() || '0';
+    const bDisplay = breadthFeet.trim() || '0';
+    setDimensionsText(`Standard: ${lDisplay}ft (L) x ${hDisplay}ft (H) x ${bDisplay}ft (B) — Custom sizes built to order`);
+  };
+
+  const handleAddHeightChange = (valStr: string) => {
+    setHeightFeet(valStr);
+    const lDisplay = lengthFeet.trim() || '0';
+    const hDisplay = valStr.trim() || '0';
+    const bDisplay = breadthFeet.trim() || '0';
+    setDimensionsText(`Standard: ${lDisplay}ft (L) x ${hDisplay}ft (H) x ${bDisplay}ft (B) — Custom sizes built to order`);
+  };
+
+  const handleAddBreadthChange = (valStr: string) => {
+    setBreadthFeet(valStr);
+    const lDisplay = lengthFeet.trim() || '0';
+    const hDisplay = heightFeet.trim() || '0';
+    const bDisplay = valStr.trim() || '0';
+    setDimensionsText(`Standard: ${lDisplay}ft (L) x ${hDisplay}ft (H) x ${bDisplay}ft (B) — Custom sizes built to order`);
+  };
+
   const handleCreateProduct = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
 
+    const numericPrice = parseFloat(unitPriceNumeric) || 0;
     const formattedPrice =
       priceType === 'per_sqft'
-        ? `₹${unitPriceNumeric} / sq.ft`
+        ? `₹${numericPrice} / sq.ft`
         : priceType === 'per_ft'
-        ? `₹${unitPriceNumeric} / running ft`
-        : `₹${unitPriceNumeric.toLocaleString('en-IN')}`;
+        ? `₹${numericPrice} / running ft`
+        : `₹${numericPrice.toLocaleString('en-IN')}`;
+
+    const numL = parseDimensionValue(lengthFeet) || 10;
+    const numH = parseDimensionValue(heightFeet) || 6;
+    const numB = parseDimensionValue(breadthFeet) || 3;
 
     const finalDimensionsText =
       dimensionsText.trim() ||
-      `Standard: ${lengthFeet}ft (L) x ${heightFeet}ft (H) x ${breadthFeet}ft (B) — Custom sizes built to order`;
+      `Standard: ${numL}ft (L) x ${numH}ft (H) x ${numB}ft (B) — Custom sizes built to order`;
 
     addProduct({
       name: name.trim(),
@@ -198,7 +244,7 @@ export default function ProductsTab() {
       sector: 'Residential',
       price: formattedPrice,
       priceType,
-      unitPriceNumeric,
+      unitPriceNumeric: numericPrice,
       material,
       materialGrade,
       leadTime: leadTime.trim() || '7 - 12 days',
@@ -218,13 +264,13 @@ export default function ProductsTab() {
       availableGauges: ['16 Gauge (1.6 mm)', '14 Gauge (2.0 mm)', '12 Gauge (2.5 mm)'],
       availableFinishes: ['Zinc Epoxy Anti-Rust Primer', 'Matte Black Powder Coating', 'Gloss Polyurethane (PU) Coat'],
       defaultDimensions: {
-        widthFeet: breadthFeet || lengthFeet,
-        heightFeet: heightFeet,
-        lengthFeet: lengthFeet,
-        breadthFeet: breadthFeet,
+        widthFeet: numB || numL,
+        heightFeet: numH,
+        lengthFeet: numL,
+        breadthFeet: numB,
       },
       specs: [
-        { label: 'Standard Dimensions (L×H×B)', value: `${lengthFeet}ft (L) x ${heightFeet}ft (H) x ${breadthFeet}ft (B)` },
+        { label: 'Standard Dimensions (L×H×B)', value: `${numL}ft (L) x ${numH}ft (H) x ${numB}ft (B)` },
         { label: 'Standard Gauge', value: '14 Gauge (2.0mm)' },
         { label: 'Weld Technology', value: 'TIG / MIG Argon Purged' },
       ],
@@ -234,9 +280,9 @@ export default function ProductsTab() {
     setIsAddModalOpen(false);
     setName('');
     setDescription('');
-    setLengthFeet(10);
-    setHeightFeet(6);
-    setBreadthFeet(3);
+    setLengthFeet('10');
+    setHeightFeet('6');
+    setBreadthFeet('3');
     setDimensionsText('Standard: 10ft (L) x 6ft (H) x 3ft (B) — Custom sizes built to order');
     setAddImageMode('file');
     setImageUrlInput('');
@@ -249,7 +295,12 @@ export default function ProductsTab() {
     const l = product.defaultDimensions?.lengthFeet ?? product.defaultDimensions?.widthFeet ?? 10;
     const h = product.defaultDimensions?.heightFeet ?? 6;
     const b = product.defaultDimensions?.breadthFeet ?? product.defaultDimensions?.depthInches ?? product.defaultDimensions?.widthFeet ?? 3;
-    const dText = product.dimensionsText || `Standard: ${l}ft (L) x ${h}ft (H) x ${b}ft (B)`;
+    const dText = product.dimensionsText || `Standard: ${l}ft (L) x ${h}ft (H) x ${b}ft (B) — Custom sizes built to order`;
+
+    setEditLength(String(l));
+    setEditHeight(String(h));
+    setEditBreadth(String(b));
+    setEditPriceInput(String(product.unitPriceNumeric || 0));
 
     setEditingProduct({
       ...product,
@@ -273,33 +324,76 @@ export default function ProductsTab() {
     setEditImageLoadError(false);
   };
 
+  const handleEditLengthChange = (valStr: string) => {
+    setEditLength(valStr);
+    if (editingProduct) {
+      const lDisplay = valStr.trim() || '0';
+      const hDisplay = editHeight.trim() || '0';
+      const bDisplay = editBreadth.trim() || '0';
+      setEditingProduct({
+        ...editingProduct,
+        dimensionsText: `Standard: ${lDisplay}ft (L) x ${hDisplay}ft (H) x ${bDisplay}ft (B) — Custom sizes built to order`,
+      });
+    }
+  };
+
+  const handleEditHeightChange = (valStr: string) => {
+    setEditHeight(valStr);
+    if (editingProduct) {
+      const lDisplay = editLength.trim() || '0';
+      const hDisplay = valStr.trim() || '0';
+      const bDisplay = editBreadth.trim() || '0';
+      setEditingProduct({
+        ...editingProduct,
+        dimensionsText: `Standard: ${lDisplay}ft (L) x ${hDisplay}ft (H) x ${bDisplay}ft (B) — Custom sizes built to order`,
+      });
+    }
+  };
+
+  const handleEditBreadthChange = (valStr: string) => {
+    setEditBreadth(valStr);
+    if (editingProduct) {
+      const lDisplay = editLength.trim() || '0';
+      const hDisplay = editHeight.trim() || '0';
+      const bDisplay = valStr.trim() || '0';
+      setEditingProduct({
+        ...editingProduct,
+        dimensionsText: `Standard: ${lDisplay}ft (L) x ${hDisplay}ft (H) x ${bDisplay}ft (B) — Custom sizes built to order`,
+      });
+    }
+  };
+
   const handleEditSave = (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingProduct) return;
 
+    const numericPrice = parseFloat(editPriceInput) || 0;
     const formattedPrice =
       editingProduct.priceType === 'per_sqft'
-        ? `₹${editingProduct.unitPriceNumeric} / sq.ft`
+        ? `₹${numericPrice} / sq.ft`
         : editingProduct.priceType === 'per_ft'
-        ? `₹${editingProduct.unitPriceNumeric} / running ft`
-        : `₹${editingProduct.unitPriceNumeric.toLocaleString('en-IN')}`;
+        ? `₹${numericPrice} / running ft`
+        : `₹${numericPrice.toLocaleString('en-IN')}`;
 
-    const l = editingProduct.defaultDimensions?.lengthFeet ?? editingProduct.defaultDimensions?.widthFeet ?? 10;
-    const h = editingProduct.defaultDimensions?.heightFeet ?? 6;
-    const b = editingProduct.defaultDimensions?.breadthFeet ?? 3;
+    const numL = parseDimensionValue(editLength) || 10;
+    const numH = parseDimensionValue(editHeight) || 6;
+    const numB = parseDimensionValue(editBreadth) || 3;
+
     const finalDimensionsText =
-      editingProduct.dimensionsText?.trim() || `Standard: ${l}ft (L) x ${h}ft (H) x ${b}ft (B) — Custom sizes built to order`;
+      editingProduct.dimensionsText?.trim() ||
+      `Standard: ${numL}ft (L) x ${numH}ft (H) x ${numB}ft (B) — Custom sizes built to order`;
 
     updateProduct(editingProduct.id, {
       ...editingProduct,
+      unitPriceNumeric: numericPrice,
       price: formattedPrice,
       dimensionsText: finalDimensionsText,
       defaultDimensions: {
         ...editingProduct.defaultDimensions,
-        widthFeet: b || l,
-        heightFeet: h,
-        lengthFeet: l,
-        breadthFeet: b,
+        widthFeet: numB || numL,
+        heightFeet: numH,
+        lengthFeet: numL,
+        breadthFeet: numB,
       },
     });
 
@@ -1007,11 +1101,12 @@ export default function ProductsTab() {
                     Unit Price (₹) *
                   </label>
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
                     required
-                    min={1}
                     value={unitPriceNumeric}
-                    onChange={(e) => setUnitPriceNumeric(Number(e.target.value))}
+                    onChange={(e) => setUnitPriceNumeric(e.target.value)}
+                    placeholder="320"
                     style={{
                       width: '100%',
                       padding: '8px 12px',
@@ -1051,7 +1146,7 @@ export default function ProductsTab() {
                       borderRadius: '6px',
                     }}
                   >
-                    {lengthFeet}ft (L) × {heightFeet}ft (H) × {breadthFeet}ft (B)
+                    {parseDimensionValue(lengthFeet)}ft (L) × {parseDimensionValue(heightFeet)}ft (H) × {parseDimensionValue(breadthFeet)}ft (B)
                   </span>
                 </div>
 
@@ -1061,17 +1156,12 @@ export default function ProductsTab() {
                       Length (L) <span style={{ color: '#64748b', fontWeight: 500 }}>(ft)</span> *
                     </label>
                     <input
-                      type="number"
-                      step={0.5}
-                      min={0.1}
+                      type="text"
+                      inputMode="decimal"
                       required
                       value={lengthFeet}
-                      onChange={(e) => {
-                        const val = Number(e.target.value) || 0;
-                        setLengthFeet(val);
-                        setDimensionsText(`Standard: ${val}ft (L) x ${heightFeet}ft (H) x ${breadthFeet}ft (B) — Custom sizes built to order`);
-                      }}
-                      placeholder="e.g. 10"
+                      onChange={(e) => handleAddLengthChange(e.target.value)}
+                      placeholder="e.g. 2 or 2.5"
                       style={{
                         width: '100%',
                         padding: '8px 10px',
@@ -1091,17 +1181,12 @@ export default function ProductsTab() {
                       Height (H) <span style={{ color: '#64748b', fontWeight: 500 }}>(ft)</span> *
                     </label>
                     <input
-                      type="number"
-                      step={0.5}
-                      min={0.1}
+                      type="text"
+                      inputMode="decimal"
                       required
                       value={heightFeet}
-                      onChange={(e) => {
-                        const val = Number(e.target.value) || 0;
-                        setHeightFeet(val);
-                        setDimensionsText(`Standard: ${lengthFeet}ft (L) x ${val}ft (H) x ${breadthFeet}ft (B) — Custom sizes built to order`);
-                      }}
-                      placeholder="e.g. 6"
+                      onChange={(e) => handleAddHeightChange(e.target.value)}
+                      placeholder="e.g. 2.5 or 6"
                       style={{
                         width: '100%',
                         padding: '8px 10px',
@@ -1121,17 +1206,12 @@ export default function ProductsTab() {
                       Breadth / Width (B) <span style={{ color: '#64748b', fontWeight: 500 }}>(ft)</span> *
                     </label>
                     <input
-                      type="number"
-                      step={0.5}
-                      min={0.1}
+                      type="text"
+                      inputMode="decimal"
                       required
                       value={breadthFeet}
-                      onChange={(e) => {
-                        const val = Number(e.target.value) || 0;
-                        setBreadthFeet(val);
-                        setDimensionsText(`Standard: ${lengthFeet}ft (L) x ${heightFeet}ft (H) x ${val}ft (B) — Custom sizes built to order`);
-                      }}
-                      placeholder="e.g. 3"
+                      onChange={(e) => handleAddBreadthChange(e.target.value)}
+                      placeholder="e.g. 2.5 or 3"
                       style={{
                         width: '100%',
                         padding: '8px 10px',
@@ -1155,7 +1235,7 @@ export default function ProductsTab() {
                     type="text"
                     value={dimensionsText}
                     onChange={(e) => setDimensionsText(e.target.value)}
-                    placeholder="e.g. Standard: 10ft (L) x 6ft (H) x 3ft (B) — Custom sizes built to order"
+                    placeholder="e.g. Standard: 2ft (L) x 2.5ft (H) x 2.5ft (B) — Custom sizes built to order"
                     style={{
                       width: '100%',
                       padding: '7px 10px',
@@ -1621,11 +1701,11 @@ export default function ProductsTab() {
                     Unit Price (₹) *
                   </label>
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
                     required
-                    min={1}
-                    value={editingProduct.unitPriceNumeric}
-                    onChange={(e) => setEditingProduct({ ...editingProduct, unitPriceNumeric: Number(e.target.value) })}
+                    value={editPriceInput}
+                    onChange={(e) => setEditPriceInput(e.target.value)}
                     style={{
                       width: '100%',
                       padding: '8px 12px',
@@ -1665,7 +1745,7 @@ export default function ProductsTab() {
                       borderRadius: '6px',
                     }}
                   >
-                    {editingProduct.defaultDimensions?.lengthFeet ?? editingProduct.defaultDimensions?.widthFeet ?? 10}ft (L) × {editingProduct.defaultDimensions?.heightFeet ?? 6}ft (H) × {editingProduct.defaultDimensions?.breadthFeet ?? 3}ft (B)
+                    {parseDimensionValue(editLength)}ft (L) × {parseDimensionValue(editHeight)}ft (H) × {parseDimensionValue(editBreadth)}ft (B)
                   </span>
                 </div>
 
@@ -1675,28 +1755,12 @@ export default function ProductsTab() {
                       Length (L) <span style={{ color: '#64748b', fontWeight: 500 }}>(ft)</span> *
                     </label>
                     <input
-                      type="number"
-                      step={0.5}
-                      min={0.1}
+                      type="text"
+                      inputMode="decimal"
                       required
-                      value={editingProduct.defaultDimensions?.lengthFeet ?? editingProduct.defaultDimensions?.widthFeet ?? 10}
-                      onChange={(e) => {
-                        const val = Number(e.target.value) || 0;
-                        const currentH = editingProduct.defaultDimensions?.heightFeet ?? 6;
-                        const currentB = editingProduct.defaultDimensions?.breadthFeet ?? 3;
-                        setEditingProduct({
-                          ...editingProduct,
-                          dimensionsText: `Standard: ${val}ft (L) x ${currentH}ft (H) x ${currentB}ft (B) — Custom sizes built to order`,
-                          defaultDimensions: {
-                            ...editingProduct.defaultDimensions,
-                            lengthFeet: val,
-                            widthFeet: currentB || val,
-                            heightFeet: currentH,
-                            breadthFeet: currentB,
-                          },
-                        });
-                      }}
-                      placeholder="e.g. 10"
+                      value={editLength}
+                      onChange={(e) => handleEditLengthChange(e.target.value)}
+                      placeholder="e.g. 2 or 2.5"
                       style={{
                         width: '100%',
                         padding: '8px 10px',
@@ -1716,28 +1780,12 @@ export default function ProductsTab() {
                       Height (H) <span style={{ color: '#64748b', fontWeight: 500 }}>(ft)</span> *
                     </label>
                     <input
-                      type="number"
-                      step={0.5}
-                      min={0.1}
+                      type="text"
+                      inputMode="decimal"
                       required
-                      value={editingProduct.defaultDimensions?.heightFeet ?? 6}
-                      onChange={(e) => {
-                        const val = Number(e.target.value) || 0;
-                        const currentL = editingProduct.defaultDimensions?.lengthFeet ?? editingProduct.defaultDimensions?.widthFeet ?? 10;
-                        const currentB = editingProduct.defaultDimensions?.breadthFeet ?? 3;
-                        setEditingProduct({
-                          ...editingProduct,
-                          dimensionsText: `Standard: ${currentL}ft (L) x ${val}ft (H) x ${currentB}ft (B) — Custom sizes built to order`,
-                          defaultDimensions: {
-                            ...editingProduct.defaultDimensions,
-                            heightFeet: val,
-                            lengthFeet: currentL,
-                            breadthFeet: currentB,
-                            widthFeet: currentB || currentL,
-                          },
-                        });
-                      }}
-                      placeholder="e.g. 6"
+                      value={editHeight}
+                      onChange={(e) => handleEditHeightChange(e.target.value)}
+                      placeholder="e.g. 2.5 or 6"
                       style={{
                         width: '100%',
                         padding: '8px 10px',
@@ -1757,28 +1805,12 @@ export default function ProductsTab() {
                       Breadth / Width (B) <span style={{ color: '#64748b', fontWeight: 500 }}>(ft)</span> *
                     </label>
                     <input
-                      type="number"
-                      step={0.5}
-                      min={0.1}
+                      type="text"
+                      inputMode="decimal"
                       required
-                      value={editingProduct.defaultDimensions?.breadthFeet ?? 3}
-                      onChange={(e) => {
-                        const val = Number(e.target.value) || 0;
-                        const currentL = editingProduct.defaultDimensions?.lengthFeet ?? editingProduct.defaultDimensions?.widthFeet ?? 10;
-                        const currentH = editingProduct.defaultDimensions?.heightFeet ?? 6;
-                        setEditingProduct({
-                          ...editingProduct,
-                          dimensionsText: `Standard: ${currentL}ft (L) x ${currentH}ft (H) x ${val}ft (B) — Custom sizes built to order`,
-                          defaultDimensions: {
-                            ...editingProduct.defaultDimensions,
-                            breadthFeet: val,
-                            widthFeet: val,
-                            lengthFeet: currentL,
-                            heightFeet: currentH,
-                          },
-                        });
-                      }}
-                      placeholder="e.g. 3"
+                      value={editBreadth}
+                      onChange={(e) => handleEditBreadthChange(e.target.value)}
+                      placeholder="e.g. 2.5 or 3"
                       style={{
                         width: '100%',
                         padding: '8px 10px',
@@ -1802,7 +1834,7 @@ export default function ProductsTab() {
                     type="text"
                     value={editingProduct.dimensionsText || ''}
                     onChange={(e) => setEditingProduct({ ...editingProduct, dimensionsText: e.target.value })}
-                    placeholder="e.g. Standard: 10ft (L) x 6ft (H) x 3ft (B) — Custom sizes built to order"
+                    placeholder="e.g. Standard: 2ft (L) x 2.5ft (H) x 2.5ft (B) — Custom sizes built to order"
                     style={{
                       width: '100%',
                       padding: '7px 10px',
