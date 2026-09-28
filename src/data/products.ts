@@ -19,7 +19,10 @@ export interface ProductItem {
   sector: 'Residential' | 'Commercial' | 'Industrial' | 'Agricultural';
   price: string;
   unitPriceNumeric: number; // base price in INR (either unit price or per sq.ft)
-  priceType: 'per_unit' | 'per_sqft' | 'per_ft';
+  priceType: 'per_unit' | 'per_sqft' | 'per_ft' | 'per_kg' | 'per_set';
+  minQuantity?: number;
+  stockQuantity?: number;
+  unitLabel?: string;
   rating: string;
   reviewsCount: number;
   image: string;

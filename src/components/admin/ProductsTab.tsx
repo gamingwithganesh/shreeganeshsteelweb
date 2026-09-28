@@ -20,7 +20,6 @@ function parseDimensionValue(input: string | number | undefined | null): number 
   if (typeof input === 'number') return isNaN(input) ? 0 : input;
   const str = input.toString().trim().replace(',', '.');
   if (!str) return 0;
-  // Match first valid float number in the string (handles "2.5f", "2.5 ft", "2.5'", "2.5")
   const match = str.match(/[-+]?[0-9]*\.?[0-9]+/);
   if (!match) return 0;
   const parsed = parseFloat(match[0]);
@@ -32,14 +31,11 @@ function formatGoogleImageUrl(url: string): string {
   const trimmed = url.trim();
   if (!trimmed) return '';
 
-  // Google Drive sharing URL formats:
-  // Format 1: https://drive.google.com/file/d/{FILE_ID}/view?usp=sharing
   const driveMatch1 = trimmed.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
   if (driveMatch1 && driveMatch1[1]) {
     return `https://drive.google.com/thumbnail?id=${driveMatch1[1]}&sz=w1200`;
   }
 
-  // Format 2: https://drive.google.com/open?id={FILE_ID} or ?id={FILE_ID}
   const driveMatch2 = trimmed.match(/[?&]id=([a-zA-Z0-9_-]+)/);
   if (driveMatch2 && driveMatch2[1]) {
     return `https://drive.google.com/thumbnail?id=${driveMatch2[1]}&sz=w1200`;
@@ -69,10 +65,15 @@ export default function ProductsTab() {
   const [category, setCategory] = useState<ProductItem['category']>('Gates & Entrances');
   const [material, setMaterial] = useState('Mild Steel (IS 2062 Grade)');
   const [materialGrade, setMaterialGrade] = useState<ProductItem['materialGrade']>('Mild Steel (MS)');
-  const [priceType, setPriceType] = useState<'per_sqft' | 'per_unit' | 'per_ft'>('per_sqft');
-  const [unitPriceNumeric, setUnitPriceNumeric] = useState<string>('320');
   
-  // Dimensions State as flexible strings to support decimals like 2, 2.5, 2.75, 2.5f smoothly
+  // Price & Quantity State
+  const [priceType, setPriceType] = useState<ProductItem['priceType']>('per_unit');
+  const [unitPriceNumeric, setUnitPriceNumeric] = useState<string>('2500');
+  const [minQuantity, setMinQuantity] = useState<string>('1');
+  const [stockQuantity, setStockQuantity] = useState<string>('25');
+  const [unitLabel, setUnitLabel] = useState<string>('Piece');
+  
+  // Dimensions State
   const [lengthFeet, setLengthFeet] = useState<string>('10');
   const [heightFeet, setHeightFeet] = useState<string>('6');
   const [breadthFeet, setBreadthFeet] = useState<string>('3');
@@ -86,10 +87,14 @@ export default function ProductsTab() {
   const [imageLoadError, setImageLoadError] = useState(false);
 
   // Edit Product Form State
+  const [editPriceType, setEditPriceType] = useState<ProductItem['priceType']>('per_unit');
+  const [editPriceInput, setEditPriceInput] = useState<string>('2500');
+  const [editMinQty, setEditMinQty] = useState<string>('1');
+  const [editStockQty, setEditStockQty] = useState<string>('25');
+  const [editUnitLabel, setEditUnitLabel] = useState<string>('Piece');
   const [editLength, setEditLength] = useState<string>('10');
   const [editHeight, setEditHeight] = useState<string>('6');
   const [editBreadth, setEditBreadth] = useState<string>('3');
-  const [editPriceInput, setEditPriceInput] = useState<string>('320');
   const [editImageMode, setEditImageMode] = useState<'file' | 'url'>('file');
   const [editImageUrlInput, setEditImageUrlInput] = useState('');
   const [editImageLoadError, setEditImageLoadError] = useState(false);
@@ -100,7 +105,6 @@ export default function ProductsTab() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const editFileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Client-Side Image Compressor (< 2MB Base64)
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, isEdit = false) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -223,12 +227,15 @@ export default function ProductsTab() {
     if (!name.trim()) return;
 
     const numericPrice = parseFloat(unitPriceNumeric) || 0;
-    const formattedPrice =
-      priceType === 'per_sqft'
-        ? `₹${numericPrice} / sq.ft`
-        : priceType === 'per_ft'
-        ? `₹${numericPrice} / running ft`
-        : `₹${numericPrice.toLocaleString('en-IN')}`;
+    const minQtyNum = parseInt(minQuantity) || 1;
+    const stockQtyNum = parseInt(stockQuantity) || 0;
+
+    let formattedPrice = `₹${numericPrice.toLocaleString('en-IN')}`;
+    if (priceType === 'per_sqft') formattedPrice = `₹${numericPrice} / sq.ft`;
+    else if (priceType === 'per_ft') formattedPrice = `₹${numericPrice} / running ft`;
+    else if (priceType === 'per_kg') formattedPrice = `₹${numericPrice} / kg`;
+    else if (priceType === 'per_set') formattedPrice = `₹${numericPrice.toLocaleString('en-IN')} / set`;
+    else if (priceType === 'per_unit') formattedPrice = `₹${numericPrice.toLocaleString('en-IN')} / ${unitLabel || 'pc'}`;
 
     const numL = parseDimensionValue(lengthFeet) || 10;
     const numH = parseDimensionValue(heightFeet) || 6;
@@ -245,6 +252,9 @@ export default function ProductsTab() {
       price: formattedPrice,
       priceType,
       unitPriceNumeric: numericPrice,
+      minQuantity: minQtyNum,
+      stockQuantity: stockQtyNum,
+      unitLabel: unitLabel.trim() || 'Piece',
       material,
       materialGrade,
       leadTime: leadTime.trim() || '7 - 12 days',
@@ -255,7 +265,7 @@ export default function ProductsTab() {
       description: description.trim() || 'Custom engineered structural metal fabrication.',
       fullDescription: description.trim() || 'Custom engineered structural metal fabrication with precision welding.',
       dimensionsText: finalDimensionsText,
-      inStockStandard: true,
+      inStockStandard: stockQtyNum > 0,
       features: [
         'Anti-corrosion multi-stage primer undercoat',
         'Precision TIG/MIG welding with argon gas purging',
@@ -271,7 +281,7 @@ export default function ProductsTab() {
       },
       specs: [
         { label: 'Standard Dimensions (L×H×B)', value: `${numL}ft (L) x ${numH}ft (H) x ${numB}ft (B)` },
-        { label: 'Standard Gauge', value: '14 Gauge (2.0mm)' },
+        { label: 'Minimum Order Quantity', value: `${minQtyNum} ${unitLabel || 'Units'}` },
         { label: 'Weld Technology', value: 'TIG / MIG Argon Purged' },
       ],
       reviews: [],
@@ -280,6 +290,9 @@ export default function ProductsTab() {
     setIsAddModalOpen(false);
     setName('');
     setDescription('');
+    setUnitPriceNumeric('2500');
+    setMinQuantity('1');
+    setStockQuantity('25');
     setLengthFeet('10');
     setHeightFeet('6');
     setBreadthFeet('3');
@@ -295,12 +308,16 @@ export default function ProductsTab() {
     const l = product.defaultDimensions?.lengthFeet ?? product.defaultDimensions?.widthFeet ?? 10;
     const h = product.defaultDimensions?.heightFeet ?? 6;
     const b = product.defaultDimensions?.breadthFeet ?? product.defaultDimensions?.depthInches ?? product.defaultDimensions?.widthFeet ?? 3;
-    const dText = product.dimensionsText || `Standard: ${l}ft (L) x ${h}ft (H) x ${b}ft (B) — Custom sizes built to order`;
+    const dText = product.dimensionsText || `Standard: ${l}ft (L) x ${h}ft (H) x ${b}ft (B)`;
 
+    setEditPriceType(product.priceType || 'per_unit');
+    setEditPriceInput(String(product.unitPriceNumeric || 0));
+    setEditMinQty(String(product.minQuantity || 1));
+    setEditStockQty(String(product.stockQuantity || 10));
+    setEditUnitLabel(product.unitLabel || 'Piece');
     setEditLength(String(l));
     setEditHeight(String(h));
     setEditBreadth(String(b));
-    setEditPriceInput(String(product.unitPriceNumeric || 0));
 
     setEditingProduct({
       ...product,
@@ -368,12 +385,15 @@ export default function ProductsTab() {
     if (!editingProduct) return;
 
     const numericPrice = parseFloat(editPriceInput) || 0;
-    const formattedPrice =
-      editingProduct.priceType === 'per_sqft'
-        ? `₹${numericPrice} / sq.ft`
-        : editingProduct.priceType === 'per_ft'
-        ? `₹${numericPrice} / running ft`
-        : `₹${numericPrice.toLocaleString('en-IN')}`;
+    const minQtyNum = parseInt(editMinQty) || 1;
+    const stockQtyNum = parseInt(editStockQty) || 0;
+
+    let formattedPrice = `₹${numericPrice.toLocaleString('en-IN')}`;
+    if (editPriceType === 'per_sqft') formattedPrice = `₹${numericPrice} / sq.ft`;
+    else if (editPriceType === 'per_ft') formattedPrice = `₹${numericPrice} / running ft`;
+    else if (editPriceType === 'per_kg') formattedPrice = `₹${numericPrice} / kg`;
+    else if (editPriceType === 'per_set') formattedPrice = `₹${numericPrice.toLocaleString('en-IN')} / set`;
+    else if (editPriceType === 'per_unit') formattedPrice = `₹${numericPrice.toLocaleString('en-IN')} / ${editUnitLabel || 'pc'}`;
 
     const numL = parseDimensionValue(editLength) || 10;
     const numH = parseDimensionValue(editHeight) || 6;
@@ -385,9 +405,14 @@ export default function ProductsTab() {
 
     updateProduct(editingProduct.id, {
       ...editingProduct,
+      priceType: editPriceType,
       unitPriceNumeric: numericPrice,
+      minQuantity: minQtyNum,
+      stockQuantity: stockQtyNum,
+      unitLabel: editUnitLabel.trim() || 'Piece',
       price: formattedPrice,
       dimensionsText: finalDimensionsText,
+      inStockStandard: stockQtyNum > 0,
       defaultDimensions: {
         ...editingProduct.defaultDimensions,
         widthFeet: numB || numL,
@@ -455,28 +480,26 @@ export default function ProductsTab() {
           </span>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-          <button
-            type="button"
-            onClick={() => setIsAddModalOpen(true)}
-            style={{
-              backgroundColor: '#09090b',
-              color: '#ffffff',
-              border: 'none',
-              padding: '8px 16px',
-              borderRadius: '8px',
-              fontSize: '0.8rem',
-              fontWeight: 600,
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-            }}
-          >
-            <IconPlus size={14} color="#ffffff" />
-            <span>Add Product</span>
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => setIsAddModalOpen(true)}
+          style={{
+            backgroundColor: '#09090b',
+            color: '#ffffff',
+            border: 'none',
+            padding: '8px 16px',
+            borderRadius: '8px',
+            fontSize: '0.8rem',
+            fontWeight: 600,
+            cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+          }}
+        >
+          <IconPlus size={14} color="#ffffff" />
+          <span>Add Product</span>
+        </button>
       </div>
 
       {/* Toast Alert */}
@@ -607,13 +630,10 @@ export default function ProductsTab() {
                   CATEGORY
                 </th>
                 <th style={{ padding: '10px 14px', fontSize: '0.7rem', fontWeight: 700, color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  MATERIAL
+                  MEASUREMENTS (L×H×B)
                 </th>
                 <th style={{ padding: '10px 14px', fontSize: '0.7rem', fontWeight: 700, color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  MEASUREMENTS (L × H × B)
-                </th>
-                <th style={{ padding: '10px 14px', fontSize: '0.7rem', fontWeight: 700, color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  PRICE
+                  PRICE &amp; QUANTITY
                 </th>
                 <th style={{ padding: '10px 18px', fontSize: '0.7rem', fontWeight: 700, color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.04em', textAlign: 'right' }}>
                   ACTIONS
@@ -623,7 +643,7 @@ export default function ProductsTab() {
             <tbody>
               {filteredProducts.length === 0 ? (
                 <tr>
-                  <td colSpan={6} style={{ padding: '32px 18px', textAlign: 'center', color: '#71717a', fontSize: '0.825rem' }}>
+                  <td colSpan={5} style={{ padding: '32px 18px', textAlign: 'center', color: '#71717a', fontSize: '0.825rem' }}>
                     No products found.
                   </td>
                 </tr>
@@ -667,7 +687,7 @@ export default function ProductsTab() {
                               {product.name}
                             </div>
                             <div style={{ fontSize: '0.7rem', color: '#71717a' }}>
-                              {product.leadTime || '7-12 days'}
+                              {product.materialGrade || product.material}
                             </div>
                           </div>
                         </div>
@@ -676,11 +696,6 @@ export default function ProductsTab() {
                       {/* Category */}
                       <td style={{ padding: '12px 14px', fontSize: '0.8rem', color: '#52525b' }}>
                         {product.category}
-                      </td>
-
-                      {/* Material */}
-                      <td style={{ padding: '12px 14px', fontSize: '0.8rem', color: '#71717a' }}>
-                        {product.materialGrade || product.material}
                       </td>
 
                       {/* Measurements (L, H, B) */}
@@ -700,16 +715,17 @@ export default function ProductsTab() {
                         >
                           {l}ft (L) × {h}ft (H) × {b}ft (B)
                         </span>
-                        {product.dimensionsText && (
-                          <div style={{ fontSize: '0.68rem', color: '#71717a', marginTop: '2px', maxWidth: '200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            {product.dimensionsText}
-                          </div>
-                        )}
                       </td>
 
-                      {/* Price */}
-                      <td style={{ padding: '12px 14px', fontWeight: 700, color: '#09090b', fontSize: '0.825rem' }}>
-                        {product.price}
+                      {/* Price & Quantity */}
+                      <td style={{ padding: '12px 14px' }}>
+                        <div style={{ fontWeight: 700, color: '#09090b', fontSize: '0.825rem' }}>
+                          {product.price}
+                        </div>
+                        <div style={{ fontSize: '0.7rem', color: '#71717a', marginTop: '2px' }}>
+                          {product.stockQuantity !== undefined ? `Stock: ${product.stockQuantity} ${product.unitLabel || 'units'}` : 'Standard Stock'}
+                          {product.minQuantity && product.minQuantity > 1 ? ` • Min: ${product.minQuantity}` : ''}
+                        </div>
                       </td>
 
                       {/* Actions */}
@@ -793,7 +809,7 @@ export default function ProductsTab() {
                   Add Product
                 </h3>
                 <p style={{ fontSize: '0.75rem', color: '#71717a', margin: '2px 0 0 0' }}>
-                  Create new steel & fabrication item with standard L, H, B measurements.
+                  Set up dimensions (L, H, B), pricing basis, and quantity limits.
                 </p>
               </div>
               <button
@@ -874,7 +890,7 @@ export default function ProductsTab() {
                   </button>
                 </div>
 
-                {/* Option 1: File Upload */}
+                {/* File / URL switcher */}
                 {addImageMode === 'file' ? (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <div
@@ -925,7 +941,6 @@ export default function ProductsTab() {
                     <span style={{ fontSize: '0.72rem', color: '#71717a' }}>PNG, JPG or WebP</span>
                   </div>
                 ) : (
-                  /* Option 2: Image URL */
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                       <div
@@ -988,35 +1003,6 @@ export default function ProductsTab() {
                         />
                       </div>
                     </div>
-
-                    {isGoogleDriveLink(imageUrlInput) && (
-                      <div
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          fontSize: '0.72rem',
-                          color: '#09090b',
-                          backgroundColor: '#f4f4f5',
-                          padding: '5px 10px',
-                          borderRadius: '6px',
-                          border: '1px solid #e4e4e7',
-                        }}
-                      >
-                        <IconCheck size={12} color="#09090b" />
-                        <span>Google Drive link detected and formatted for display.</span>
-                      </div>
-                    )}
-
-                    {imageLoadError ? (
-                      <div style={{ fontSize: '0.72rem', color: '#dc2626' }}>
-                        Could not load preview. If using Google Drive, make sure link sharing is set to &ldquo;Anyone with the link can view&rdquo;.
-                      </div>
-                    ) : (
-                      <div style={{ fontSize: '0.71rem', color: '#71717a', lineHeight: 1.4 }}>
-                        Paste any direct image link or Google Drive link (make sure file is shared to anyone with link).
-                      </div>
-                    )}
                   </div>
                 )}
               </div>
@@ -1032,7 +1018,7 @@ export default function ProductsTab() {
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="e.g. Modern Swing Gate"
+                    placeholder="e.g. Laser Gate / Custom Trolley"
                     style={{
                       width: '100%',
                       padding: '8px 12px',
@@ -1070,57 +1056,7 @@ export default function ProductsTab() {
                 </div>
               </div>
 
-              {/* Pricing Model & Unit Price */}
-              <div className="admin-form-grid-2">
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#09090b', marginBottom: '4px' }}>
-                    Pricing Model
-                  </label>
-                  <select
-                    value={priceType}
-                    onChange={(e) => setPriceType(e.target.value as any)}
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      borderRadius: '8px',
-                      border: '1px solid #e4e4e7',
-                      fontSize: '0.825rem',
-                      color: '#09090b',
-                      outline: 'none',
-                      backgroundColor: '#ffffff',
-                    }}
-                  >
-                    <option value="per_sqft">Per Sq. Ft</option>
-                    <option value="per_ft">Per Running Ft</option>
-                    <option value="per_unit">Per Unit</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#09090b', marginBottom: '4px' }}>
-                    Unit Price (₹) *
-                  </label>
-                  <input
-                    type="text"
-                    inputMode="decimal"
-                    required
-                    value={unitPriceNumeric}
-                    onChange={(e) => setUnitPriceNumeric(e.target.value)}
-                    placeholder="320"
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      borderRadius: '8px',
-                      border: '1px solid #e4e4e7',
-                      fontSize: '0.825rem',
-                      color: '#09090b',
-                      outline: 'none',
-                    }}
-                  />
-                </div>
-              </div>
-
-              {/* SECTION: Product Measurements (L, H, B) */}
+              {/* SECTION: PRICE & QUANTITY SETTINGS */}
               <div
                 style={{
                   backgroundColor: '#f8fafc',
@@ -1133,8 +1069,170 @@ export default function ProductsTab() {
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
-                  <label style={{ fontSize: '0.78rem', fontWeight: 800, color: '#09090b', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span>📐 Product Measurements (L, H, B)</span>
+                  <label style={{ fontSize: '0.78rem', fontWeight: 800, color: '#09090b', margin: 0 }}>
+                    💰 Price &amp; Quantity Settings
+                  </label>
+                  <span
+                    style={{
+                      fontSize: '0.72rem',
+                      fontWeight: 700,
+                      backgroundColor: '#09090b',
+                      color: '#ffffff',
+                      padding: '2px 8px',
+                      borderRadius: '6px',
+                    }}
+                  >
+                    ₹{unitPriceNumeric || '0'} / {unitLabel || 'unit'} (Min: {minQuantity || '1'})
+                  </span>
+                </div>
+
+                <div className="admin-form-grid-2">
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#334155', marginBottom: '3px' }}>
+                      Pricing Basis / Model *
+                    </label>
+                    <select
+                      value={priceType}
+                      onChange={(e) => {
+                        const pt = e.target.value as ProductItem['priceType'];
+                        setPriceType(pt);
+                        if (pt === 'per_unit') setUnitLabel('Piece');
+                        else if (pt === 'per_sqft') setUnitLabel('Sq.Ft');
+                        else if (pt === 'per_ft') setUnitLabel('Running Ft');
+                        else if (pt === 'per_kg') setUnitLabel('Kg');
+                        else if (pt === 'per_set') setUnitLabel('Set');
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '8px 10px',
+                        borderRadius: '8px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.825rem',
+                        color: '#09090b',
+                        backgroundColor: '#ffffff',
+                        outline: 'none',
+                      }}
+                    >
+                      <option value="per_unit">Per Piece / Unit (Quantity Based)</option>
+                      <option value="per_sqft">Per Sq. Ft (Area Based)</option>
+                      <option value="per_ft">Per Running Ft (Length Based)</option>
+                      <option value="per_kg">Per Kilogram (Weight Based)</option>
+                      <option value="per_set">Per Set / Pair (Package Based)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#334155', marginBottom: '3px' }}>
+                      Unit Price (₹) *
+                    </label>
+                    <input
+                      type="text"
+                      inputMode="decimal"
+                      required
+                      value={unitPriceNumeric}
+                      onChange={(e) => setUnitPriceNumeric(e.target.value)}
+                      placeholder="e.g. 2500"
+                      style={{
+                        width: '100%',
+                        padding: '8px 10px',
+                        borderRadius: '8px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.825rem',
+                        fontWeight: 600,
+                        color: '#09090b',
+                        backgroundColor: '#ffffff',
+                        outline: 'none',
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div className="admin-form-grid-3">
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#334155', marginBottom: '3px' }}>
+                      Min Order Qty (MOQ)
+                    </label>
+                    <input
+                      type="number"
+                      min={1}
+                      value={minQuantity}
+                      onChange={(e) => setMinQuantity(e.target.value)}
+                      placeholder="1"
+                      style={{
+                        width: '100%',
+                        padding: '8px 10px',
+                        borderRadius: '8px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.825rem',
+                        color: '#09090b',
+                        backgroundColor: '#ffffff',
+                        outline: 'none',
+                      }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#334155', marginBottom: '3px' }}>
+                      Stock Quantity
+                    </label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={stockQuantity}
+                      onChange={(e) => setStockQuantity(e.target.value)}
+                      placeholder="e.g. 50"
+                      style={{
+                        width: '100%',
+                        padding: '8px 10px',
+                        borderRadius: '8px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.825rem',
+                        color: '#09090b',
+                        backgroundColor: '#ffffff',
+                        outline: 'none',
+                      }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#334155', marginBottom: '3px' }}>
+                      Unit Name / Label
+                    </label>
+                    <input
+                      type="text"
+                      value={unitLabel}
+                      onChange={(e) => setUnitLabel(e.target.value)}
+                      placeholder="Piece / Unit / Kg"
+                      style={{
+                        width: '100%',
+                        padding: '8px 10px',
+                        borderRadius: '8px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.825rem',
+                        color: '#09090b',
+                        backgroundColor: '#ffffff',
+                        outline: 'none',
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION: MEASUREMENTS (L, H, B) */}
+              <div
+                style={{
+                  backgroundColor: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '12px',
+                  padding: '14px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '10px',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
+                  <label style={{ fontSize: '0.78rem', fontWeight: 800, color: '#09090b', margin: 0 }}>
+                    📐 Product Measurements (L, H, B)
                   </label>
                   <span
                     style={{
@@ -1229,7 +1327,7 @@ export default function ProductsTab() {
 
                 <div>
                   <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#334155', marginBottom: '3px' }}>
-                    Dimensions Display Text <span style={{ color: '#64748b', fontWeight: 400 }}>(Shown in Shop catalog & quotations)</span>
+                    Dimensions Display Text
                   </label>
                   <input
                     type="text"
@@ -1394,7 +1492,7 @@ export default function ProductsTab() {
                   Edit Product
                 </h3>
                 <p style={{ fontSize: '0.75rem', color: '#71717a', margin: '2px 0 0 0' }}>
-                  Update pricing, measurements (L, H, B), or specifications.
+                  Update pricing, quantity basis, measurements (L, H, B), or specifications.
                 </p>
               </div>
               <button
@@ -1414,7 +1512,6 @@ export default function ProductsTab() {
                   Product Picture
                 </label>
 
-                {/* Segmented Mode Switcher */}
                 <div
                   style={{
                     display: 'inline-flex',
@@ -1475,7 +1572,6 @@ export default function ProductsTab() {
                   </button>
                 </div>
 
-                {/* Option 1: File Upload */}
                 {editImageMode === 'file' ? (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <div
@@ -1526,7 +1622,6 @@ export default function ProductsTab() {
                     <span style={{ fontSize: '0.72rem', color: '#71717a' }}>PNG, JPG or WebP</span>
                   </div>
                 ) : (
-                  /* Option 2: Image URL */
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                       <div
@@ -1589,35 +1684,6 @@ export default function ProductsTab() {
                         />
                       </div>
                     </div>
-
-                    {isGoogleDriveLink(editImageUrlInput) && (
-                      <div
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          fontSize: '0.72rem',
-                          color: '#09090b',
-                          backgroundColor: '#f4f4f5',
-                          padding: '5px 10px',
-                          borderRadius: '6px',
-                          border: '1px solid #e4e4e7',
-                        }}
-                      >
-                        <IconCheck size={12} color="#09090b" />
-                        <span>Google Drive link detected and formatted for display.</span>
-                      </div>
-                    )}
-
-                    {editImageLoadError ? (
-                      <div style={{ fontSize: '0.72rem', color: '#dc2626' }}>
-                        Could not load preview. If using Google Drive, make sure link sharing is set to &ldquo;Anyone with the link can view&rdquo;.
-                      </div>
-                    ) : (
-                      <div style={{ fontSize: '0.71rem', color: '#71717a', lineHeight: 1.4 }}>
-                        Paste any direct image link or Google Drive link (make sure file is shared to anyone with link).
-                      </div>
-                    )}
                   </div>
                 )}
               </div>
@@ -1670,56 +1736,7 @@ export default function ProductsTab() {
                 </div>
               </div>
 
-              {/* Pricing Model & Unit Price */}
-              <div className="admin-form-grid-2">
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#09090b', marginBottom: '4px' }}>
-                    Pricing Model
-                  </label>
-                  <select
-                    value={editingProduct.priceType || 'per_sqft'}
-                    onChange={(e) => setEditingProduct({ ...editingProduct, priceType: e.target.value as any })}
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      borderRadius: '8px',
-                      border: '1px solid #e4e4e7',
-                      fontSize: '0.825rem',
-                      color: '#09090b',
-                      outline: 'none',
-                      backgroundColor: '#ffffff',
-                    }}
-                  >
-                    <option value="per_sqft">Per Sq. Ft</option>
-                    <option value="per_ft">Per Running Ft</option>
-                    <option value="per_unit">Per Unit</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#09090b', marginBottom: '4px' }}>
-                    Unit Price (₹) *
-                  </label>
-                  <input
-                    type="text"
-                    inputMode="decimal"
-                    required
-                    value={editPriceInput}
-                    onChange={(e) => setEditPriceInput(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      borderRadius: '8px',
-                      border: '1px solid #e4e4e7',
-                      fontSize: '0.825rem',
-                      color: '#09090b',
-                      outline: 'none',
-                    }}
-                  />
-                </div>
-              </div>
-
-              {/* SECTION: Product Measurements (L, H, B) for Edit */}
+              {/* SECTION: PRICE & QUANTITY SETTINGS (EDIT) */}
               <div
                 style={{
                   backgroundColor: '#f8fafc',
@@ -1732,8 +1749,169 @@ export default function ProductsTab() {
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
-                  <label style={{ fontSize: '0.78rem', fontWeight: 800, color: '#09090b', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span>📐 Product Measurements (L, H, B)</span>
+                  <label style={{ fontSize: '0.78rem', fontWeight: 800, color: '#09090b', margin: 0 }}>
+                    💰 Price &amp; Quantity Settings
+                  </label>
+                  <span
+                    style={{
+                      fontSize: '0.72rem',
+                      fontWeight: 700,
+                      backgroundColor: '#09090b',
+                      color: '#ffffff',
+                      padding: '2px 8px',
+                      borderRadius: '6px',
+                    }}
+                  >
+                    ₹{editPriceInput || '0'} / {editUnitLabel || 'unit'} (Min: {editMinQty || '1'})
+                  </span>
+                </div>
+
+                <div className="admin-form-grid-2">
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#334155', marginBottom: '3px' }}>
+                      Pricing Basis / Model *
+                    </label>
+                    <select
+                      value={editPriceType}
+                      onChange={(e) => {
+                        const pt = e.target.value as ProductItem['priceType'];
+                        setEditPriceType(pt);
+                        if (pt === 'per_unit') setEditUnitLabel('Piece');
+                        else if (pt === 'per_sqft') setEditUnitLabel('Sq.Ft');
+                        else if (pt === 'per_ft') setEditUnitLabel('Running Ft');
+                        else if (pt === 'per_kg') setEditUnitLabel('Kg');
+                        else if (pt === 'per_set') setEditUnitLabel('Set');
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '8px 10px',
+                        borderRadius: '8px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.825rem',
+                        color: '#09090b',
+                        backgroundColor: '#ffffff',
+                        outline: 'none',
+                      }}
+                    >
+                      <option value="per_unit">Per Piece / Unit (Quantity Based)</option>
+                      <option value="per_sqft">Per Sq. Ft (Area Based)</option>
+                      <option value="per_ft">Per Running Ft (Length Based)</option>
+                      <option value="per_kg">Per Kilogram (Weight Based)</option>
+                      <option value="per_set">Per Set / Pair (Package Based)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#334155', marginBottom: '3px' }}>
+                      Unit Price (₹) *
+                    </label>
+                    <input
+                      type="text"
+                      inputMode="decimal"
+                      required
+                      value={editPriceInput}
+                      onChange={(e) => setEditPriceInput(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '8px 10px',
+                        borderRadius: '8px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.825rem',
+                        fontWeight: 600,
+                        color: '#09090b',
+                        backgroundColor: '#ffffff',
+                        outline: 'none',
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div className="admin-form-grid-3">
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#334155', marginBottom: '3px' }}>
+                      Min Order Qty
+                    </label>
+                    <input
+                      type="number"
+                      min={1}
+                      value={editMinQty}
+                      onChange={(e) => setEditMinQty(e.target.value)}
+                      placeholder="1"
+                      style={{
+                        width: '100%',
+                        padding: '8px 10px',
+                        borderRadius: '8px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.825rem',
+                        color: '#09090b',
+                        backgroundColor: '#ffffff',
+                        outline: 'none',
+                      }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#334155', marginBottom: '3px' }}>
+                      Stock Quantity
+                    </label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={editStockQty}
+                      onChange={(e) => setEditStockQty(e.target.value)}
+                      placeholder="50"
+                      style={{
+                        width: '100%',
+                        padding: '8px 10px',
+                        borderRadius: '8px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.825rem',
+                        color: '#09090b',
+                        backgroundColor: '#ffffff',
+                        outline: 'none',
+                      }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#334155', marginBottom: '3px' }}>
+                      Unit Name / Label
+                    </label>
+                    <input
+                      type="text"
+                      value={editUnitLabel}
+                      onChange={(e) => setEditUnitLabel(e.target.value)}
+                      placeholder="Piece / Unit / Kg"
+                      style={{
+                        width: '100%',
+                        padding: '8px 10px',
+                        borderRadius: '8px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '0.825rem',
+                        color: '#09090b',
+                        backgroundColor: '#ffffff',
+                        outline: 'none',
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION: MEASUREMENTS (L, H, B) */}
+              <div
+                style={{
+                  backgroundColor: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '12px',
+                  padding: '14px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '10px',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
+                  <label style={{ fontSize: '0.78rem', fontWeight: 800, color: '#09090b', margin: 0 }}>
+                    📐 Product Measurements (L, H, B)
                   </label>
                   <span
                     style={{
@@ -1828,7 +2006,7 @@ export default function ProductsTab() {
 
                 <div>
                   <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, color: '#334155', marginBottom: '3px' }}>
-                    Dimensions Display Text <span style={{ color: '#64748b', fontWeight: 400 }}>(Shown in Shop catalog & quotations)</span>
+                    Dimensions Display Text
                   </label>
                   <input
                     type="text"
