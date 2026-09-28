@@ -10,15 +10,24 @@ export default function Footer() {
       style={{
         backgroundColor: '#ffffff',
         color: '#111827',
-        padding: 'clamp(3rem, 5vw, 4.5rem) 0 1.5rem 0',
+        padding: 'clamp(3.5rem, 6vw, 5.5rem) 0 clamp(1.75rem, 3vw, 2.5rem) 0',
         borderTop: '1px solid rgba(0, 0, 0, 0.08)',
-        position: 'relative',
-        overflow: 'hidden',
+        width: '100%',
+        boxSizing: 'border-box',
+        fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
       }}
     >
-      <div className="container-custom">
+      <div
+        style={{
+          maxWidth: '1360px',
+          margin: '0 auto',
+          padding: '0 clamp(1.5rem, 4vw, 3.5rem)',
+          width: '100%',
+          boxSizing: 'border-box',
+        }}
+      >
         {/* ========================================================
-            1. Top Section: 'Experience liftoff' on Left + Product & Resources on Right
+            1. Top Section: 'Experience liftoff' on Left, Columns on Right
            ======================================================== */}
         <div
           style={{
@@ -27,20 +36,19 @@ export default function Footer() {
             alignItems: 'flex-start',
             flexWrap: 'wrap',
             gap: '2.5rem',
-            paddingBottom: 'clamp(2rem, 4vw, 3.5rem)',
+            paddingBottom: 'clamp(2.5rem, 5vw, 4.5rem)',
           }}
         >
-          {/* Left: Tagline Headline */}
+          {/* Left: Headline Text */}
           <div>
             <h2
               style={{
-                fontSize: 'clamp(1.75rem, 2.5vw, 2.25rem)',
+                fontSize: 'clamp(1.75rem, 2.5vw, 2.35rem)',
                 fontWeight: 400,
                 color: '#111827',
                 letterSpacing: '-0.025em',
-                lineHeight: 1.2,
+                lineHeight: 1.15,
                 margin: 0,
-                fontFamily: 'inherit',
               }}
             >
               Experience liftoff
@@ -51,7 +59,7 @@ export default function Footer() {
           <div
             style={{
               display: 'flex',
-              gap: 'clamp(3.5rem, 8vw, 8rem)',
+              gap: 'clamp(3.5rem, 7vw, 7.5rem)',
               flexWrap: 'wrap',
             }}
           >
@@ -63,7 +71,7 @@ export default function Footer() {
                   fontWeight: 500,
                   color: '#111827',
                   letterSpacing: '-0.01em',
-                  marginBottom: '1rem',
+                  marginBottom: '1.15rem',
                 }}
               >
                 Product
@@ -150,7 +158,7 @@ export default function Footer() {
                   fontWeight: 500,
                   color: '#111827',
                   letterSpacing: '-0.01em',
-                  marginBottom: '1rem',
+                  marginBottom: '1.15rem',
                 }}
               >
                 Resources
@@ -232,11 +240,11 @@ export default function Footer() {
         </div>
 
         {/* ========================================================
-            2. Monumental Giant Wordmark (Full Width Clean Typography)
+            2. Monumental Giant Wordmark: Full Width Edge-to-Edge
            ======================================================== */}
         <div
           style={{
-            padding: 'clamp(1rem, 2.5vw, 2.5rem) 0 clamp(1rem, 2vw, 2rem) 0',
+            padding: 'clamp(1rem, 2.5vw, 2.5rem) 0 clamp(1.25rem, 3vw, 2.5rem) 0',
             width: '100%',
             overflow: 'hidden',
           }}
@@ -253,7 +261,6 @@ export default function Footer() {
               textAlign: 'left',
               width: '100%',
               marginLeft: '-2px',
-              fontFamily: 'inherit',
             }}
           >
             Shree Ganesh Steel
@@ -266,7 +273,7 @@ export default function Footer() {
         <div
           style={{
             borderTop: '1px solid rgba(0, 0, 0, 0.08)',
-            paddingTop: '1.25rem',
+            paddingTop: '1.35rem',
             paddingBottom: '0.5rem',
             display: 'flex',
             justifyContent: 'space-between',
@@ -298,7 +305,7 @@ export default function Footer() {
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: 'clamp(1rem, 2vw, 2rem)',
+              gap: 'clamp(1rem, 2vw, 2.25rem)',
               flexWrap: 'wrap',
               fontSize: '0.78rem',
               color: '#5f6368',
