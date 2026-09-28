@@ -10,7 +10,7 @@ export default function Footer() {
       style={{
         backgroundColor: '#ffffff',
         color: '#111827',
-        padding: 'clamp(3.5rem, 5vw, 5rem) 0 clamp(1.5rem, 3vw, 2.5rem) 0',
+        padding: 'clamp(3rem, 5vw, 4.5rem) 0 1.5rem 0',
         borderTop: '1px solid rgba(0, 0, 0, 0.08)',
         position: 'relative',
         overflow: 'hidden',
@@ -18,8 +18,7 @@ export default function Footer() {
     >
       <div className="container-custom">
         {/* ========================================================
-            1. Top Row:
-               'Experience precision' on Left + Exactly 2 Columns (Product & Resources) on Right
+            1. Top Section: 'Experience liftoff' on Left + Product & Resources on Right
            ======================================================== */}
         <div
           style={{
@@ -28,23 +27,23 @@ export default function Footer() {
             alignItems: 'flex-start',
             flexWrap: 'wrap',
             gap: '2.5rem',
-            paddingBottom: 'clamp(2.5rem, 4vw, 4rem)',
+            paddingBottom: 'clamp(2rem, 4vw, 3.5rem)',
           }}
         >
-          {/* Left: Clean Tagline Headline */}
-          <div style={{ maxWidth: '400px' }}>
+          {/* Left: Tagline Headline */}
+          <div>
             <h2
-              className="font-display"
               style={{
-                fontSize: 'clamp(1.75rem, 2.5vw, 2.5rem)',
-                fontWeight: 500,
+                fontSize: 'clamp(1.75rem, 2.5vw, 2.25rem)',
+                fontWeight: 400,
                 color: '#111827',
                 letterSpacing: '-0.025em',
                 lineHeight: 1.2,
                 margin: 0,
+                fontFamily: 'inherit',
               }}
             >
-              Experience precision
+              Experience liftoff
             </h2>
           </div>
 
@@ -52,7 +51,7 @@ export default function Footer() {
           <div
             style={{
               display: 'flex',
-              gap: 'clamp(3rem, 7vw, 7rem)',
+              gap: 'clamp(3.5rem, 8vw, 8rem)',
               flexWrap: 'wrap',
             }}
           >
@@ -60,11 +59,11 @@ export default function Footer() {
             <div>
               <div
                 style={{
-                  fontSize: '0.875rem',
-                  fontWeight: 600,
+                  fontSize: '0.8125rem',
+                  fontWeight: 500,
                   color: '#111827',
                   letterSpacing: '-0.01em',
-                  marginBottom: '1.25rem',
+                  marginBottom: '1rem',
                 }}
               >
                 Product
@@ -76,16 +75,16 @@ export default function Footer() {
                   margin: 0,
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '0.75rem',
-                  fontSize: '0.875rem',
+                  gap: '0.625rem',
+                  fontSize: '0.8125rem',
                 }}
               >
                 <li>
                   <Link
                     href="/shop"
-                    style={{ color: '#4b5563', textDecoration: 'none', transition: 'color 0.15s ease' }}
+                    style={{ color: '#5f6368', textDecoration: 'none', transition: 'color 0.15s ease' }}
                     onMouseEnter={(e) => (e.currentTarget.style.color = '#000000')}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = '#4b5563')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = '#5f6368')}
                   >
                     Custom Gates
                   </Link>
@@ -93,9 +92,19 @@ export default function Footer() {
                 <li>
                   <Link
                     href="/shop"
-                    style={{ color: '#4b5563', textDecoration: 'none', transition: 'color 0.15s ease' }}
+                    style={{ color: '#5f6368', textDecoration: 'none', transition: 'color 0.15s ease' }}
                     onMouseEnter={(e) => (e.currentTarget.style.color = '#000000')}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = '#4b5563')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = '#5f6368')}
+                  >
+                    PEB Sheds
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/shop"
+                    style={{ color: '#5f6368', textDecoration: 'none', transition: 'color 0.15s ease' }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = '#000000')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = '#5f6368')}
                   >
                     Laser Balustrades
                   </Link>
@@ -103,19 +112,9 @@ export default function Footer() {
                 <li>
                   <Link
                     href="/shop"
-                    style={{ color: '#4b5563', textDecoration: 'none', transition: 'color 0.15s ease' }}
+                    style={{ color: '#5f6368', textDecoration: 'none', transition: 'color 0.15s ease' }}
                     onMouseEnter={(e) => (e.currentTarget.style.color = '#000000')}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = '#4b5563')}
-                  >
-                    Industrial PEB Sheds
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/shop"
-                    style={{ color: '#4b5563', textDecoration: 'none', transition: 'color 0.15s ease' }}
-                    onMouseEnter={(e) => (e.currentTarget.style.color = '#000000')}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = '#4b5563')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = '#5f6368')}
                   >
                     Rolling Shutters
                   </Link>
@@ -123,9 +122,9 @@ export default function Footer() {
                 <li>
                   <Link
                     href="/shop"
-                    style={{ color: '#4b5563', textDecoration: 'none', transition: 'color 0.15s ease' }}
+                    style={{ color: '#5f6368', textDecoration: 'none', transition: 'color 0.15s ease' }}
                     onMouseEnter={(e) => (e.currentTarget.style.color = '#000000')}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = '#4b5563')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = '#5f6368')}
                   >
                     Agro Equipment
                   </Link>
@@ -133,11 +132,11 @@ export default function Footer() {
                 <li>
                   <Link
                     href="/shop"
-                    style={{ color: '#4b5563', textDecoration: 'none', transition: 'color 0.15s ease' }}
+                    style={{ color: '#5f6368', textDecoration: 'none', transition: 'color 0.15s ease' }}
                     onMouseEnter={(e) => (e.currentTarget.style.color = '#000000')}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = '#4b5563')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = '#5f6368')}
                   >
-                    Full Catalog
+                    All Products
                   </Link>
                 </li>
               </ul>
@@ -147,11 +146,11 @@ export default function Footer() {
             <div>
               <div
                 style={{
-                  fontSize: '0.875rem',
-                  fontWeight: 600,
+                  fontSize: '0.8125rem',
+                  fontWeight: 500,
                   color: '#111827',
                   letterSpacing: '-0.01em',
-                  marginBottom: '1.25rem',
+                  marginBottom: '1rem',
                 }}
               >
                 Resources
@@ -163,16 +162,16 @@ export default function Footer() {
                   margin: 0,
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '0.75rem',
-                  fontSize: '0.875rem',
+                  gap: '0.625rem',
+                  fontSize: '0.8125rem',
                 }}
               >
                 <li>
                   <Link
                     href="/blogs"
-                    style={{ color: '#4b5563', textDecoration: 'none', transition: 'color 0.15s ease' }}
+                    style={{ color: '#5f6368', textDecoration: 'none', transition: 'color 0.15s ease' }}
                     onMouseEnter={(e) => (e.currentTarget.style.color = '#000000')}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = '#4b5563')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = '#5f6368')}
                   >
                     Blog
                   </Link>
@@ -180,9 +179,9 @@ export default function Footer() {
                 <li>
                   <Link
                     href="/shop"
-                    style={{ color: '#4b5563', textDecoration: 'none', transition: 'color 0.15s ease' }}
+                    style={{ color: '#5f6368', textDecoration: 'none', transition: 'color 0.15s ease' }}
                     onMouseEnter={(e) => (e.currentTarget.style.color = '#000000')}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = '#4b5563')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = '#5f6368')}
                   >
                     Pricing
                   </Link>
@@ -190,9 +189,9 @@ export default function Footer() {
                 <li>
                   <Link
                     href="/services"
-                    style={{ color: '#4b5563', textDecoration: 'none', transition: 'color 0.15s ease' }}
+                    style={{ color: '#5f6368', textDecoration: 'none', transition: 'color 0.15s ease' }}
                     onMouseEnter={(e) => (e.currentTarget.style.color = '#000000')}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = '#4b5563')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = '#5f6368')}
                   >
                     Services &amp; Sheds
                   </Link>
@@ -200,9 +199,9 @@ export default function Footer() {
                 <li>
                   <Link
                     href="/track-order"
-                    style={{ color: '#4b5563', textDecoration: 'none', transition: 'color 0.15s ease' }}
+                    style={{ color: '#5f6368', textDecoration: 'none', transition: 'color 0.15s ease' }}
                     onMouseEnter={(e) => (e.currentTarget.style.color = '#000000')}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = '#4b5563')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = '#5f6368')}
                   >
                     Order Tracker
                   </Link>
@@ -210,9 +209,9 @@ export default function Footer() {
                 <li>
                   <Link
                     href="/about"
-                    style={{ color: '#4b5563', textDecoration: 'none', transition: 'color 0.15s ease' }}
+                    style={{ color: '#5f6368', textDecoration: 'none', transition: 'color 0.15s ease' }}
                     onMouseEnter={(e) => (e.currentTarget.style.color = '#000000')}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = '#4b5563')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = '#5f6368')}
                   >
                     About Workshop
                   </Link>
@@ -220,11 +219,11 @@ export default function Footer() {
                 <li>
                   <Link
                     href="/contact"
-                    style={{ color: '#4b5563', textDecoration: 'none', transition: 'color 0.15s ease' }}
+                    style={{ color: '#5f6368', textDecoration: 'none', transition: 'color 0.15s ease' }}
                     onMouseEnter={(e) => (e.currentTarget.style.color = '#000000')}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = '#4b5563')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = '#5f6368')}
                   >
-                    Contact Us
+                    Contact
                   </Link>
                 </li>
               </ul>
@@ -233,28 +232,28 @@ export default function Footer() {
         </div>
 
         {/* ========================================================
-            2. Monumental Giant Wordmark (Full Width 'Shree Ganesh Steel')
+            2. Monumental Giant Wordmark (Full Width Clean Typography)
            ======================================================== */}
         <div
           style={{
-            padding: 'clamp(1rem, 3vw, 2.5rem) 0 clamp(1rem, 2.5vw, 2rem) 0',
+            padding: 'clamp(1rem, 2.5vw, 2.5rem) 0 clamp(1rem, 2vw, 2rem) 0',
             width: '100%',
             overflow: 'hidden',
           }}
         >
           <div
-            className="font-display"
             style={{
-              fontSize: 'clamp(2.2rem, 7.8vw, 7.6rem)',
+              fontSize: 'clamp(2.5rem, 8.8vw, 8.8rem)',
               fontWeight: 800,
               color: '#111827',
               letterSpacing: '-0.04em',
-              lineHeight: 0.92,
+              lineHeight: 0.9,
               whiteSpace: 'nowrap',
               userSelect: 'none',
               textAlign: 'left',
               width: '100%',
               marginLeft: '-2px',
+              fontFamily: 'inherit',
             }}
           >
             Shree Ganesh Steel
@@ -267,13 +266,14 @@ export default function Footer() {
         <div
           style={{
             borderTop: '1px solid rgba(0, 0, 0, 0.08)',
-            paddingTop: 'clamp(1.25rem, 2vw, 1.75rem)',
+            paddingTop: '1.25rem',
+            paddingBottom: '0.5rem',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
             flexWrap: 'wrap',
             gap: '1.25rem',
-            fontSize: '0.8125rem',
+            fontSize: '0.78rem',
             color: '#5f6368',
           }}
         >
@@ -286,8 +286,8 @@ export default function Footer() {
               textDecoration: 'none',
               color: '#202124',
               fontWeight: 600,
-              fontSize: '1.125rem',
-              letterSpacing: '-0.025em',
+              fontSize: '1rem',
+              letterSpacing: '-0.02em',
             }}
           >
             Shree Ganesh Steel
@@ -298,8 +298,10 @@ export default function Footer() {
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: 'clamp(0.85rem, 2vw, 2rem)',
+              gap: 'clamp(1rem, 2vw, 2rem)',
               flexWrap: 'wrap',
+              fontSize: '0.78rem',
+              color: '#5f6368',
             }}
           >
             <Link
