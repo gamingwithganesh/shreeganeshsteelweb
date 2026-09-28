@@ -608,7 +608,9 @@ function TrackOrderContent() {
                       <div style={{ flex: 1 }}>
                         <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#0f172a' }}>{item.name}</div>
                         <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                          {item.widthFeet && item.heightFeet ? `${item.widthFeet}ft x ${item.heightFeet}ft` : 'Standard'} • {item.selectedGauge || '14 Gauge'}
+                          {item.lengthFeet || item.widthFeet
+                            ? `📏 ${item.lengthFeet || item.widthFeet}ft (L) × ${item.heightFeet || 6}ft (H)${item.breadthFeet ? ` × ${item.breadthFeet}ft (B)` : ''}`
+                            : (item.dimensionsText || 'Standard Sizing')} • {item.selectedGauge || '14 Gauge'}
                         </div>
                         <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#000000', marginTop: '2px' }}>
                           ₹{(item.calculatedTotalPrice || parseInt(item.price.replace(/[^0-9]/g, '')) || 0).toLocaleString()}

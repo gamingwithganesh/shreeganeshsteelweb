@@ -4,7 +4,7 @@ import React, { useState, useMemo, useEffect, Suspense } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { PRODUCTS, CATEGORIES, SECTORS, MATERIAL_GRADES, ProductItem } from '@/data/products';
+import { PRODUCTS, CATEGORIES, SECTORS, MATERIAL_GRADES, ProductItem, formatProductDimensions } from '@/data/products';
 import { useLiveProducts } from '@/hooks/useLiveProducts';
 import { useCart } from '@/context/CartContext';
 import { ThreeDStar, ThreeDRuler, ThreeDShield, ThreeDFactory, ThreeDBolt } from '@/components/ThreeDIcons';
@@ -768,6 +768,12 @@ function ShopContent() {
                         </span>
                       </div>
 
+                      {/* Prominent Measurements Badge (L × H × B) */}
+                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', marginTop: '5px', fontSize: '0.72rem', color: '#0f172a', fontWeight: 700, backgroundColor: '#f1f5f9', border: '1px solid #e2e8f0', padding: '2px 7px', borderRadius: '5px', width: 'fit-content' }}>
+                        <span>📏</span>
+                        <span>{formatProductDimensions(product)}</span>
+                      </div>
+
                       {/* Price Row: Discount % + MRP Strikethrough + Direct Price */}
                       <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', marginTop: '6px', flexWrap: 'wrap' }}>
                         <span style={{ color: '#16a34a', fontWeight: 800, fontSize: '0.88rem' }}>
@@ -793,9 +799,9 @@ function ShopContent() {
 
                   {/* Specification Chips Row (Flipkart-Style Spec Tags) */}
                   <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', marginTop: '10px' }}>
+                    <span className="spec-tag" style={{ fontWeight: 700, color: '#0f172a', backgroundColor: '#f1f5f9', border: '1px solid #cbd5e1' }}>📏 {formatProductDimensions(product)}</span>
                     <span className="spec-tag">{product.materialGrade}</span>
                     <span className="spec-tag">{product.sector}</span>
-                    <span className="spec-tag">{product.dimensionsText || 'Custom Site Blueprint'}</span>
                     <span className="spec-tag">0.5mm Laser Precision</span>
                   </div>
 
@@ -828,6 +834,11 @@ function ShopContent() {
                           price: product.price,
                           category: product.category,
                           image: product.image,
+                          widthFeet: product.defaultDimensions?.lengthFeet ?? product.defaultDimensions?.widthFeet,
+                          lengthFeet: product.defaultDimensions?.lengthFeet ?? product.defaultDimensions?.widthFeet,
+                          heightFeet: product.defaultDimensions?.heightFeet,
+                          breadthFeet: product.defaultDimensions?.breadthFeet,
+                          dimensionsText: formatProductDimensions(product),
                           calculatedTotalPrice: product.unitPriceNumeric,
                           quantity: 1,
                         })
@@ -1019,9 +1030,18 @@ function ShopContent() {
                           </Link>
                         </h3>
 
-                        <p style={{ color: '#64748b', fontSize: '0.85rem', lineHeight: 1.5, marginBottom: '1.25rem', flex: 1 }}>
+                        <p style={{ color: '#64748b', fontSize: '0.85rem', lineHeight: 1.5, marginBottom: '0.85rem', flex: 1 }}>
                           {product.description}
                         </p>
+
+                        {/* Standard Size Banner (L × H × B) */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', padding: '7px 12px', borderRadius: '10px', marginBottom: '0.85rem' }}>
+                          <span style={{ fontSize: '1rem' }}>📏</span>
+                          <div style={{ minWidth: 0, flex: 1 }}>
+                            <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Standard Size (L × H × B)</div>
+                            <div style={{ fontSize: '0.84rem', fontWeight: 800, color: '#0f172a' }}>{formatProductDimensions(product)}</div>
+                          </div>
+                        </div>
 
                         <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '1rem', marginTop: 'auto' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '0.4rem' }}>
@@ -1069,6 +1089,11 @@ function ShopContent() {
                                   price: product.price,
                                   category: product.category,
                                   image: product.image,
+                                  widthFeet: product.defaultDimensions?.lengthFeet ?? product.defaultDimensions?.widthFeet,
+                                  lengthFeet: product.defaultDimensions?.lengthFeet ?? product.defaultDimensions?.widthFeet,
+                                  heightFeet: product.defaultDimensions?.heightFeet,
+                                  breadthFeet: product.defaultDimensions?.breadthFeet,
+                                  dimensionsText: formatProductDimensions(product),
                                   calculatedTotalPrice: product.unitPriceNumeric,
                                   quantity: 1,
                                 })

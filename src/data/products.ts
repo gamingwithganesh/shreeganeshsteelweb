@@ -49,6 +49,25 @@ export interface ProductItem {
   reviews: ReviewItem[];
 }
 
+export function formatProductDimensions(product?: Partial<ProductItem>): string {
+  if (!product) return 'Custom Blueprint';
+  const def = product.defaultDimensions;
+  const l = def?.lengthFeet ?? def?.widthFeet;
+  const h = def?.heightFeet;
+  const b = def?.breadthFeet ?? (def?.depthInches ? +(def.depthInches / 12).toFixed(1) : undefined);
+
+  if (l && h && b && b > 0) {
+    return `${l}ft (L) × ${h}ft (H) × ${b}ft (B)`;
+  }
+  if (l && h) {
+    return `${l}ft (L) × ${h}ft (H)`;
+  }
+  if (product.dimensionsText) {
+    return product.dimensionsText;
+  }
+  return 'Standard Fabricated Size';
+}
+
 export const PRODUCTS: ProductItem[] = [
   {
     id: '1',
@@ -71,8 +90,8 @@ export const PRODUCTS: ProductItem[] = [
     badge: 'Popular Choice',
     material: 'Mild Steel with Zinc Epoxy Primer',
     materialGrade: 'Mild Steel (MS)',
-    defaultDimensions: { widthFeet: 12, heightFeet: 6 },
-    dimensionsText: 'Standard: 12ft (W) x 6ft (H) — Custom sizes built to order',
+    defaultDimensions: { lengthFeet: 12, widthFeet: 12, heightFeet: 6 },
+    dimensionsText: 'Standard: 12ft (L) × 6ft (H) — Custom sizes built to order',
     leadTime: '7 - 10 working days',
     inStockStandard: true,
     availableGauges: ['14 Gauge (2.0 mm)', '12 Gauge (2.5 mm)', '10 Gauge (3.2 mm)'],
@@ -130,8 +149,8 @@ export const PRODUCTS: ProductItem[] = [
     badge: 'Top Rated',
     material: 'Stainless Steel Grade 304 Jindal Certified',
     materialGrade: 'SS Grade 304',
-    defaultDimensions: { widthFeet: 10, heightFeet: 3 },
-    dimensionsText: 'Height: 36" or 42", lengths customized per floor/stair run',
+    defaultDimensions: { lengthFeet: 10, widthFeet: 10, heightFeet: 3 },
+    dimensionsText: 'Standard: 10ft (L) × 3ft (H) — Custom runs built to order',
     leadTime: '4 - 6 working days',
     inStockStandard: true,
     availableGauges: ['16 Gauge (1.6 mm)', '14 Gauge (2.0 mm)'],
@@ -180,8 +199,8 @@ export const PRODUCTS: ProductItem[] = [
     badge: 'Heavy Duty',
     material: 'Cold-Rolled Structural Steel Tubing',
     materialGrade: 'Mild Steel (MS)',
-    defaultDimensions: { widthFeet: 4, heightFeet: 6, depthInches: 18 },
-    dimensionsText: 'Height: 72", Width: 48", Depth: 18" (4 Tiers)',
+    defaultDimensions: { lengthFeet: 4, widthFeet: 4, heightFeet: 6, breadthFeet: 1.5, depthInches: 18 },
+    dimensionsText: 'Standard: 4ft (L) × 6ft (H) × 1.5ft (B) — 4 Tiers',
     leadTime: '3 - 5 working days',
     inStockStandard: true,
     availableGauges: ['14 Gauge (2.0 mm)', '12 Gauge (2.5 mm)'],
@@ -229,8 +248,8 @@ export const PRODUCTS: ProductItem[] = [
     badge: 'New Design',
     material: 'High-Tensile Cold Rolled Sheet & Solid Bar Iron',
     materialGrade: 'Mild Steel (MS)',
-    defaultDimensions: { widthFeet: 3.5, heightFeet: 7 },
-    dimensionsText: 'Standard: 7ft (H) x 3.5ft (W) x 2.5" thick (Customizable)',
+    defaultDimensions: { lengthFeet: 3.5, widthFeet: 3.5, heightFeet: 7 },
+    dimensionsText: 'Standard: 3.5ft (L) × 7ft (H) × 2.5" thick (Customizable)',
     leadTime: '10 - 14 working days',
     inStockStandard: false,
     availableGauges: ['12 Gauge (2.5 mm)', '10 Gauge (3.2 mm)'],
@@ -278,8 +297,8 @@ export const PRODUCTS: ProductItem[] = [
     badge: 'Industrial Masterwork',
     material: 'IS 2062 Grade Structural Steel Tubing & Channels',
     materialGrade: 'Mild Steel (MS)',
-    defaultDimensions: { widthFeet: 30, heightFeet: 50 },
-    dimensionsText: 'Spans: 20ft to 80ft clear-span, lengths up to 300ft',
+    defaultDimensions: { lengthFeet: 50, widthFeet: 30, heightFeet: 18, breadthFeet: 30 },
+    dimensionsText: 'Standard: 50ft (L) × 18ft (H) × 30ft (B) — Spans 20ft to 80ft',
     leadTime: '15 - 25 working days',
     inStockStandard: false,
     availableGauges: ['Heavy Structural Grade (3.2mm to 6.0mm)'],
@@ -327,8 +346,8 @@ export const PRODUCTS: ProductItem[] = [
     badge: 'Architectural Trend',
     material: 'Cold Rolled Sheet / SS 304 / Corten Steel',
     materialGrade: 'Mild Steel (MS)',
-    defaultDimensions: { widthFeet: 4, heightFeet: 8 },
-    dimensionsText: 'Standard sheets: 8ft x 4ft, customizable modular tessellations',
+    defaultDimensions: { lengthFeet: 4, widthFeet: 4, heightFeet: 8 },
+    dimensionsText: 'Standard: 4ft (L) × 8ft (H) — Custom modular tessellations',
     leadTime: '5 - 7 working days',
     inStockStandard: true,
     availableGauges: ['14 Gauge (2.0 mm)', '12 Gauge (2.5 mm)', '10 Gauge (3.2 mm)'],
@@ -376,8 +395,8 @@ export const PRODUCTS: ProductItem[] = [
     badge: 'Farm Proven',
     material: 'High-Tensile Structural Channel Iron & Steel Plate',
     materialGrade: 'Mild Steel (MS)',
-    defaultDimensions: { widthFeet: 6, heightFeet: 3.5 },
-    dimensionsText: 'Width: 6ft, Height: 42", fits all standard Vidarbha trolleys',
+    defaultDimensions: { lengthFeet: 6, widthFeet: 6, heightFeet: 3.5 },
+    dimensionsText: 'Standard: 6ft (L) × 3.5ft (H) — Fits all standard Vidarbha trolleys',
     leadTime: '3 - 5 working days',
     inStockStandard: true,
     availableGauges: ['10 Gauge (3.2 mm)', 'Heavy 4.0 mm Industrial Plate'],
@@ -425,8 +444,8 @@ export const PRODUCTS: ProductItem[] = [
     badge: 'Luxury Finish',
     material: 'Precision Cold Drawn Heavy Steel Tubing',
     materialGrade: 'Mild Steel (MS)',
-    defaultDimensions: { widthFeet: 6, heightFeet: 2.5, depthInches: 36 },
-    dimensionsText: 'Length: 6ft, Width: 3ft, Height: 29.5" (Custom sizes)',
+    defaultDimensions: { lengthFeet: 6, widthFeet: 6, heightFeet: 2.5, breadthFeet: 3, depthInches: 36 },
+    dimensionsText: 'Standard: 6ft (L) × 2.5ft (H) × 3ft (B) — Custom sizes available',
     leadTime: '5 - 8 working days',
     inStockStandard: true,
     availableGauges: ['12 Gauge (2.5 mm)', '10 Gauge (3.2 mm)'],

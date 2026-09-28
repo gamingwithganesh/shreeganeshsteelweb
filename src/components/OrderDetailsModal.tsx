@@ -210,9 +210,9 @@ export default function OrderDetailsModal({ order, isOpen = true, onClose }: Ord
                     </div>
                   </td>
                   <td style={{ padding: '0.75rem 0.5rem', color: '#475569' }}>
-                    {item.widthFeet && item.heightFeet
-                      ? `${item.widthFeet}ft x ${item.heightFeet}ft (${item.calculatedSqFt} sq.ft)`
-                      : 'Custom Size'}
+                    {item.lengthFeet || item.widthFeet
+                      ? `${item.lengthFeet || item.widthFeet}ft (L) × ${item.heightFeet || 6}ft (H)${item.breadthFeet ? ` × ${item.breadthFeet}ft (B)` : ''}`
+                      : (item.dimensionsText || 'Custom Size')}
                   </td>
                   <td style={{ padding: '0.75rem 0.5rem', color: '#475569' }}>{item.quantity || 1}</td>
                   <td style={{ padding: '0.75rem 0.5rem', textAlign: 'right', fontWeight: 700, color: '#0f172a' }}>

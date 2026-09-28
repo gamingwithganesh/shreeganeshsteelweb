@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ProductItem } from '@/data/products';
+import { ProductItem, formatProductDimensions } from '@/data/products';
 import { useCart } from '@/context/CartContext';
 import { useLiveProducts } from '@/hooks/useLiveProducts';
 import MeasurementGuideModal from '@/components/MeasurementGuideModal';
@@ -62,12 +62,18 @@ function ProductDetailView({ product }: { product: ProductItem }) {
   };
 
   // Sizing & Customization states
-  const defaultW = product.defaultDimensions?.widthFeet || 10;
-  const defaultH = product.defaultDimensions?.heightFeet || 6;
-  const [widthInput, setWidthInput] = useState<string>(String(defaultW));
+  const defaultL = product.defaultDimensions?.lengthFeet ?? product.defaultDimensions?.widthFeet ?? 10;
+  const defaultH = product.defaultDimensions?.heightFeet ?? 6;
+  const defaultB = product.defaultDimensions?.breadthFeet ?? (product.defaultDimensions?.depthInches ? +(product.defaultDimensions.depthInches / 12).toFixed(1) : undefined);
+
+  const [lengthInput, setLengthInput] = useState<string>(String(defaultL));
   const [heightInput, setHeightInput] = useState<string>(String(defaultH));
-  const widthFeet = parseDim(widthInput, defaultW);
+  const [breadthInput, setBreadthInput] = useState<string>(defaultB !== undefined ? String(defaultB) : '');
+
+  const lengthFeet = parseDim(lengthInput, defaultL);
   const heightFeet = parseDim(heightInput, defaultH);
+  const breadthFeet = breadthInput.trim() ? parseDim(breadthInput, defaultB || 0) : undefined;
+
   const [selectedGauge, setSelectedGauge] = useState<string>(
     product.availableGauges?.[0] || '14 Gauge (2.0 mm)'
   );
@@ -83,16 +89,16 @@ function ProductDetailView({ product }: { product: ProductItem }) {
   const [isCompressingDesign, setIsCompressingDesign] = useState<boolean>(false);
 
   // Dynamic price calculation
-  const totalSqFt = widthFeet * heightFeet;
+  const totalSqFt = Number((lengthFeet * heightFeet).toFixed(2));
   let dynamicUnitPrice = product.unitPriceNumeric;
 
   if (product.priceType === 'per_sqft') {
-    dynamicUnitPrice = product.unitPriceNumeric * totalSqFt;
+    dynamicUnitPrice = Math.round(product.unitPriceNumeric * totalSqFt);
   } else if (product.priceType === 'per_ft') {
-    dynamicUnitPrice = product.unitPriceNumeric * widthFeet;
+    dynamicUnitPrice = Math.round(product.unitPriceNumeric * lengthFeet);
   } else {
     // For per_unit items, scale slightly if custom dimensions differ from default
-    const defaultSqFt = defaultW * defaultH;
+    const defaultSqFt = defaultL * defaultH;
     if (totalSqFt !== defaultSqFt && defaultSqFt > 0) {
       const ratio = totalSqFt / defaultSqFt;
       dynamicUnitPrice = Math.round(product.unitPriceNumeric * ratio);
@@ -114,14 +120,18 @@ function ProductDetailView({ product }: { product: ProductItem }) {
   const calculatedTotalPrice = dynamicUnitPrice * quantity;
 
   const handleAddToCart = () => {
+    const formattedDimStr = `${lengthFeet}ft (L) × ${heightFeet}ft (H)${breadthFeet ? ` × ${breadthFeet}ft (B)` : ''}`;
     addToCart({
       id: `${product.id}-${selectedGauge}-${selectedFinish}`,
       name: product.name,
       price: `₹${dynamicUnitPrice.toLocaleString()}`,
       category: product.category,
       image: product.image,
-      widthFeet,
+      widthFeet: lengthFeet,
+      lengthFeet,
       heightFeet,
+      breadthFeet,
+      dimensionsText: formattedDimStr,
       calculatedSqFt: totalSqFt,
       selectedGauge,
       selectedFinish,
@@ -325,6 +335,51 @@ function ProductDetailView({ product }: { product: ProductItem }) {
               </span>
             </div>
 
+            {/* Standard Size & Measurement Specs Display */}
+            <div
+              style={{
+                backgroundColor: '#f8fafc',
+                border: '1.5px solid #e2e8f0',
+                borderRadius: '16px',
+                padding: '1.1rem 1.25rem',
+                marginBottom: '1.25rem',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.65rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.82rem', fontWeight: 800, color: '#0f172a' }}>
+                  <ThreeDRuler size={18} />
+                  <span>Standard Product Measurements (L × H × B)</span>
+                </div>
+                <span style={{ fontSize: '0.72rem', backgroundColor: '#000000', color: '#ffffff', fontWeight: 700, padding: '2px 8px', borderRadius: '9999px' }}>
+                  {formatProductDimensions(product)}
+                </span>
+              </div>
+
+              {/* 3 Metric Pills: Length, Height, Breadth */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '0.6rem' }}>
+                <div style={{ backgroundColor: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '6px 10px', textAlign: 'center' }}>
+                  <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Length (L)</div>
+                  <div style={{ fontSize: '1rem', fontWeight: 900, color: '#0f172a' }}>{defaultL} ft</div>
+                </div>
+                <div style={{ backgroundColor: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '6px 10px', textAlign: 'center' }}>
+                  <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Height (H)</div>
+                  <div style={{ fontSize: '1rem', fontWeight: 900, color: '#0f172a' }}>{defaultH} ft</div>
+                </div>
+                <div style={{ backgroundColor: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '6px 10px', textAlign: 'center' }}>
+                  <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>Breadth (B)</div>
+                  <div style={{ fontSize: '1rem', fontWeight: 900, color: '#0f172a' }}>
+                    {defaultB !== undefined && defaultB > 0 ? `${defaultB} ft` : 'Flat / Standard'}
+                  </div>
+                </div>
+              </div>
+
+              {product.dimensionsText && (
+                <div style={{ fontSize: '0.75rem', color: '#475569', lineHeight: 1.4 }}>
+                  📐 <strong>Spec Note:</strong> {product.dimensionsText}
+                </div>
+              )}
+            </div>
+
             {/* Dynamic Calculated Price Box */}
             <div
               style={{
@@ -367,7 +422,7 @@ function ProductDetailView({ product }: { product: ProductItem }) {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 800, fontSize: '0.95rem', color: '#0f172a' }}>
                   <ThreeDRuler size={20} />
-                  <span>Custom Dimension Calculator</span>
+                  <span>Custom Dimension Calculator (L × H × B)</span>
                 </div>
 
                 <button
@@ -387,17 +442,17 @@ function ProductDetailView({ product }: { product: ProductItem }) {
                 </button>
               </div>
 
-              {/* Inputs */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '0.75rem' }}>
+              {/* 3-Column Inputs: Length (L), Height (H), Breadth (B) */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.85rem', marginBottom: '0.75rem' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
-                    Width (Feet)
+                    Length (L) in Feet
                   </label>
                   <input
                     type="text"
                     inputMode="decimal"
-                    value={widthInput}
-                    onChange={(e) => setWidthInput(e.target.value)}
+                    value={lengthInput}
+                    onChange={(e) => setLengthInput(e.target.value)}
                     placeholder="e.g. 2 or 2.5"
                     style={{
                       width: '100%',
@@ -413,7 +468,7 @@ function ProductDetailView({ product }: { product: ProductItem }) {
 
                 <div>
                   <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
-                    Height (Feet)
+                    Height (H) in Feet
                   </label>
                   <input
                     type="text"
@@ -432,10 +487,33 @@ function ProductDetailView({ product }: { product: ProductItem }) {
                     }}
                   />
                 </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: '#475569', marginBottom: '4px' }}>
+                    Breadth (B) in Feet
+                  </label>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    value={breadthInput}
+                    onChange={(e) => setBreadthInput(e.target.value)}
+                    placeholder={defaultB !== undefined && defaultB > 0 ? `e.g. ${defaultB}` : 'Optional (e.g. 2.5)'}
+                    style={{
+                      width: '100%',
+                      padding: '0.65rem 0.85rem',
+                      borderRadius: '8px',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '0.9rem',
+                      fontWeight: 700,
+                      outline: 'none',
+                    }}
+                  />
+                </div>
               </div>
 
-              <div style={{ fontSize: '0.78rem', color: '#64748b' }}>
-                Total Area: <strong>{totalSqFt} sq.ft</strong> ({widthFeet} ft x {heightFeet} ft)
+              <div style={{ fontSize: '0.78rem', color: '#334155', backgroundColor: '#f1f5f9', padding: '8px 12px', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '4px' }}>
+                <span>📏 <strong>Configured Size:</strong> {lengthFeet} ft (L) × {heightFeet} ft (H){breadthFeet ? ` × ${breadthFeet} ft (B)` : ''}</span>
+                <span>Area: <strong>{totalSqFt} sq.ft</strong></span>
               </div>
             </div>
 

@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { PRODUCTS, ProductItem } from '@/data/products';
+import { PRODUCTS, ProductItem, formatProductDimensions } from '@/data/products';
 import { useLiveProducts } from '@/hooks/useLiveProducts';
 import { useCart } from '@/context/CartContext';
 import { ThreeDStar, ThreeDTruck, ThreeDShield, ThreeDFactory, ThreeDRuler } from '@/components/ThreeDIcons';
@@ -85,7 +85,20 @@ export default function HomeShoppingSection() {
     : liveProducts.filter((p) => p.sector === activeSector);
 
   const handleQuickAdd = (product: ProductItem) => {
-    addToCart(product);
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      category: product.category,
+      image: product.image,
+      widthFeet: product.defaultDimensions?.lengthFeet ?? product.defaultDimensions?.widthFeet,
+      lengthFeet: product.defaultDimensions?.lengthFeet ?? product.defaultDimensions?.widthFeet,
+      heightFeet: product.defaultDimensions?.heightFeet,
+      breadthFeet: product.defaultDimensions?.breadthFeet,
+      dimensionsText: formatProductDimensions(product),
+      calculatedTotalPrice: product.unitPriceNumeric,
+      quantity: 1,
+    });
     setAddedProductId(product.id);
     setTimeout(() => {
       setAddedProductId((current) => (current === product.id ? null : current));
@@ -394,7 +407,7 @@ export default function HomeShoppingSection() {
                         fontSize: '0.84rem',
                         fontWeight: 700,
                         lineHeight: 1.25,
-                        margin: '0 0 6px 0',
+                        margin: '0 0 4px 0',
                         display: '-webkit-box',
                         WebkitLineClamp: 2,
                         WebkitBoxOrient: 'vertical',
@@ -404,6 +417,12 @@ export default function HomeShoppingSection() {
                       {prod.name}
                     </h3>
                   </Link>
+
+                  {/* Mobile Measurement Badge (L × H × B) */}
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', fontSize: '0.64rem', color: '#0f172a', fontWeight: 700, backgroundColor: '#f1f5f9', border: '1px solid #e2e8f0', padding: '2px 6px', borderRadius: '4px', marginBottom: '6px', width: 'fit-content' }}>
+                    <span>📏</span>
+                    <span>{formatProductDimensions(prod)}</span>
+                  </div>
 
                   <div style={{ marginTop: 'auto' }}>
                     {/* Price Row: Strikethrough Market MRP + Bold Price */}
@@ -639,6 +658,23 @@ export default function HomeShoppingSection() {
 
                 {/* Clean Pill Tags */}
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '1.5rem' }}>
+                  <span
+                    style={{
+                      fontSize: '0.72rem',
+                      backgroundColor: '#f1f5f9',
+                      color: '#0f172a',
+                      padding: '4px 10px',
+                      borderRadius: '8px',
+                      fontWeight: 700,
+                      border: '1px solid #cbd5e1',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                    }}
+                  >
+                    <span>📏</span>
+                    <span>{formatProductDimensions(prod)}</span>
+                  </span>
                   <span
                     style={{
                       fontSize: '0.72rem',

@@ -11,6 +11,9 @@ export interface CartItem {
   // Dynamic fabrication customization attributes
   widthFeet?: number;
   heightFeet?: number;
+  lengthFeet?: number;
+  breadthFeet?: number;
+  dimensionsText?: string;
   calculatedSqFt?: number;
   selectedGauge?: string;
   selectedFinish?: string;
@@ -385,7 +388,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         priority: 'urgent',
         createdAt: new Date().toLocaleString(),
         targetDate: 'Within 7-10 Days',
-        dimensions: newOrder.items[0]?.widthFeet ? `${newOrder.items[0].widthFeet}ft x ${newOrder.items[0].heightFeet}ft` : 'Custom Fit',
+        dimensions: newOrder.items[0]?.dimensionsText || (newOrder.items[0]?.lengthFeet || newOrder.items[0]?.widthFeet ? `${newOrder.items[0].lengthFeet || newOrder.items[0].widthFeet}ft (L) × ${newOrder.items[0].heightFeet || 6}ft (H)${newOrder.items[0].breadthFeet ? ` × ${newOrder.items[0].breadthFeet}ft (B)` : ''}` : 'Custom Fit'),
         notes: `${deliveryLabel} | ${hasPrimer ? 'Dual-Coat Anti-Rust Primer (+6%)' : 'Raw Finish'} | ${hasInstall ? 'On-Site Installation Included' : 'Supply Only'} | Adv: ₹${newOrder.advancePaid}, Due: ₹${newOrder.balanceDue}`,
         paymentScreenshot: newOrder.paymentScreenshot,
         transactionRef: newOrder.transactionRef,

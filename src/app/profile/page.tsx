@@ -192,7 +192,7 @@ export default function ProfilePage() {
                     {order.items.map((item, iIdx) => (
                       <div key={iIdx} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
                         <span style={{ color: '#0f172a', fontWeight: 600 }}>
-                          • {item.name} ({item.widthFeet && item.heightFeet ? `${item.widthFeet}ft x ${item.heightFeet}ft` : 'Standard'} • {item.selectedGauge || '14G'})
+                          • {item.name} ({item.lengthFeet || item.widthFeet ? `${item.lengthFeet || item.widthFeet}ft (L) × ${item.heightFeet || 6}ft (H)${item.breadthFeet ? ` × ${item.breadthFeet}ft (B)` : ''}` : (item.dimensionsText || 'Standard')} • {item.selectedGauge || '14G'})
                         </span>
                         <span style={{ color: '#64748b' }}>
                           ₹{(item.calculatedTotalPrice || parseInt(item.price.replace(/[^0-9]/g, '')) || 0).toLocaleString()}

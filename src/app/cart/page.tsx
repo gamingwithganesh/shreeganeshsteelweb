@@ -495,9 +495,9 @@ export default function CartPage() {
                           {item.name} <span style={{ color: '#6b7280', fontWeight: 500 }}>(Qty: {item.quantity || 1})</span>
                         </div>
                         <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '2px' }}>
-                          {item.widthFeet && item.heightFeet
-                            ? `${item.widthFeet} ft × ${item.heightFeet} ft (${item.calculatedSqFt || item.widthFeet * item.heightFeet} sq.ft)`
-                            : 'Standard Workshop Sizing'}
+                          {item.lengthFeet || item.widthFeet
+                            ? `📏 ${item.lengthFeet || item.widthFeet}ft (L) × ${item.heightFeet || 6}ft (H)${item.breadthFeet ? ` × ${item.breadthFeet}ft (B)` : ''} (${item.calculatedSqFt || (item.lengthFeet || item.widthFeet || 1) * (item.heightFeet || 1)} sq.ft)`
+                            : (item.dimensionsText ? `📏 ${item.dimensionsText}` : 'Standard Workshop Sizing')}
                           {item.selectedGauge && ` • ${item.selectedGauge}`}
                           {item.selectedFinish && ` • ${item.selectedFinish}`}
                         </div>
@@ -716,7 +716,9 @@ export default function CartPage() {
                       </div>
 
                       <div style={{ fontSize: '0.78rem', color: '#6b7280', marginTop: '2px', marginBottom: '8px' }}>
-                        {item.widthFeet && item.heightFeet ? `${item.widthFeet}ft × ${item.heightFeet}ft` : 'Standard'} • {item.selectedGauge || '14 Gauge'} • {item.selectedFinish || 'Anti-Rust Primer'}
+                        {item.lengthFeet || item.widthFeet
+                          ? `📏 ${item.lengthFeet || item.widthFeet}ft (L) × ${item.heightFeet || 6}ft (H)${item.breadthFeet ? ` × ${item.breadthFeet}ft (B)` : ''}`
+                          : (item.dimensionsText ? `📏 ${item.dimensionsText}` : 'Standard Sizing')} • {item.selectedGauge || '14 Gauge'} • {item.selectedFinish || 'Anti-Rust Primer'}
                       </div>
 
                       {/* Quantity Stepper & Remove */}
