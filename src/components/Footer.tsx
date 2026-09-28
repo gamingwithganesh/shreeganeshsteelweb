@@ -4,166 +4,337 @@ import React from 'react';
 import Link from 'next/link';
 
 export default function Footer() {
-  const googleMapsUrl =
-    'https://www.google.com/maps/place/Shri+Ganesh+Welding+Works+shop+Ghatanji/@20.1441888,78.3122625,17z/data=!3m1!4b1!4m6!3m5!1s0x3bd3b9157d1d648b:0x1efbfee1ed30f59e!8m2!3d20.1441838!4d78.3148374!16s%2Fg%2F11gm87w9rv?entry=ttu&g_ep=EgoyMDI2MDkxNi4wIKXMDSoASAFQAw%3D%3D';
-
   return (
     <footer
       id="site-footer"
       style={{
         backgroundColor: '#ffffff',
-        color: '#0f172a',
-        padding: '3rem 0 1.75rem 0',
-        borderTop: '1px solid #e2e8f0',
+        color: '#111827',
+        padding: 'clamp(3.5rem, 5vw, 5rem) 0 clamp(1.5rem, 3vw, 2.5rem) 0',
+        borderTop: '1px solid rgba(0, 0, 0, 0.08)',
+        position: 'relative',
+        overflow: 'hidden',
       }}
     >
       <div className="container-custom">
-        {/* Simple & Forward 3-Column Footer Grid */}
+        {/* ========================================================
+            1. Top Row:
+               'Experience precision' on Left + Exactly 2 Columns (Product & Resources) on Right
+           ======================================================== */}
         <div
           style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            flexWrap: 'wrap',
             gap: '2.5rem',
-            paddingBottom: '2rem',
-            borderBottom: '1px solid #f1f5f9',
+            paddingBottom: 'clamp(2.5rem, 4vw, 4rem)',
           }}
         >
-          {/* Column 1: Brand & Contact */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <Link
-              href="/"
+          {/* Left: Clean Tagline Headline */}
+          <div style={{ maxWidth: '400px' }}>
+            <h2
+              className="font-display"
               style={{
-                textDecoration: 'none',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                color: '#09090b',
+                fontSize: 'clamp(1.75rem, 2.5vw, 2.5rem)',
+                fontWeight: 500,
+                color: '#111827',
+                letterSpacing: '-0.025em',
+                lineHeight: 1.2,
+                margin: 0,
               }}
             >
-              <span
-                style={{
-                  width: '28px',
-                  height: '28px',
-                  backgroundColor: '#09090b',
-                  color: '#ffffff',
-                  borderRadius: '6px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '0.8rem',
-                  fontWeight: 800,
-                }}
-              >
-                SG
-              </span>
-              <span style={{ fontSize: '1.1rem', fontWeight: 800, letterSpacing: '-0.02em' }}>
-                Shree Ganesh Steel
-              </span>
-            </Link>
-
-            <p style={{ fontSize: '0.85rem', color: '#64748b', margin: 0, lineHeight: 1.5 }}>
-              Custom structural steel, laser gates, balustrades &amp; industrial PEB sheds.
-            </p>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '0.825rem', marginTop: '4px' }}>
-              <a
-                href={googleMapsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: '#475569', textDecoration: 'none' }}
-              >
-                📍 Main Road, Ghatanji, Dist. Yavatmal
-              </a>
-              <a href="tel:+919822463944" style={{ color: '#475569', textDecoration: 'none' }}>
-                📞 +91 98224 63944
-              </a>
-            </div>
+              Experience precision
+            </h2>
           </div>
 
-          {/* Column 2: Quick Links */}
-          <div>
-            <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#09090b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.85rem' }}>
-              Navigation
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px 16px', fontSize: '0.85rem' }}>
-              <Link href="/shop" style={{ color: '#64748b', textDecoration: 'none' }}>
-                Products
-              </Link>
-              <Link href="/services" style={{ color: '#64748b', textDecoration: 'none' }}>
-                Services
-              </Link>
-              <Link href="/track-order" style={{ color: '#64748b', textDecoration: 'none' }}>
-                Track Order
-              </Link>
-              <Link href="/blogs" style={{ color: '#64748b', textDecoration: 'none' }}>
-                Blogs
-              </Link>
-              <Link href="/about" style={{ color: '#64748b', textDecoration: 'none' }}>
-                About Us
-              </Link>
-              <Link href="/contact" style={{ color: '#64748b', textDecoration: 'none' }}>
-                Contact
-              </Link>
-            </div>
-          </div>
-
-          {/* Column 3: Hours & Support */}
-          <div>
-            <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#09090b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.85rem' }}>
-              Workshop Hours
-            </div>
-            <p style={{ fontSize: '0.85rem', color: '#64748b', margin: 0, lineHeight: 1.6 }}>
-              Monday – Saturday: 8:00 AM – 8:30 PM<br />
-              Sunday: 9:00 AM – 2:00 PM
-            </p>
-            <div style={{ marginTop: '12px' }}>
-              <Link
-                href="/contact"
+          {/* Right: Exactly 2 Columns (Product & Resources) */}
+          <div
+            style={{
+              display: 'flex',
+              gap: 'clamp(3rem, 7vw, 7rem)',
+              flexWrap: 'wrap',
+            }}
+          >
+            {/* Column 1: Product */}
+            <div>
+              <div
                 style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  padding: '6px 12px',
-                  backgroundColor: '#09090b',
-                  color: '#ffffff',
-                  borderRadius: '6px',
-                  fontSize: '0.78rem',
+                  fontSize: '0.875rem',
                   fontWeight: 600,
-                  textDecoration: 'none',
+                  color: '#111827',
+                  letterSpacing: '-0.01em',
+                  marginBottom: '1.25rem',
                 }}
               >
-                Request Quote →
-              </Link>
+                Product
+              </div>
+              <ul
+                style={{
+                  listStyle: 'none',
+                  padding: 0,
+                  margin: 0,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.75rem',
+                  fontSize: '0.875rem',
+                }}
+              >
+                <li>
+                  <Link
+                    href="/shop"
+                    style={{ color: '#4b5563', textDecoration: 'none', transition: 'color 0.15s ease' }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = '#000000')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = '#4b5563')}
+                  >
+                    Custom Gates
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/shop"
+                    style={{ color: '#4b5563', textDecoration: 'none', transition: 'color 0.15s ease' }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = '#000000')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = '#4b5563')}
+                  >
+                    Laser Balustrades
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/shop"
+                    style={{ color: '#4b5563', textDecoration: 'none', transition: 'color 0.15s ease' }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = '#000000')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = '#4b5563')}
+                  >
+                    Industrial PEB Sheds
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/shop"
+                    style={{ color: '#4b5563', textDecoration: 'none', transition: 'color 0.15s ease' }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = '#000000')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = '#4b5563')}
+                  >
+                    Rolling Shutters
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/shop"
+                    style={{ color: '#4b5563', textDecoration: 'none', transition: 'color 0.15s ease' }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = '#000000')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = '#4b5563')}
+                  >
+                    Agro Equipment
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/shop"
+                    style={{ color: '#4b5563', textDecoration: 'none', transition: 'color 0.15s ease' }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = '#000000')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = '#4b5563')}
+                  >
+                    Full Catalog
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Column 2: Resources */}
+            <div>
+              <div
+                style={{
+                  fontSize: '0.875rem',
+                  fontWeight: 600,
+                  color: '#111827',
+                  letterSpacing: '-0.01em',
+                  marginBottom: '1.25rem',
+                }}
+              >
+                Resources
+              </div>
+              <ul
+                style={{
+                  listStyle: 'none',
+                  padding: 0,
+                  margin: 0,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.75rem',
+                  fontSize: '0.875rem',
+                }}
+              >
+                <li>
+                  <Link
+                    href="/blogs"
+                    style={{ color: '#4b5563', textDecoration: 'none', transition: 'color 0.15s ease' }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = '#000000')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = '#4b5563')}
+                  >
+                    Blog
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/shop"
+                    style={{ color: '#4b5563', textDecoration: 'none', transition: 'color 0.15s ease' }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = '#000000')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = '#4b5563')}
+                  >
+                    Pricing
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/services"
+                    style={{ color: '#4b5563', textDecoration: 'none', transition: 'color 0.15s ease' }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = '#000000')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = '#4b5563')}
+                  >
+                    Services &amp; Sheds
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/track-order"
+                    style={{ color: '#4b5563', textDecoration: 'none', transition: 'color 0.15s ease' }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = '#000000')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = '#4b5563')}
+                  >
+                    Order Tracker
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/about"
+                    style={{ color: '#4b5563', textDecoration: 'none', transition: 'color 0.15s ease' }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = '#000000')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = '#4b5563')}
+                  >
+                    About Workshop
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/contact"
+                    style={{ color: '#4b5563', textDecoration: 'none', transition: 'color 0.15s ease' }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = '#000000')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = '#4b5563')}
+                  >
+                    Contact Us
+                  </Link>
+                </li>
+              </ul>
             </div>
           </div>
         </div>
 
-        {/* Minimal Bottom Bar */}
+        {/* ========================================================
+            2. Monumental Giant Wordmark (Full Width 'Shree Ganesh Steel')
+           ======================================================== */}
         <div
           style={{
-            paddingTop: '1.25rem',
+            padding: 'clamp(1rem, 3vw, 2.5rem) 0 clamp(1rem, 2.5vw, 2rem) 0',
+            width: '100%',
+            overflow: 'hidden',
+          }}
+        >
+          <div
+            className="font-display"
+            style={{
+              fontSize: 'clamp(2.2rem, 7.8vw, 7.6rem)',
+              fontWeight: 800,
+              color: '#111827',
+              letterSpacing: '-0.04em',
+              lineHeight: 0.92,
+              whiteSpace: 'nowrap',
+              userSelect: 'none',
+              textAlign: 'left',
+              width: '100%',
+              marginLeft: '-2px',
+            }}
+          >
+            Shree Ganesh Steel
+          </div>
+        </div>
+
+        {/* ========================================================
+            3. Bottom Bar: Brand on Left, Meta Links on Right
+           ======================================================== */}
+        <div
+          style={{
+            borderTop: '1px solid rgba(0, 0, 0, 0.08)',
+            paddingTop: 'clamp(1.25rem, 2vw, 1.75rem)',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
             flexWrap: 'wrap',
-            gap: '12px',
-            fontSize: '0.78rem',
-            color: '#94a3b8',
+            gap: '1.25rem',
+            fontSize: '0.8125rem',
+            color: '#5f6368',
           }}
         >
-          <div>
-            © {new Date().getFullYear()} Shree Ganesh Steel &amp; Welding Workshop.
-          </div>
+          {/* Left: Brand Name / Logo */}
+          <Link
+            href="/"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              textDecoration: 'none',
+              color: '#202124',
+              fontWeight: 600,
+              fontSize: '1.125rem',
+              letterSpacing: '-0.025em',
+            }}
+          >
+            Shree Ganesh Steel
+          </Link>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <Link href="/about" style={{ color: '#64748b', textDecoration: 'none' }}>
-              About
+          {/* Right: Meta Links */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'clamp(0.85rem, 2vw, 2rem)',
+              flexWrap: 'wrap',
+            }}
+          >
+            <Link
+              href="/about"
+              style={{ color: '#5f6368', textDecoration: 'none', transition: 'color 0.15s ease' }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = '#000000')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = '#5f6368')}
+            >
+              About Workshop
             </Link>
-            <Link href="/contact" style={{ color: '#64748b', textDecoration: 'none' }}>
-              Support
+            <Link
+              href="/shop"
+              style={{ color: '#5f6368', textDecoration: 'none', transition: 'color 0.15s ease' }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = '#000000')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = '#5f6368')}
+            >
+              Steel Products
             </Link>
-            <Link href="/admin" style={{ color: '#64748b', textDecoration: 'none' }}>
+            <Link
+              href="/contact"
+              style={{ color: '#5f6368', textDecoration: 'none', transition: 'color 0.15s ease' }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = '#000000')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = '#5f6368')}
+            >
+              Contact
+            </Link>
+            <Link
+              href="/admin"
+              style={{ color: '#5f6368', textDecoration: 'none', transition: 'color 0.15s ease' }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = '#000000')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = '#5f6368')}
+            >
               Admin
             </Link>
+            <span style={{ color: '#9ca3af' }}>© {new Date().getFullYear()} SGWWSP</span>
           </div>
         </div>
       </div>
